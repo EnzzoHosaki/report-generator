@@ -1,0 +1,27 @@
+# Ambientes virtuais
+venv/
+.venv/
+
+# Cache Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Saídas e temporários
+nohup.out
+*.log
+*.tmp
+*.zip
+
+# Configs locais
+.env
+.env.*
+
+# Editor / IDE
+.vscode/
+.idea/
+
+# Sistemas
+.DS_Store
+Thumbs.db
