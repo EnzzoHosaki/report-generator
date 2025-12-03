@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Relatório RPS - {{ dados.cliente_nome }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+  <!-- Botão só aparece na WEB -->
+  <a href="/report/pdf/{{ dados.cliente_id }}" class="fab-download" target="_blank">
+    BAIXAR PDF
+  </a>
+
+  <!-- Página 0: Capa -->
+  <div class="page-container cover-page">
+    <div class="rps-logo-simulated">RPS</div>
+    <h1 class="cover-title">Relatório Gerencial</h1>
+    <div class="cover-subtitle">Performance Financeira & Controladoria</div>
+    <div class="cover-client-box">
+      <div class="cover-client-name">{{ dados.cliente_nome }}</div>
+      <div class="cover-date">{{ dados.periodo }}</div>
+    </div>
+    <div class="cover-footer">RPS CONTABILIDADE | Excelência e Precisão em Números</div>
+  </div>
+
+  <!-- Página 1: Resumo Gerencial -->
+  <div class="page-container">
+    <div class="content-wrapper">
+      <div class="header">
+        <div>
+          <h1>Resumo Gerencial</h1>
+          <span style="font-size: 10pt; color: #666;">KPI Cards</span>
+        </div>
+        <div class="meta">
+          <strong>{{ dados.cliente_nome }}</strong><br>{{ dados.periodo }}
+        </div>
+      </div>
+
+      <div class="kpi-container" style="grid-template-columns: repeat(4, 1fr);">
+        <div class="kpi-box"><div class="kpi-label">Venda Líquida</div><div class="kpi-value">{{ dados.kpis.vendas_liquidas }}</div></div>
+        <div class="kpi-box"><div class="kpi-label">Carga Trib.</div><div class="kpi-value negative">{{ dados.kpis.carga_tributaria }}</div></div>
+        <div class="kpi-box"><div class="kpi-label">Compras</div><div class="kpi-value">{{ dados.kpis.compras }}</div></div>
+        <div class="kpi-box"><div class="kpi-label">CAPEX</div><div class="kpi-value">{{ dados.kpis.capex }}</div></div>
+        <div class="kpi-box"><div class="kpi-label">OpEx</div><div class="kpi-value">{{ dados.kpis.opex }}</div></div>
+        <div class="kpi-box"><div class="kpi-label">FinEx</div><div class="kpi-value">{{ dados.kpis.finex }}</div></div>
+        <div class="kpi-box"><div class="kpi-label">Outros</div><div class="kpi-value">{{ dados.kpis.outros }}</div></div>
+        <div class="kpi-box">
+          <div class="kpi-label">Resultado Líquido</div>
+          <div class="kpi-value {{ 'positive' if dados.kpis.lucro_liquido_raw > 0 else 'negative' }}">{{ dados.kpis.lucro_liquido }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Página 2: Evolução de Ativos -->
+  <div class="page-container">
+    <div class="content-wrapper">
+      <div class="header">
+        <div>
+          <h1>Ativos</h1>
+          <span style="font-size: 10pt; color: #666;">Composição & Evolução</span>
+        </div>
+        <div class="meta"><strong>{{ dados.cliente_nome }}</strong><br>Pág. 2</div>
+      </div>
+      <div class="row">
+        <div class="card" style="width:100%">
+          <h3>Evolução da Composição (Empilhado)</h3>
+          <img class="chart-img" src="data:image/png;base64,{{ graficos.ativos_stack }}">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Página 3: Evolução de Passivos -->
+  <div class="page-container">
+    <div class="content-wrapper">
+      <div class="header">
+        <div>
+          <h1>Passivos</h1>
+          <span style="font-size: 10pt; color: #666;">Composição & Evolução</span>
+        </div>
+        <div class="meta"><strong>{{ dados.cliente_nome }}</strong><br>Pág. 3</div>
+      </div>
+      <div class="row">
+        <div class="card" style="width:100%">
+          <h3>Composição (Circulante vs Não-Circulante)</h3>
+          <img class="chart-img" src="data:image/png;base64,{{ graficos.passivos_stack }}">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Página 4: Rentabilidade & Patrimônio -->
+  <div class="page-container">
+    <div class="content-wrapper">
+      <div class="header">
+        <div>
+          <h1>Rentabilidade & Patrimônio</h1>
+          <span style="font-size: 10pt; color: #666;">Análises de  Indicadores</span>
+        </div>
+        <div class="meta"><strong>{{ dados.cliente_nome }}</strong><br>Pág. 4</div>
+      </div>
+      <div class="row">
+        <div class="col-half card">
+          <h3>Rentabilidade vs CDI</h3>
+          <img class="chart-img" src="data:image/png;base64,{{ graficos.rentabilidade_line }}">
+        </div>
+        <div class="col-half card">
+          <h3>Patrimônio Líquido vs Ativos Totais</h3>
+          <img class="chart-img" src="data:image/png;base64,{{ graficos.equity_vs_ativos }}">
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-half card">
+          <h3>ROE vs CDI (Tabela)</h3>
+          <table>
+            <thead>
+              <tr><th>Período</th><th>ROE (%)</th><th>CDI (%)</th><th>Spread</th></tr>
+            </thead>
+            <tbody>
+              {% for row in dados.tabela_roe %}
+              <tr>
+                <td>{{ row.periodo }}</td>
+                <td>{{ row.roe }}%</td>
+                <td>{{ row.cdi }}%</td>
+                <td style="font-weight: bold; color: {{ 'green' if row.delta > 0 else '#bc4749' }}">{{ row.delta }}%</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <div class="col-half card">
+          <h3>KPIs Financeiros</h3>
+          <div class="kpi-container" style="grid-template-columns: repeat(2, 1fr);">
+            <div class="kpi-box"><div class="kpi-label">EBITDA</div><div class="kpi-value">{{ dados.indicadores.ebitda }}</div></div>
+            <div class="kpi-box"><div class="kpi-label">NCG</div><div class="kpi-value">{{ dados.indicadores.ncg }}</div></div>
+            <div class="kpi-box"><div class="kpi-label">Liq. Corrente</div><div class="kpi-value">{{ dados.indicadores.liquidez_corrente }}</div></div>
+            <div class="kpi-box"><div class="kpi-label">Endividamento</div><div class="kpi-value">{{ dados.indicadores.endividamento }}</div></div>
+            <div class="kpi-box"><div class="kpi-label">Margem Líquida</div><div class="kpi-value">{{ dados.indicadores.margem_liquida }}</div></div>
+            <div class="kpi-box"><div class="kpi-label">ROA</div><div class="kpi-value">{{ dados.indicadores.roa }}</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Página 5: Vendas -->
+  <div class="page-container">
+    <div class="content-wrapper">
+      <div class="header">
+        <div>
+          <h1>Vendas</h1>
+          <span style="font-size: 10pt; color: #666;">Produtos & Evolução YoY</span>
+        </div>
+        <div class="meta"><strong>{{ dados.cliente_nome }}</strong><br>Pág. 5</div>
+      </div>
+      <div class="row">
+        <div class="col-half card">
+          <h3>Top Produtos</h3>
+          <div style="width: 70%; margin: 0 auto;">
+            <img class="chart-img" src="data:image/png;base64,{{ graficos.vendas_pie }}">
+          </div>
+        </div>
+        <div class="col-half card">
+          <h3>Comparativo Anual (YoY)</h3>
+          <img class="chart-img" src="data:image/png;base64,{{ graficos.vendas_line }}">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Página 6: Custos & Fornecedores -->
+  <div class="page-container">
+    <div class="content-wrapper">
+      <div class="header">
+        <div>
+          <h1>Custos & Fornecedores</h1>
+          <span style="font-size: 10pt; color: #666;">Análises</span>
+        </div>
+        <div class="meta"><strong>{{ dados.cliente_nome }}</strong><br>Pág. 6</div>
+      </div>
+      <div class="row">
+        <div class="col-half card">
+          <h3>Composição de Despesas</h3>
+          <div style="width: 70%; margin: 0 auto;">
+            <img class="chart-img" src="data:image/png;base64,{{ graficos.custos_pie }}">
+          </div>
+        </div>
+        <div class="col-half card">
+          <h3>Top Fornecedores</h3>
+          <div style="width: 70%; margin: 0 auto;">
+            <img class="chart-img" src="data:image/png;base64,{{ graficos.fornecedores_pie }}">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</body>
+
+</html>

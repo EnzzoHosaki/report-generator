@@ -1,0 +1,284 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+
+/* --- 1. CONFIGURAÇÕES GLOBAIS (Aplicam a WEB e PDF) --- */
+:root {
+  --rps-primary: #829871;
+  --rps-secondary: #a7baa6;
+  --rps-tertiary: #262123;
+  --bg-light: #fdfdfd;
+  --border-color: #d1d9d0;
+  --danger-color: #bc4749;
+  --success-color: #6a994e;
+}
+
+/* Regra CRUCIAL para o PDF sair deitado */
+@page {
+  size: A4 landscape;
+  margin: 0;
+}
+
+body {
+  font-family: 'Roboto', sans-serif;
+  color: var(--rps-tertiary);
+  margin: 0;
+  padding: 0;
+  font-size: 10pt;
+  /* No PDF o fundo será branco, na Web será cinza (sobrescrito abaixo) */
+  background-color: white;
+}
+
+/* Utilitários de Layout (Flex/Grid funcionam em ambos) */
+.content-wrapper {
+  padding: 1cm;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.row {
+  display: flex;
+  width: 100%;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.col-half {
+  width: 50%;
+}
+
+.card {
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 10px;
+  background: white;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+/* Tipografia e Elementos */
+.header {
+  border-bottom: 3px solid var(--rps-primary);
+  padding-bottom: 5px;
+  margin-bottom: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.header h1 {
+  color: var(--rps-primary);
+  margin: 0;
+  font-size: 18pt;
+  text-transform: uppercase;
+}
+
+.header .meta {
+  text-align: right;
+  font-size: 9pt;
+  color: var(--rps-tertiary);
+  opacity: 0.7;
+}
+
+.section-title {
+  background-color: var(--rps-primary);
+  color: white;
+  padding: 5px 12px;
+  font-size: 11pt;
+  font-weight: bold;
+  border-radius: 3px;
+  margin-bottom: 10px;
+  display: inline-block;
+  min-width: 200px;
+}
+
+/* KPIs */
+.kpi-container {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.kpi-box {
+  background-color: #f0f4f1;
+  border: 1px solid var(--rps-secondary);
+  border-radius: 4px;
+  padding: 10px;
+  text-align: center;
+}
+
+.kpi-label {
+  font-size: 8pt;
+  color: var(--rps-tertiary);
+  text-transform: uppercase;
+  margin-bottom: 5px;
+}
+
+.kpi-value {
+  font-size: 12pt;
+  font-weight: 700;
+  color: var(--rps-primary);
+}
+
+.negative {
+  color: var(--danger-color);
+}
+
+.positive {
+  color: var(--success-color);
+}
+
+/* Tabelas e Gráficos */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 8pt;
+}
+
+th {
+  background-color: var(--rps-secondary);
+  color: var(--rps-tertiary);
+  padding: 6px;
+  text-align: left;
+}
+
+td {
+  border-bottom: 1px solid var(--border-color);
+  padding: 6px;
+  color: var(--rps-tertiary);
+}
+
+.chart-img {
+  width: 100%;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+
+h3 {
+  margin: 0 0 10px 0;
+  font-size: 10pt;
+  color: var(--rps-tertiary);
+  border-left: 4px solid var(--rps-primary);
+  padding-left: 8px;
+}
+
+/* Capa */
+.cover-page {
+  width: 100%;
+  /* Altura fixa para garantir que o PDF entenda que é uma página cheia */
+  height: 210mm;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, var(--rps-tertiary) 0%, #3a3336 100%);
+  color: white;
+  text-align: center;
+  position: relative;
+  page-break-after: always;
+  /* Força quebra no PDF */
+}
+
+.rps-logo-simulated {
+  font-size: 40pt;
+  font-weight: 700;
+  letter-spacing: 5px;
+  border: 3px solid var(--rps-primary);
+  padding: 10px 30px;
+  color: var(--rps-primary);
+  display: inline-block;
+  margin-bottom: 40px;
+}
+
+.cover-title {
+  font-size: 28pt;
+  font-weight: 300;
+  margin: 0;
+  text-transform: uppercase;
+  color: var(--rps-secondary);
+}
+
+.cover-subtitle {
+  font-size: 14pt;
+  margin-top: 10px;
+  color: #ccc;
+  font-weight: 300;
+}
+
+.cover-client-box {
+  margin-top: 60px;
+  background-color: var(--rps-primary);
+  padding: 20px 60px;
+  border-radius: 4px;
+  color: white;
+}
+
+.cover-client-name {
+  font-size: 18pt;
+  font-weight: 700;
+  margin-bottom: 5px;
+}
+
+.cover-footer {
+  position: absolute;
+  bottom: 30px;
+  font-size: 9pt;
+  color: var(--rps-secondary);
+}
+
+
+/* --- 2. APENAS TELA (Visualização Web "Folha") --- */
+@media screen {
+  body {
+    background-color: #555;
+    /* Fundo cinza escuro só na web */
+  }
+
+  .page-container {
+    background-color: white;
+    width: 297mm;
+    /* Largura A4 Paisagem */
+    height: 210mm;
+    /* Altura A4 Paisagem */
+    margin: 20px auto;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Botão flutuante só na tela */
+  .fab-download {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background-color: var(--rps-primary);
+    color: white;
+    padding: 15px 25px;
+    border-radius: 50px;
+    text-decoration: none;
+    font-weight: bold;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+    transition: transform 0.2s;
+    font-family: sans-serif;
+  }
+
+  .fab-download:hover {
+    transform: scale(1.05);
+  }
+}
+
+/* --- 3. APENAS PDF/IMPRESSÃO (Limpeza) --- */
+@media print {
+  .page-container {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    box-shadow: none;
+    page-break-after: always;
+  }
+
+  .fab-download {
+    display: none;
+  }
+}
