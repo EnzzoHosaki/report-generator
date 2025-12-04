@@ -44,7 +44,7 @@ class ChartService:
     def barras_empilhadas(self, df: pd.DataFrame, cores: List[str], width: float = 0.6, legend_cols: int = 3) -> str:
         fig, ax = plt.subplots(figsize=(7, 3.5))
         df.plot(kind="bar", stacked=True, ax=ax, color=cores, width=width)
-        ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.15), ncol=legend_cols, frameon=False)
+        ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.25), ncol=legend_cols, frameon=False)
         sns.despine(left=True)
         return self._fig_to_b64(fig)
 

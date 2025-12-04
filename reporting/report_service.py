@@ -29,8 +29,8 @@ class ReportService:
 
         df_passivos = pd.DataFrame({
             "Mes": ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun"],
+            "Não Circulante": [60, 58, 55, 56, 54, 52],
             "Circulante": [40, 42, 45, 44, 46, 48],
-            "Nao_Circulante": [60, 58, 55, 56, 54, 52],
         }).set_index("Mes")
 
         meses = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun"]
@@ -46,7 +46,7 @@ class ReportService:
                 df_ativos, cores=[self.charts.primary, self.charts.secondary, "#d1d9d0"], legend_cols=3
             ),
             "passivos_stack": self.charts.area_empilhada(
-                df_passivos, cores=[self.charts.secondary, self.charts.tertiary], legend_cols=2
+                df_passivos, cores=[self.charts.tertiary, self.charts.secondary], legend_cols=2
             ),
             "rentabilidade_line": self.charts.linhas_duplas(
                 meses, rent_rps, rent_cdi, label1="RPS", label2="CDI"
