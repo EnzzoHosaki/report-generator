@@ -22,7 +22,10 @@
        PÁGINA 0: CAPA PREMIUM
        ======================================== -->
   <div class="page-container cover-page">
-    <div class="rps-logo-simulated">RPS</div>
+    <div style="margin-bottom: 30px;">
+      <img src="{{ url_for('static', filename='img/Logo RPS 30 anos branca (sem fundo).png') }}" alt="RPS Logo" style="max-width: 200px; height: auto;">
+    </div>
+    <div class="rps-logo-simulated" style="display: none;">RPS</div>
     <h1 class="cover-title">Relatório Gerencial</h1>
     <div class="cover-subtitle">Performance Financeira · Controladoria Estratégica</div>
     <div class="cover-client-box">
@@ -199,7 +202,7 @@
           <div class="chart-container" style="max-height: 300px; overflow: hidden;">
             <img class="chart-img" src="data:image/png;base64,{{ graficos.ativos_stack }}" alt="Gráfico de Ativos" style="max-width: 90%; height: auto;">
           </div>
-          <div style="margin-top: 12px; padding: 12px; background: #f8faf9; border-radius: 8px;">
+          <div style="margin-top: auto; padding: 12px; background: #f8faf9; border-radius: 8px;">
             <div class="flex-between" style="margin-bottom: 8px;">
               <span style="font-size: 8pt; font-weight: 600;">Principais Movimentações:</span>
             </div>
@@ -252,7 +255,7 @@
           <div class="chart-container" style="max-height: 300px; overflow: hidden;">
             <img class="chart-img" src="data:image/png;base64,{{ graficos.passivos_stack }}" alt="Gráfico de Passivos" style="max-width: 90%; height: auto;">
           </div>
-          <div style="margin-top: 12px; padding: 12px; background: #fff4e6; border-radius: 8px; border-left: 4px solid var(--warning-color);">
+          <div style="margin-top: auto; padding: 12px; background: #fff4e6; border-radius: 8px; border-left: 4px solid var(--warning-color);">
             <div style="font-size: 8pt;">
               <strong><i class="fas fa-lightbulb icon"></i>Insight:</strong> Passivo circulante cresceu 6% enquanto não-circulante reduziu 8%.
               Indica melhora no perfil de endividamento com maior participação de curto prazo.
@@ -281,7 +284,7 @@
       </div>
 
       <div class="row">
-        <div class="col-full card">
+        <div class="col-half card">
           <div class="card-header">
             <h3><i class="fas fa-chart-area icon"></i>Rentabilidade vs CDI</h3>
             <span class="badge badge-success">Superando</span>
@@ -290,10 +293,8 @@
             <img class="chart-img" src="data:image/png;base64,{{ graficos.rentabilidade_line }}" alt="Rentabilidade">
           </div>
         </div>
-      </div>
 
-      <div class="row">
-        <div class="col-full card">
+        <div class="col-half card">
           <div class="card-header">
             <h3><i class="fas fa-gem icon"></i>Patrimônio vs Ativos</h3>
             <span class="badge badge-info">Crescimento</span>

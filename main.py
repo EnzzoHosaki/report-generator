@@ -174,8 +174,8 @@ if __name__ == '__main__':
     ╔═══════════════════════════════════════════════════════╗
     ║   RPS REPORT SYSTEM - INICIANDO                       ║
     ╠═══════════════════════════════════════════════════════╣
-    ║  Servidor: http://localhost:{port}                    ║
-    ║  Modo: {'DEBUG' if debug else 'PRODUCTION'}           ║                    
+    ║  Servidor: http://localhost:{port}                      ║
+    ║  Modo: {'DEBUG' if debug else 'PRODUCTION'}                                          ║                    
     ║  WebPDF: WeasyPrint (A4 Landscape)                    ║
     ╚═══════════════════════════════════════════════════════╝
     """)
