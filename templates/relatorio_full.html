@@ -22,10 +22,9 @@
        PÁGINA 0: CAPA PREMIUM
        ======================================== -->
   <div class="page-container cover-page">
-    <div style="margin-bottom: 30px;">
-      <img src="{{ url_for('static', filename='img/Logo RPS 30 anos branca (sem fundo).png') }}" alt="RPS Logo" style="max-width: 200px; height: auto;">
+    <div style="margin-bottom: 30px; text-align: center;">
+      <img src="{{ url_for('static', filename='img/Logo RPS 30 anos branca (sem fundo).png') }}" alt="RPS Logo" style="max-width: 250px; max-height: 140px; width: auto; height: auto; object-fit: contain;">
     </div>
-    <div class="rps-logo-simulated" style="display: none;">RPS</div>
     <h1 class="cover-title">Relatório Gerencial</h1>
     <div class="cover-subtitle">Performance Financeira · Controladoria Estratégica</div>
     <div class="cover-client-box">
@@ -473,9 +472,8 @@
           <div class="chart-container">
             <img class="chart-img" src="data:image/png;base64,{{ graficos.custos_pie }}" alt="Custos" style="max-width: 75%;">
           </div>
-          <div style="margin-top: 12px; padding: 12px; background: #fff4e6; border-radius: 6px; font-size: 8pt;">
-              <strong><i class="fas fa-exclamation-triangle icon"></i>Alerta:</strong> Pessoal representa 50% dos custos. Avaliar produtividade e automação.
-            </div>
+          <div style="margin-top: auto; padding: 12px; background: #fff4e6; border-radius: 6px; font-size: 8pt;">
+            <strong><i class="fas fa-exclamation-triangle icon"></i>Alerta:</strong> Pessoal representa 50% dos custos. Avaliar produtividade e automação.
           </div>
         </div>
 
@@ -487,10 +485,8 @@
           <div class="chart-container">
             <img class="chart-img" src="data:image/png;base64,{{ graficos.fornecedores_pie }}" alt="Fornecedores" style="max-width: 75%;">
           </div>
-          <div style="margin-top: auto;">
-            <div style="padding: 10px; background: #e8f4fd; border-radius: 6px; font-size: 8pt;">
-              <strong><i class="fas fa-lightbulb icon"></i>Recomendação:</strong> Fornecedor A representa 60%. Considerar diversificação para reduzir risco.
-            </div>
+          <div style="margin-top: auto; padding: 10px; background: #e8f4fd; border-radius: 6px; font-size: 8pt;">
+            <strong><i class="fas fa-lightbulb icon"></i>Recomendação:</strong> Fornecedor A representa 60%. Considerar diversificação para reduzir risco.
           </div>
         </div>
       </div>
