@@ -5,8 +5,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>RPS Report System - Dashboard</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@600;700&display=swap');
+
+    .icon { margin-right: 4px; }
 
     :root {
       --rps-primary: #2d5a3d;
@@ -352,7 +355,7 @@
     <!-- Header -->
     <div class="header">
       <div class="header-left">
-        <h1>🚀 RPS Report System</h1>
+        <h1><i class="fas fa-rocket icon"></i>RPS Report System</h1>
         <p>Sistema Inteligente de Relatórios Gerenciais</p>
       </div>
       <div class="header-stats">
@@ -370,7 +373,7 @@
     <!-- Filtros -->
     <div class="filters">
       <div class="filter-group">
-        <label>📅 Período</label>
+        <label><i class="fas fa-calendar icon"></i>Período</label>
         <select id="periodoSelect">
           {% for p in periodos %}
           <option value="{{ p }}" {% if loop.first %}selected{% endif %}>{{ p }}</option>
@@ -378,11 +381,11 @@
         </select>
       </div>
       <div class="filter-group">
-        <label>🔍 Buscar Cliente</label>
+        <label><i class="fas fa-search icon"></i>Buscar Cliente</label>
         <input type="text" id="searchInput" placeholder="Digite o ID ou nome...">
       </div>
       <div class="filter-group" style="flex: 0 0 auto; margin-top: 24px;">
-        <button class="btn btn-secondary" onclick="resetFilters()">🔄 Limpar</button>
+        <button class="btn btn-secondary" onclick="resetFilters()"><i class="fas fa-redo icon"></i>Limpar</button>
       </div>
     </div>
 
@@ -391,7 +394,7 @@
       {% for cliente in clientes %}
       <div class="client-card" data-client-id="{{ cliente }}">
         <div class="client-header">
-          <div class="client-icon">🏢</div>
+          <div class="client-icon"><i class="fas fa-building"></i></div>
           <div class="client-info">
             <h3>Cliente {{ cliente }}</h3>
             <p>ID: {{ cliente }} • Status: Ativo ✓</p>
@@ -415,10 +418,10 @@
 
         <div class="client-actions">
           <a href="/report/view/{{ cliente }}?periodo={{ periodos[0] }}" class="btn btn-secondary" title="Visualizar no navegador">
-            👁️ Visualizar
+            <i class="fas fa-eye icon"></i>Visualizar
           </a>
           <a href="/report/pdf/{{ cliente }}?periodo={{ periodos[0] }}" class="btn btn-primary" onclick="showLoading()" title="Baixar PDF">
-            ⬇️ PDF
+            <i class="fas fa-download icon"></i>PDF
           </a>
         </div>
       </div>
@@ -427,10 +430,10 @@
 
     <!-- Ações em Lote -->
     <div class="batch-actions">
-      <h3>📦 Geração em Lote</h3>
+      <h3><i class="fas fa-box icon"></i>Geração em Lote</h3>
       <p>Baixe todos os relatórios de uma vez em um arquivo ZIP</p>
       <a href="/report/pdf-batch?ids={{ clientes|join(',') }}&periodo={{ periodos[0] }}" class="btn btn-primary" onclick="showLoading()" style="font-size: 12pt; padding: 16px 32px;">
-        ⬇️ Baixar Todos os Relatórios (ZIP)
+        <i class="fas fa-download icon"></i>Baixar Todos os Relatórios (ZIP)
       </a>
     </div>
 

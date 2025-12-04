@@ -36,12 +36,21 @@ def home():
     """Dashboard moderno com cards de clientes e estatísticas"""
     clientes = data_provider.listar_clientes()
     
-    # Gerar períodos disponíveis (últimos 6 meses)
+    # Gerar períodos disponíveis (últimos 6 meses) em português
+    meses_pt = {
+        'January': 'Janeiro', 'February': 'Fevereiro', 'March': 'Março',
+        'April': 'Abril', 'May': 'Maio', 'June': 'Junho',
+        'July': 'Julho', 'August': 'Agosto', 'September': 'Setembro',
+        'October': 'Outubro', 'November': 'Novembro', 'December': 'Dezembro'
+    }
     periodos = []
     data_atual = datetime.now()
     for i in range(6):
         data = data_atual - timedelta(days=30*i)
-        periodos.append(data.strftime('%B/%Y'))
+        mes_en = data.strftime('%B')
+        ano = data.strftime('%Y')
+        mes_pt = meses_pt.get(mes_en, mes_en)
+        periodos.append(f"{mes_pt}/{ano}")
     
     return render_template('dashboard.html', 
                          clientes=clientes,

@@ -5,7 +5,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Relatório RPS - {{ dados.cliente_nome }}</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    .icon { margin-right: 4px; }
+  </style>
 </head>
 
 <body>
@@ -25,7 +29,7 @@
       <div class="cover-client-name">{{ dados.cliente_nome }}</div>
       <div class="cover-date">{{ dados.periodo }}</div>
     </div>
-    <div class="cover-footer">RPS CONTABILIDADE | Excelência e Precisão em Números</div>
+    <div class="cover-footer">RPS Assessoria Contábil Administrativa</div>
   </div>
 
   <!-- ========================================
@@ -47,42 +51,42 @@
 
       <div class="kpi-container">
         <div class="kpi-box">
-          <div class="kpi-label">💰 Vendas Líquidas</div>
+          <div class="kpi-label"><i class="fas fa-money-bill-wave icon"></i>Vendas Líquidas</div>
           <div class="kpi-value positive">{{ dados.kpis.vendas_liquidas }}</div>
           <div class="kpi-trend positive">▲ 12.5% vs mês anterior</div>
         </div>
         <div class="kpi-box">
-          <div class="kpi-label">📊 Carga Tributária</div>
+          <div class="kpi-label"><i class="fas fa-chart-pie icon"></i>Carga Tributária</div>
           <div class="kpi-value negative">{{ dados.kpis.carga_tributaria }}</div>
           <div class="kpi-trend neutral">18% sobre vendas</div>
         </div>
         <div class="kpi-box">
-          <div class="kpi-label">🛒 Compras</div>
+          <div class="kpi-label"><i class="fas fa-shopping-cart icon"></i>Compras</div>
           <div class="kpi-value">{{ dados.kpis.compras }}</div>
           <div class="kpi-trend positive">▼ 3.2% economia</div>
         </div>
         <div class="kpi-box">
-          <div class="kpi-label">🏗️ CAPEX</div>
+          <div class="kpi-label"><i class="fas fa-hard-hat icon"></i>CAPEX</div>
           <div class="kpi-value">{{ dados.kpis.capex }}</div>
           <div class="kpi-trend neutral">5% das vendas</div>
         </div>
         <div class="kpi-box">
-          <div class="kpi-label">⚙️ Despesas Operacionais</div>
+          <div class="kpi-label"><i class="fas fa-cogs icon"></i>Despesas Operacionais</div>
           <div class="kpi-value">{{ dados.kpis.opex }}</div>
           <div class="kpi-trend positive">Dentro do orçado</div>
         </div>
         <div class="kpi-box">
-          <div class="kpi-label">💳 Despesas Financeiras</div>
+          <div class="kpi-label"><i class="fas fa-credit-card icon"></i>Despesas Financeiras</div>
           <div class="kpi-value">{{ dados.kpis.finex }}</div>
           <div class="kpi-trend positive">▼ 1.5% redução</div>
         </div>
         <div class="kpi-box">
-          <div class="kpi-label">📑 Outras Despesas</div>
+          <div class="kpi-label"><i class="fas fa-file-invoice icon"></i>Outras Despesas</div>
           <div class="kpi-value">{{ dados.kpis.outros }}</div>
           <div class="kpi-trend neutral">Dentro da meta</div>
         </div>
         <div class="kpi-box" style="background: linear-gradient(135deg, #f0f9f4 0%, #e8f5ec 100%);">
-          <div class="kpi-label">✨ Resultado Líquido</div>
+          <div class="kpi-label"><i class="fas fa-star icon"></i>Resultado Líquido</div>
           <div class="kpi-value {{ 'positive' if dados.kpis.lucro_liquido_raw > 0 else 'negative' }}">
             {{ dados.kpis.lucro_liquido }}
           </div>
@@ -95,7 +99,7 @@
       <div class="row">
         <div class="col-half card">
           <div class="card-header">
-            <h3>📈 Análise de Tendência</h3>
+            <h3><i class="fas fa-chart-line icon"></i>Análise de Tendência</h3>
             <span class="badge badge-success">+12.5%</span>
           </div>
           <p class="text-muted" style="font-size: 9pt; margin-bottom: 12px;">
@@ -136,23 +140,23 @@
 
         <div class="col-half card">
           <div class="card-header">
-            <h3>🎯 Destaques do Período</h3>
+            <h3><i class="fas fa-bullseye icon"></i>Destaques do Período</h3>
           </div>
           <div style="display: flex; flex-direction: column; gap: 14px;">
             <div style="padding: 12px; background: #f0f9f4; border-left: 4px solid var(--success-color); border-radius: 6px;">
-              <div style="font-weight: 600; color: var(--success-color); margin-bottom: 4px;">✓ Vendas Acima da Meta</div>
+              <div style="font-weight: 600; color: var(--success-color); margin-bottom: 4px;"><i class="fas fa-check icon"></i>Vendas Acima da Meta</div>
               <div style="font-size: 8pt; color: var(--text-secondary);">
                 Faturamento superou projeção em 12.5%, impulsionado pelo segmento de produtos premium.
               </div>
             </div>
             <div style="padding: 12px; background: #fff4e6; border-left: 4px solid var(--warning-color); border-radius: 6px;">
-              <div style="font-weight: 600; color: var(--warning-color); margin-bottom: 4px;">⚠ Atenção aos Custos</div>
+              <div style="font-weight: 600; color: var(--warning-color); margin-bottom: 4px;"><i class="fas fa-exclamation-circle icon"></i>Atenção aos Custos</div>
               <div style="font-size: 8pt; color: var(--text-secondary);">
                 Despesas financeiras representam 3% do faturamento. Oportunidade de renegociação.
               </div>
             </div>
             <div style="padding: 12px; background: #e8f4fd; border-left: 4px solid var(--info-color); border-radius: 6px;">
-              <div style="font-weight: 600; color: var(--info-color); margin-bottom: 4px;">ℹ Investimentos Planejados</div>
+              <div style="font-weight: 600; color: var(--info-color); margin-bottom: 4px;"><i class="fas fa-info-circle icon"></i>Investimentos Planejados</div>
               <div style="font-size: 8pt; color: var(--text-secondary);">
                 CAPEX dentro do previsto com foco em automação e eficiência operacional.
               </div>
@@ -182,7 +186,7 @@
 
       <div class="row" style="flex: 0 0 auto;">
         <div class="col-full">
-          <span class="section-badge">📊 Evolução Mensal</span>
+          <span class="section-badge"><i class="fas fa-chart-bar icon"></i>Evolução Mensal</span>
         </div>
       </div>
 
@@ -235,7 +239,7 @@
 
       <div class="row" style="flex: 0 0 auto;">
         <div class="col-full">
-          <span class="section-badge">💼 Estrutura de Capital</span>
+          <span class="section-badge"><i class="fas fa-briefcase icon"></i>Estrutura de Capital</span>
         </div>
       </div>
 
@@ -250,7 +254,7 @@
           </div>
           <div style="margin-top: 12px; padding: 12px; background: #fff4e6; border-radius: 8px; border-left: 4px solid var(--warning-color);">
             <div style="font-size: 8pt;">
-              <strong>💡 Insight:</strong> Passivo circulante cresceu 6% enquanto não-circulante reduziu 8%.
+              <strong><i class="fas fa-lightbulb icon"></i>Insight:</strong> Passivo circulante cresceu 6% enquanto não-circulante reduziu 8%.
               Indica melhora no perfil de endividamento com maior participação de curto prazo.
             </div>
           </div>
@@ -279,7 +283,7 @@
       <div class="row">
         <div class="col-half card">
           <div class="card-header">
-            <h3>📈 Rentabilidade vs CDI</h3>
+            <h3><i class="fas fa-chart-area icon"></i>Rentabilidade vs CDI</h3>
             <span class="badge badge-success">Superando</span>
           </div>
           <div class="chart-container">
@@ -288,7 +292,7 @@
         </div>
         <div class="col-half card">
           <div class="card-header">
-            <h3>💎 Patrimônio vs Ativos</h3>
+            <h3><i class="fas fa-gem icon"></i>Patrimônio vs Ativos</h3>
             <span class="badge badge-info">Crescimento</span>
           </div>
           <div class="chart-container">
@@ -300,7 +304,7 @@
       <div class="row">
         <div class="col-half card">
           <div class="card-header">
-            <h3>🎯 ROE vs CDI - Análise Comparativa</h3>
+            <h3><i class="fas fa-target icon"></i>ROE vs CDI - Análise Comparativa</h3>
           </div>
           <table>
             <thead>
@@ -334,7 +338,7 @@
 
         <div class="col-half card">
           <div class="card-header">
-            <h3>📊 Indicadores Financeiros</h3>
+            <h3><i class="fas fa-chart-bar icon"></i>Indicadores Financeiros</h3>
           </div>
           <div class="kpi-container" style="grid-template-columns: repeat(2, 1fr);">
             <div class="kpi-box">
@@ -387,7 +391,7 @@
       <div class="row">
         <div class="col-half card">
           <div class="card-header">
-            <h3>🏆 Top Produtos</h3>
+            <h3><i class="fas fa-trophy icon"></i>Top Produtos</h3>
             <span class="badge badge-success">Mix Equilibrado</span>
           </div>
           <div class="chart-container">
@@ -402,7 +406,7 @@
 
         <div class="col-half card">
           <div class="card-header">
-            <h3>📅 Comparativo Anual (YoY)</h3>
+            <h3><i class="fas fa-calendar-alt icon"></i>Comparativo Anual (YoY)</h3>
             <span class="badge badge-success">+18% vs 2023</span>
           </div>
           <div class="chart-container">
@@ -438,22 +442,21 @@
       <div class="row">
         <div class="col-half card">
           <div class="card-header">
-            <h3>💰 Composição de Despesas</h3>
+            <h3><i class="fas fa-wallet icon"></i>Composição de Despesas</h3>
             <span class="badge badge-warning">Atenção Pessoal</span>
           </div>
           <div class="chart-container">
             <img class="chart-img" src="data:image/png;base64,{{ graficos.custos_pie }}" alt="Custos" style="max-width: 75%;">
           </div>
-          <div style="margin-top: auto;">
-            <div style="padding: 10px; background: #fff4e6; border-radius: 6px; font-size: 8pt;">
-              <strong>⚠️ Alerta:</strong> Pessoal representa 50% dos custos. Avaliar produtividade e automação.
+          <div style="margin-top: 12px; padding: 12px; background: #fff4e6; border-radius: 6px; font-size: 8pt;">
+              <strong><i class="fas fa-exclamation-triangle icon"></i>Alerta:</strong> Pessoal representa 50% dos custos. Avaliar produtividade e automação.
             </div>
           </div>
         </div>
 
         <div class="col-half card">
           <div class="card-header">
-            <h3>🤝 Concentração de Fornecedores</h3>
+            <h3><i class="fas fa-handshake icon"></i>Concentração de Fornecedores</h3>
             <span class="badge badge-warning">Alta Concentração</span>
           </div>
           <div class="chart-container">
@@ -461,7 +464,7 @@
           </div>
           <div style="margin-top: auto;">
             <div style="padding: 10px; background: #e8f4fd; border-radius: 6px; font-size: 8pt;">
-              <strong>💡 Recomendação:</strong> Fornecedor A representa 60%. Considerar diversificação para reduzir risco.
+              <strong><i class="fas fa-lightbulb icon"></i>Recomendação:</strong> Fornecedor A representa 60%. Considerar diversificação para reduzir risco.
             </div>
           </div>
         </div>
@@ -489,7 +492,7 @@
       <div class="row">
         <div class="col-half card" style="background: linear-gradient(135deg, #f0f9f4 0%, #e8f5ec 100%);">
           <div class="card-header">
-            <h3>✅ Pontos Fortes</h3>
+            <h3><i class="fas fa-check-circle icon"></i>Pontos Fortes</h3>
           </div>
           <div style="display: flex; flex-direction: column; gap: 12px; font-size: 9pt;">
             <div style="display: flex; gap: 10px;">
@@ -521,7 +524,7 @@
 
         <div class="col-half card" style="background: linear-gradient(135deg, #fff9e6 0%, #fff4d9 100%);">
           <div class="card-header">
-            <h3>⚠️ Pontos de Atenção</h3>
+            <h3><i class="fas fa-exclamation-triangle icon"></i>Pontos de Atenção</h3>
           </div>
           <div style="display: flex; flex-direction: column; gap: 12px; font-size: 9pt;">
             <div style="display: flex; gap: 10px;">
@@ -555,7 +558,7 @@
       <div class="row">
         <div class="col-full card">
           <div class="card-header">
-            <h3>🎯 Recomendações Estratégicas</h3>
+            <h3><i class="fas fa-lightbulb icon"></i>Recomendações Estratégicas</h3>
           </div>
           <table>
             <thead>
@@ -598,7 +601,7 @@
 
       <div style="margin-top: auto; padding: 16px; background: linear-gradient(135deg, var(--rps-primary), var(--rps-secondary)); color: white; border-radius: 12px; text-align: center;">
         <div style="font-size: 10pt; font-weight: 600; margin-bottom: 6px;">
-          📞 Dúvidas ou necessita de análises adicionais?
+          <i class="fas fa-phone icon"></i>Dúvidas ou necessita de análises adicionais?
         </div>
         <div style="font-size: 8pt; opacity: 0.95;">
           Entre em contato com sua equipe RPS | contato@rpscontabilidade.com.br | (11) 3000-0000
