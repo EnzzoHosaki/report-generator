@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Erro {{ error_code }} - RPS System</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #2d5a3d 0%, #3d7a52 100%);
+      color: white;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .error-container {
+      text-align: center;
+      max-width: 600px;
+    }
+
+    .error-code {
+      font-size: 120pt;
+      font-weight: 700;
+      color: rgba(255, 255, 255, 0.2);
+      line-height: 1;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      font-size: 32pt;
+      margin-bottom: 16px;
+    }
+
+    p {
+      font-size: 14pt;
+      opacity: 0.9;
+      margin-bottom: 40px;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 16px 32px;
+      background: rgba(255, 255, 255, 0.2);
+      border: 2px solid white;
+      border-radius: 12px;
+      color: white;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 12pt;
+      transition: all 0.3s;
+      backdrop-filter: blur(10px);
+    }
+
+    .btn:hover {
+      background: white;
+      color: #2d5a3d;
+      transform: translateY(-2px);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="error-container">
+    <div class="error-code">{{ error_code }}</div>
+    <h1>Oops! Algo deu errado</h1>
+    <p>{{ error_message }}</p>
+    <a href="/" class="btn">🏠 Voltar ao Início</a>
+  </div>
+</body>
+
+</html>

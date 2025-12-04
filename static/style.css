@@ -1,122 +1,282 @@
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@600;700&display=swap');
 
-/* --- 1. CONFIGURAÇÕES GLOBAIS (Aplicam a WEB e PDF) --- */
+/* ============================================
+   CONFIGURAÇÕES GLOBAIS
+   ============================================ */
 :root {
-  --rps-primary: #829871;
-  --rps-secondary: #a7baa6;
-  --rps-tertiary: #262123;
-  --bg-light: #fdfdfd;
-  --border-color: #d1d9d0;
-  --danger-color: #bc4749;
-  --success-color: #6a994e;
+  --rps-primary: #2d5a3d;
+  --rps-primary-light: #3d7a52;
+  --rps-secondary: #7fa88f;
+  --rps-accent: #d4af37;
+  --rps-tertiary: #1a1a1a;
+  --bg-light: #fafbfa;
+  --bg-card: #ffffff;
+  --border-color: #e5e9e6;
+  --danger-color: #e63946;
+  --success-color: #2a9d8f;
+  --warning-color: #f77f00;
+  --info-color: #457b9d;
+  --text-primary: #2b2d2f;
+  --text-secondary: #6b7280;
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
 }
 
-/* Regra CRUCIAL para o PDF sair deitado */
 @page {
   size: A4 landscape;
   margin: 0;
 }
 
-body {
-  font-family: 'Roboto', sans-serif;
-  color: var(--rps-tertiary);
+/* ============================================
+   TIPOGRAFIA & BASE
+   ============================================ */
+* {
   margin: 0;
   padding: 0;
-  font-size: 10pt;
-  /* No PDF o fundo será branco, na Web será cinza (sobrescrito abaixo) */
-  background-color: white;
+  box-sizing: border-box;
 }
 
-/* Utilitários de Layout (Flex/Grid funcionam em ambos) */
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  color: var(--text-primary);
+  background-color: white;
+  font-size: 10pt;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ============================================
+   LAYOUT CONTAINERS
+   ============================================ */
 .content-wrapper {
-  padding: 1cm;
+  padding: 1.2cm;
   height: 100%;
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
 }
 
 .row {
   display: flex;
   width: 100%;
-  gap: 15px;
-  margin-bottom: 15px;
+  gap: 18px;
+  margin-bottom: 18px;
+  flex: 1;
 }
 
 .col-half {
   width: 50%;
+  display: flex;
+  flex-direction: column;
 }
 
+.col-third {
+  width: 33.333%;
+  display: flex;
+  flex-direction: column;
+}
+
+.col-full {
+  width: 100%;
+}
+
+/* ============================================
+   CARDS MODERNOS
+   ============================================ */
 .card {
   border: 1px solid var(--border-color);
-  border-radius: 4px;
-  padding: 10px;
-  background: white;
+  border-radius: 12px;
+  padding: 18px;
+  background: var(--bg-card);
   height: 100%;
   box-sizing: border-box;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
 }
 
-/* Tipografia e Elementos */
-.header {
-  border-bottom: 3px solid var(--rps-primary);
-  padding-bottom: 5px;
-  margin-bottom: 15px;
+.card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.card-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-end;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--border-color);
 }
 
-.header h1 {
-  color: var(--rps-primary);
-  margin: 0;
+.card-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: 18pt;
-  text-transform: uppercase;
-}
-
-.header .meta {
-  text-align: right;
-  font-size: 9pt;
-  color: var(--rps-tertiary);
-  opacity: 0.7;
-}
-
-.section-title {
-  background-color: var(--rps-primary);
+  background: linear-gradient(135deg, var(--rps-primary), var(--rps-primary-light));
   color: white;
-  padding: 5px 12px;
-  font-size: 11pt;
-  font-weight: bold;
-  border-radius: 3px;
-  margin-bottom: 10px;
-  display: inline-block;
-  min-width: 200px;
+  box-shadow: var(--shadow-sm);
 }
 
-/* KPIs */
+/* ============================================
+   HEADER APRIMORADO
+   ============================================ */
+.header {
+  background: linear-gradient(135deg, var(--rps-primary) 0%, var(--rps-primary-light) 100%);
+  padding: 20px 24px;
+  margin: -1.2cm -1.2cm 20px -1.2cm;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: white;
+  box-shadow: var(--shadow-md);
+}
+
+.header-left h1 {
+  font-family: 'Poppins', sans-serif;
+  font-size: 22pt;
+  font-weight: 700;
+  margin: 0 0 4px 0;
+  text-transform: uppercase;
+  letter-spacing: -0.5px;
+}
+
+.header-left .subtitle {
+  font-size: 9pt;
+  opacity: 0.9;
+  font-weight: 400;
+  letter-spacing: 0.5px;
+}
+
+.header-right {
+  text-align: right;
+}
+
+.header-right .client-name {
+  font-size: 11pt;
+  font-weight: 600;
+  margin-bottom: 3px;
+}
+
+.header-right .period {
+  font-size: 9pt;
+  opacity: 0.85;
+}
+
+.header-right .page-number {
+  font-size: 8pt;
+  opacity: 0.7;
+  margin-top: 4px;
+}
+
+/* ============================================
+   SECTION TITLES MODERNOS
+   ============================================ */
+h3 {
+  font-size: 11pt;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 14px 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+h3::before {
+  content: '';
+  width: 4px;
+  height: 20px;
+  background: linear-gradient(180deg, var(--rps-primary), var(--rps-accent));
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.section-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--rps-primary);
+  color: white;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 9pt;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow-sm);
+}
+
+/* ============================================
+   KPI CARDS PREMIUM
+   ============================================ */
 .kpi-container {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 10px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
   margin-bottom: 20px;
 }
 
 .kpi-box {
-  background-color: #f0f4f1;
-  border: 1px solid var(--rps-secondary);
-  border-radius: 4px;
-  padding: 10px;
+  background: linear-gradient(135deg, #ffffff 0%, #f8faf9 100%);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 16px;
   text-align: center;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.kpi-box::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, var(--rps-primary), var(--rps-accent));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.kpi-box:hover::before {
+  opacity: 1;
+}
+
+.kpi-box:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
 }
 
 .kpi-label {
   font-size: 8pt;
-  color: var(--rps-tertiary);
+  color: var(--text-secondary);
   text-transform: uppercase;
-  margin-bottom: 5px;
+  margin-bottom: 8px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
 }
 
 .kpi-value {
-  font-size: 12pt;
+  font-size: 14pt;
   font-weight: 700;
   color: var(--rps-primary);
+  font-family: 'Poppins', sans-serif;
+}
+
+.kpi-trend {
+  font-size: 7pt;
+  margin-top: 4px;
+  font-weight: 600;
 }
 
 .negative {
@@ -127,158 +287,344 @@ body {
   color: var(--success-color);
 }
 
-/* Tabelas e Gráficos */
+.neutral {
+  color: var(--info-color);
+}
+
+/* ============================================
+   TABELAS ELEGANTES
+   ============================================ */
 table {
   width: 100%;
-  border-collapse: collapse;
-  font-size: 8pt;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 9pt;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+thead tr {
+  background: linear-gradient(135deg, var(--rps-primary), var(--rps-primary-light));
 }
 
 th {
-  background-color: var(--rps-secondary);
-  color: var(--rps-tertiary);
-  padding: 6px;
+  color: white;
+  padding: 12px 10px;
   text-align: left;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 8pt;
+  letter-spacing: 0.5px;
 }
 
 td {
   border-bottom: 1px solid var(--border-color);
-  padding: 6px;
-  color: var(--rps-tertiary);
+  padding: 10px;
+  color: var(--text-primary);
+  background: white;
+}
+
+tbody tr:hover {
+  background-color: #f8faf9;
+}
+
+tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.table-highlight {
+  font-weight: 600;
+  color: var(--rps-primary);
+}
+
+/* ============================================
+   GRÁFICOS
+   ============================================ */
+.chart-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
 }
 
 .chart-img {
   width: 100%;
   height: auto;
   display: block;
-  margin: 0 auto;
+  max-height: 100%;
+  object-fit: contain;
 }
 
-h3 {
-  margin: 0 0 10px 0;
-  font-size: 10pt;
-  color: var(--rps-tertiary);
-  border-left: 4px solid var(--rps-primary);
-  padding-left: 8px;
-}
-
-/* Capa */
+/* ============================================
+   CAPA PREMIUM
+   ============================================ */
 .cover-page {
   width: 100%;
-  /* Altura fixa para garantir que o PDF entenda que é uma página cheia */
   height: 210mm;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  background: linear-gradient(135deg, var(--rps-tertiary) 0%, #3a3336 100%);
+  background: linear-gradient(135deg, #1a3a28 0%, var(--rps-primary) 50%, var(--rps-primary-light) 100%);
   color: white;
   text-align: center;
   position: relative;
   page-break-after: always;
-  /* Força quebra no PDF */
+  overflow: hidden;
+}
+
+.cover-page::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+  animation: pulse 15s ease-in-out infinite;
+}
+
+@keyframes pulse {
+
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.3;
+  }
+
+  50% {
+    transform: scale(1.1);
+    opacity: 0.5;
+  }
 }
 
 .rps-logo-simulated {
-  font-size: 40pt;
-  font-weight: 700;
-  letter-spacing: 5px;
-  border: 3px solid var(--rps-primary);
-  padding: 10px 30px;
-  color: var(--rps-primary);
+  font-family: 'Poppins', sans-serif;
+  font-size: 52pt;
+  font-weight: 800;
+  letter-spacing: 8px;
+  background: linear-gradient(135deg, var(--rps-accent), #f4d03f);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  padding: 20px 40px;
+  border: 4px solid var(--rps-accent);
+  border-radius: 16px;
   display: inline-block;
-  margin-bottom: 40px;
+  margin-bottom: 50px;
+  box-shadow: 0 8px 32px rgba(212, 175, 55, 0.3);
+  position: relative;
+  z-index: 1;
 }
 
 .cover-title {
-  font-size: 28pt;
-  font-weight: 300;
+  font-family: 'Poppins', sans-serif;
+  font-size: 32pt;
+  font-weight: 700;
   margin: 0;
   text-transform: uppercase;
-  color: var(--rps-secondary);
+  letter-spacing: 2px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+  position: relative;
+  z-index: 1;
 }
 
 .cover-subtitle {
-  font-size: 14pt;
-  margin-top: 10px;
-  color: #ccc;
-  font-weight: 300;
+  font-size: 15pt;
+  margin-top: 12px;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 400;
+  letter-spacing: 1px;
+  position: relative;
+  z-index: 1;
 }
 
 .cover-client-box {
-  margin-top: 60px;
-  background-color: var(--rps-primary);
-  padding: 20px 60px;
-  border-radius: 4px;
-  color: white;
+  margin-top: 70px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  padding: 30px 80px;
+  border-radius: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  position: relative;
+  z-index: 1;
 }
 
 .cover-client-name {
-  font-size: 18pt;
+  font-size: 22pt;
   font-weight: 700;
-  margin-bottom: 5px;
+  margin-bottom: 8px;
+  color: var(--rps-accent);
+}
+
+.cover-date {
+  font-size: 12pt;
+  opacity: 0.9;
 }
 
 .cover-footer {
   position: absolute;
-  bottom: 30px;
+  bottom: 40px;
   font-size: 9pt;
-  color: var(--rps-secondary);
+  color: rgba(255, 255, 255, 0.7);
+  letter-spacing: 1px;
+  z-index: 1;
 }
 
+/* ============================================
+   BADGES & INDICATORS
+   ============================================ */
+.badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 8pt;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
 
-/* --- 2. APENAS TELA (Visualização Web "Folha") --- */
+.badge-success {
+  background: rgba(42, 157, 143, 0.15);
+  color: var(--success-color);
+}
+
+.badge-danger {
+  background: rgba(230, 57, 70, 0.15);
+  color: var(--danger-color);
+}
+
+.badge-warning {
+  background: rgba(247, 127, 0, 0.15);
+  color: var(--warning-color);
+}
+
+.badge-info {
+  background: rgba(69, 123, 157, 0.15);
+  color: var(--info-color);
+}
+
+/* ============================================
+   VISUALIZAÇÃO WEB
+   ============================================ */
 @media screen {
   body {
-    background-color: #555;
-    /* Fundo cinza escuro só na web */
+    background: linear-gradient(135deg, #f5f7f6 0%, #e8ece9 100%);
+    padding: 20px 0;
   }
 
   .page-container {
     background-color: white;
     width: 297mm;
-    /* Largura A4 Paisagem */
     height: 210mm;
-    /* Altura A4 Paisagem */
     margin: 20px auto;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.12);
     position: relative;
     overflow: hidden;
+    border-radius: 4px;
   }
 
-  /* Botão flutuante só na tela */
+  /* Botão FAB Moderno */
   .fab-download {
     position: fixed;
-    bottom: 30px;
-    right: 30px;
-    background-color: var(--rps-primary);
+    bottom: 40px;
+    right: 40px;
+    background: linear-gradient(135deg, var(--rps-primary), var(--rps-primary-light));
     color: white;
-    padding: 15px 25px;
+    padding: 16px 28px;
     border-radius: 50px;
     text-decoration: none;
-    font-weight: bold;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    font-weight: 600;
+    font-size: 10pt;
+    box-shadow: 0 8px 24px rgba(45, 90, 61, 0.4);
     z-index: 1000;
-    transition: transform 0.2s;
-    font-family: sans-serif;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    letter-spacing: 0.5px;
+  }
+
+  .fab-download::before {
+    content: '⬇';
+    font-size: 14pt;
   }
 
   .fab-download:hover {
-    transform: scale(1.05);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(45, 90, 61, 0.5);
   }
 }
 
-/* --- 3. APENAS PDF/IMPRESSÃO (Limpeza) --- */
+/* ============================================
+   MODO IMPRESSÃO/PDF
+   ============================================ */
 @media print {
+  body {
+    background: white;
+  }
+
   .page-container {
     width: 100%;
     height: 100%;
     margin: 0;
     box-shadow: none;
     page-break-after: always;
+    border-radius: 0;
   }
 
   .fab-download {
-    display: none;
+    display: none !important;
   }
+
+  .card:hover {
+    transform: none;
+    box-shadow: var(--shadow-sm);
+  }
+}
+
+/* ============================================
+   UTILITÁRIOS
+   ============================================ */
+.text-center {
+  text-align: center;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.text-muted {
+  color: var(--text-secondary);
+}
+
+.font-bold {
+  font-weight: 600;
+}
+
+.mb-0 {
+  margin-bottom: 0;
+}
+
+.mt-auto {
+  margin-top: auto;
+}
+
+.flex-1 {
+  flex: 1;
+}
+
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flex-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }

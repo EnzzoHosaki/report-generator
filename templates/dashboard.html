@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RPS Report System - Dashboard</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@600;700&display=swap');
+
+    :root {
+      --rps-primary: #2d5a3d;
+      --rps-primary-light: #3d7a52;
+      --rps-secondary: #7fa88f;
+      --rps-accent: #d4af37;
+      --bg-light: #f5f7f6;
+      --text-primary: #2b2d2f;
+      --text-secondary: #6b7280;
+      --border-color: #e5e9e6;
+      --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #f5f7f6 0%, #e8ece9 100%);
+      color: var(--text-primary);
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    /* Header */
+    .header {
+      background: linear-gradient(135deg, var(--rps-primary) 0%, var(--rps-primary-light) 100%);
+      color: white;
+      padding: 40px;
+      border-radius: 20px;
+      margin-bottom: 40px;
+      box-shadow: var(--shadow-lg);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .header-left h1 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 36pt;
+      font-weight: 700;
+      margin-bottom: 8px;
+      letter-spacing: -1px;
+    }
+
+    .header-left p {
+      font-size: 14pt;
+      opacity: 0.9;
+    }
+
+    .header-stats {
+      display: flex;
+      gap: 30px;
+    }
+
+    .stat-box {
+      text-align: center;
+      background: rgba(255, 255, 255, 0.15);
+      padding: 20px 30px;
+      border-radius: 12px;
+      backdrop-filter: blur(10px);
+    }
+
+    .stat-number {
+      font-size: 32pt;
+      font-weight: 700;
+      color: var(--rps-accent);
+    }
+
+    .stat-label {
+      font-size: 10pt;
+      opacity: 0.9;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* Filtros */
+    .filters {
+      background: white;
+      padding: 30px;
+      border-radius: 16px;
+      margin-bottom: 30px;
+      box-shadow: var(--shadow);
+      display: flex;
+      gap: 20px;
+      align-items: center;
+    }
+
+    .filter-group {
+      flex: 1;
+    }
+
+    .filter-group label {
+      display: block;
+      font-size: 10pt;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .filter-group select,
+    .filter-group input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid var(--border-color);
+      border-radius: 10px;
+      font-size: 11pt;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.3s;
+    }
+
+    .filter-group select:focus,
+    .filter-group input:focus {
+      outline: none;
+      border-color: var(--rps-primary);
+      box-shadow: 0 0 0 3px rgba(45, 90, 61, 0.1);
+    }
+
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 10px;
+      font-size: 11pt;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--rps-primary), var(--rps-primary-light));
+      color: white;
+      box-shadow: 0 4px 12px rgba(45, 90, 61, 0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(45, 90, 61, 0.4);
+    }
+
+    .btn-secondary {
+      background: white;
+      color: var(--rps-primary);
+      border: 2px solid var(--rps-primary);
+    }
+
+    .btn-secondary:hover {
+      background: var(--rps-primary);
+      color: white;
+    }
+
+    /* Grid de Clientes */
+    .clients-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    .client-card {
+      background: white;
+      border-radius: 16px;
+      padding: 28px;
+      box-shadow: var(--shadow);
+      transition: all 0.3s;
+      border: 2px solid transparent;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .client-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(90deg, var(--rps-primary), var(--rps-accent));
+    }
+
+    .client-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+      border-color: var(--rps-secondary);
+    }
+
+    .client-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .client-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--rps-primary), var(--rps-primary-light));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24pt;
+      color: white;
+    }
+
+    .client-info h3 {
+      font-size: 16pt;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+
+    .client-info p {
+      font-size: 9pt;
+      color: var(--text-secondary);
+    }
+
+    .client-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+      padding: 16px;
+      background: #f8faf9;
+      border-radius: 12px;
+    }
+
+    .mini-stat {
+      text-align: center;
+    }
+
+    .mini-stat-value {
+      font-size: 13pt;
+      font-weight: 700;
+      color: var(--rps-primary);
+    }
+
+    .mini-stat-label {
+      font-size: 7pt;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .client-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .client-actions .btn {
+      flex: 1;
+      justify-content: center;
+      font-size: 10pt;
+      padding: 10px 16px;
+    }
+
+    /* Ações em Lote */
+    .batch-actions {
+      background: white;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      text-align: center;
+    }
+
+    .batch-actions h3 {
+      font-size: 16pt;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+
+    .batch-actions p {
+      font-size: 10pt;
+      color: var(--text-secondary);
+      margin-bottom: 20px;
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--text-secondary);
+      font-size: 9pt;
+    }
+
+    /* Loading */
+    .loading {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(5px);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .loading.active {
+      display: flex;
+    }
+
+    .spinner {
+      width: 60px;
+      height: 60px;
+      border: 4px solid rgba(255, 255, 255, 0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+  </div>
+
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <div class="header-left">
+        <h1>🚀 RPS Report System</h1>
+        <p>Sistema Inteligente de Relatórios Gerenciais</p>
+      </div>
+      <div class="header-stats">
+        <div class="stat-box">
+          <div class="stat-number">{{ total_clientes }}</div>
+          <div class="stat-label">Clientes</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-number">{{ periodos|length }}</div>
+          <div class="stat-label">Períodos</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="filters">
+      <div class="filter-group">
+        <label>📅 Período</label>
+        <select id="periodoSelect">
+          {% for p in periodos %}
+          <option value="{{ p }}" {% if loop.first %}selected{% endif %}>{{ p }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>🔍 Buscar Cliente</label>
+        <input type="text" id="searchInput" placeholder="Digite o ID ou nome...">
+      </div>
+      <div class="filter-group" style="flex: 0 0 auto; margin-top: 24px;">
+        <button class="btn btn-secondary" onclick="resetFilters()">🔄 Limpar</button>
+      </div>
+    </div>
+
+    <!-- Grid de Clientes -->
+    <div class="clients-grid" id="clientsGrid">
+      {% for cliente in clientes %}
+      <div class="client-card" data-client-id="{{ cliente }}">
+        <div class="client-header">
+          <div class="client-icon">🏢</div>
+          <div class="client-info">
+            <h3>Cliente {{ cliente }}</h3>
+            <p>ID: {{ cliente }} • Status: Ativo ✓</p>
+          </div>
+        </div>
+
+        <div class="client-stats">
+          <div class="mini-stat">
+            <div class="mini-stat-value">R$ 850K</div>
+            <div class="mini-stat-label">Vendas</div>
+          </div>
+          <div class="mini-stat">
+            <div class="mini-stat-value">12%</div>
+            <div class="mini-stat-label">Margem</div>
+          </div>
+          <div class="mini-stat">
+            <div class="mini-stat-value">+15%</div>
+            <div class="mini-stat-label">Crescimento</div>
+          </div>
+        </div>
+
+        <div class="client-actions">
+          <a href="/report/view/{{ cliente }}?periodo={{ periodos[0] }}" class="btn btn-secondary" title="Visualizar no navegador">
+            👁️ Visualizar
+          </a>
+          <a href="/report/pdf/{{ cliente }}?periodo={{ periodos[0] }}" class="btn btn-primary" onclick="showLoading()" title="Baixar PDF">
+            ⬇️ PDF
+          </a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Ações em Lote -->
+    <div class="batch-actions">
+      <h3>📦 Geração em Lote</h3>
+      <p>Baixe todos os relatórios de uma vez em um arquivo ZIP</p>
+      <a href="/report/pdf-batch?ids={{ clientes|join(',') }}&periodo={{ periodos[0] }}" class="btn btn-primary" onclick="showLoading()" style="font-size: 12pt; padding: 16px 32px;">
+        ⬇️ Baixar Todos os Relatórios (ZIP)
+      </a>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <p>RPS Contabilidade © 2025 | Excelência e Precisão em Números</p>
+      <p style="margin-top: 8px; font-size: 8pt;">
+        Powered by Flask + WeasyPrint | Design System v2.0
+      </p>
+    </div>
+  </div>
+
+  <script>
+    // Loading overlay
+    function showLoading() {
+      document.getElementById('loading').classList.add('active');
+      setTimeout(() => {
+        document.getElementById('loading').classList.remove('active');
+      }, 3000);
+    }
+
+    // Filtro de busca
+    const searchInput = document.getElementById('searchInput');
+    const clientCards = document.querySelectorAll('.client-card');
+
+    searchInput.addEventListener('input', (e) => {
+      const search = e.target.value.toLowerCase();
+      clientCards.forEach(card => {
+        const id = card.dataset.clientId;
+        const match = id.includes(search);
+        card.style.display = match ? 'block' : 'none';
+      });
+    });
+
+    // Atualizar período nos links
+    const periodoSelect = document.getElementById('periodoSelect');
+    periodoSelect.addEventListener('change', (e) => {
+      const periodo = e.target.value;
+      document.querySelectorAll('.client-actions a, .batch-actions a').forEach(link => {
+        const url = new URL(link.href);
+        url.searchParams.set('periodo', periodo);
+        link.href = url.toString();
+      });
+    });
+
+    // Reset filters
+    function resetFilters() {
+      searchInput.value = '';
+      periodoSelect.selectedIndex = 0;
+      clientCards.forEach(card => card.style.display = 'block');
+      periodoSelect.dispatchEvent(new Event('change'));
+    }
+
+    // Animações de entrada
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry, index) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => {
+            entry.target.style.opacity = '1';
+            entry.target.style.transform = 'translateY(0)';
+          }, index * 50);
+        }
+      });
+    });
+
+    clientCards.forEach(card => {
+      card.style.opacity = '0';
+      card.style.transform = 'translateY(20px)';
+      card.style.transition = 'all 0.5s ease';
+      observer.observe(card);
+    });
+  </script>
+</body>
+
+</html>

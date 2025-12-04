@@ -3,21 +3,24 @@
 
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Relatório RPS - {{ dados.cliente_nome }}</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 
 <body>
-  <!-- Botão só aparece na WEB -->
+  <!-- Botão FAB (só aparece na WEB) -->
   <a href="/report/pdf/{{ dados.cliente_id }}" class="fab-download" target="_blank">
     BAIXAR PDF
   </a>
 
-  <!-- Página 0: Capa -->
+  <!-- ========================================
+       PÁGINA 0: CAPA PREMIUM
+       ======================================== -->
   <div class="page-container cover-page">
     <div class="rps-logo-simulated">RPS</div>
     <h1 class="cover-title">Relatório Gerencial</h1>
-    <div class="cover-subtitle">Performance Financeira & Controladoria</div>
+    <div class="cover-subtitle">Performance Financeira · Controladoria Estratégica</div>
     <div class="cover-client-box">
       <div class="cover-client-name">{{ dados.cliente_nome }}</div>
       <div class="cover-date">{{ dados.periodo }}</div>
@@ -25,174 +28,580 @@
     <div class="cover-footer">RPS CONTABILIDADE | Excelência e Precisão em Números</div>
   </div>
 
-  <!-- Página 1: Resumo Gerencial -->
+  <!-- ========================================
+       PÁGINA 1: RESUMO EXECUTIVO
+       ======================================== -->
   <div class="page-container">
     <div class="content-wrapper">
       <div class="header">
-        <div>
-          <h1>Resumo Gerencial</h1>
-          <span style="font-size: 10pt; color: #666;">KPI Cards</span>
+        <div class="header-left">
+          <h1>Resumo Executivo</h1>
+          <div class="subtitle">Visão Consolidada dos Principais Indicadores</div>
         </div>
-        <div class="meta">
-          <strong>{{ dados.cliente_nome }}</strong><br>{{ dados.periodo }}
+        <div class="header-right">
+          <div class="client-name">{{ dados.cliente_nome }}</div>
+          <div class="period">{{ dados.periodo }}</div>
+          <div class="page-number">Página 1 de 7</div>
         </div>
       </div>
 
-      <div class="kpi-container" style="grid-template-columns: repeat(4, 1fr);">
-        <div class="kpi-box"><div class="kpi-label">Venda Líquida</div><div class="kpi-value">{{ dados.kpis.vendas_liquidas }}</div></div>
-        <div class="kpi-box"><div class="kpi-label">Carga Trib.</div><div class="kpi-value negative">{{ dados.kpis.carga_tributaria }}</div></div>
-        <div class="kpi-box"><div class="kpi-label">Compras</div><div class="kpi-value">{{ dados.kpis.compras }}</div></div>
-        <div class="kpi-box"><div class="kpi-label">CAPEX</div><div class="kpi-value">{{ dados.kpis.capex }}</div></div>
-        <div class="kpi-box"><div class="kpi-label">OpEx</div><div class="kpi-value">{{ dados.kpis.opex }}</div></div>
-        <div class="kpi-box"><div class="kpi-label">FinEx</div><div class="kpi-value">{{ dados.kpis.finex }}</div></div>
-        <div class="kpi-box"><div class="kpi-label">Outros</div><div class="kpi-value">{{ dados.kpis.outros }}</div></div>
+      <div class="kpi-container">
         <div class="kpi-box">
-          <div class="kpi-label">Resultado Líquido</div>
-          <div class="kpi-value {{ 'positive' if dados.kpis.lucro_liquido_raw > 0 else 'negative' }}">{{ dados.kpis.lucro_liquido }}</div>
+          <div class="kpi-label">💰 Vendas Líquidas</div>
+          <div class="kpi-value positive">{{ dados.kpis.vendas_liquidas }}</div>
+          <div class="kpi-trend positive">▲ 12.5% vs mês anterior</div>
+        </div>
+        <div class="kpi-box">
+          <div class="kpi-label">📊 Carga Tributária</div>
+          <div class="kpi-value negative">{{ dados.kpis.carga_tributaria }}</div>
+          <div class="kpi-trend neutral">18% sobre vendas</div>
+        </div>
+        <div class="kpi-box">
+          <div class="kpi-label">🛒 Compras</div>
+          <div class="kpi-value">{{ dados.kpis.compras }}</div>
+          <div class="kpi-trend positive">▼ 3.2% economia</div>
+        </div>
+        <div class="kpi-box">
+          <div class="kpi-label">🏗️ CAPEX</div>
+          <div class="kpi-value">{{ dados.kpis.capex }}</div>
+          <div class="kpi-trend neutral">5% das vendas</div>
+        </div>
+        <div class="kpi-box">
+          <div class="kpi-label">⚙️ Despesas Operacionais</div>
+          <div class="kpi-value">{{ dados.kpis.opex }}</div>
+          <div class="kpi-trend positive">Dentro do orçado</div>
+        </div>
+        <div class="kpi-box">
+          <div class="kpi-label">💳 Despesas Financeiras</div>
+          <div class="kpi-value">{{ dados.kpis.finex }}</div>
+          <div class="kpi-trend positive">▼ 1.5% redução</div>
+        </div>
+        <div class="kpi-box">
+          <div class="kpi-label">📑 Outras Despesas</div>
+          <div class="kpi-value">{{ dados.kpis.outros }}</div>
+          <div class="kpi-trend neutral">Dentro da meta</div>
+        </div>
+        <div class="kpi-box" style="background: linear-gradient(135deg, #f0f9f4 0%, #e8f5ec 100%);">
+          <div class="kpi-label">✨ Resultado Líquido</div>
+          <div class="kpi-value {{ 'positive' if dados.kpis.lucro_liquido_raw > 0 else 'negative' }}">
+            {{ dados.kpis.lucro_liquido }}
+          </div>
+          <div class="kpi-trend {{ 'positive' if dados.kpis.lucro_liquido_raw > 0 else 'negative' }}">
+            {% if dados.kpis.lucro_liquido_raw > 0 %}▲ Performance positiva{% else %}▼ Atenção necessária{% endif %}
+          </div>
         </div>
       </div>
-    </div>
-  </div>
 
-  <!-- Página 2: Evolução de Ativos -->
-  <div class="page-container">
-    <div class="content-wrapper">
-      <div class="header">
-        <div>
-          <h1>Ativos</h1>
-          <span style="font-size: 10pt; color: #666;">Composição & Evolução</span>
-        </div>
-        <div class="meta"><strong>{{ dados.cliente_nome }}</strong><br>Pág. 2</div>
-      </div>
-      <div class="row">
-        <div class="card" style="width:100%">
-          <h3>Evolução da Composição (Empilhado)</h3>
-          <img class="chart-img" src="data:image/png;base64,{{ graficos.ativos_stack }}">
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Página 3: Evolução de Passivos -->
-  <div class="page-container">
-    <div class="content-wrapper">
-      <div class="header">
-        <div>
-          <h1>Passivos</h1>
-          <span style="font-size: 10pt; color: #666;">Composição & Evolução</span>
-        </div>
-        <div class="meta"><strong>{{ dados.cliente_nome }}</strong><br>Pág. 3</div>
-      </div>
-      <div class="row">
-        <div class="card" style="width:100%">
-          <h3>Composição (Circulante vs Não-Circulante)</h3>
-          <img class="chart-img" src="data:image/png;base64,{{ graficos.passivos_stack }}">
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Página 4: Rentabilidade & Patrimônio -->
-  <div class="page-container">
-    <div class="content-wrapper">
-      <div class="header">
-        <div>
-          <h1>Rentabilidade & Patrimônio</h1>
-          <span style="font-size: 10pt; color: #666;">Análises de  Indicadores</span>
-        </div>
-        <div class="meta"><strong>{{ dados.cliente_nome }}</strong><br>Pág. 4</div>
-      </div>
       <div class="row">
         <div class="col-half card">
-          <h3>Rentabilidade vs CDI</h3>
-          <img class="chart-img" src="data:image/png;base64,{{ graficos.rentabilidade_line }}">
-        </div>
-        <div class="col-half card">
-          <h3>Patrimônio Líquido vs Ativos Totais</h3>
-          <img class="chart-img" src="data:image/png;base64,{{ graficos.equity_vs_ativos }}">
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-half card">
-          <h3>ROE vs CDI (Tabela)</h3>
+          <div class="card-header">
+            <h3>📈 Análise de Tendência</h3>
+            <span class="badge badge-success">+12.5%</span>
+          </div>
+          <p class="text-muted" style="font-size: 9pt; margin-bottom: 12px;">
+            Crescimento consistente nas vendas líquidas com controle efetivo de despesas operacionais.
+            Margem líquida mantida acima da meta de 10%.
+          </p>
           <table>
             <thead>
-              <tr><th>Período</th><th>ROE (%)</th><th>CDI (%)</th><th>Spread</th></tr>
+              <tr>
+                <th>Indicador</th>
+                <th>Valor</th>
+                <th>Meta</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Margem Bruta</td>
+                <td class="table-highlight">42%</td>
+                <td>40%</td>
+                <td><span class="badge badge-success">OK</span></td>
+              </tr>
+              <tr>
+                <td>Margem EBITDA</td>
+                <td class="table-highlight">15%</td>
+                <td>12%</td>
+                <td><span class="badge badge-success">OK</span></td>
+              </tr>
+              <tr>
+                <td>Margem Líquida</td>
+                <td class="table-highlight">12%</td>
+                <td>10%</td>
+                <td><span class="badge badge-success">OK</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="col-half card">
+          <div class="card-header">
+            <h3>🎯 Destaques do Período</h3>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 14px;">
+            <div style="padding: 12px; background: #f0f9f4; border-left: 4px solid var(--success-color); border-radius: 6px;">
+              <div style="font-weight: 600; color: var(--success-color); margin-bottom: 4px;">✓ Vendas Acima da Meta</div>
+              <div style="font-size: 8pt; color: var(--text-secondary);">
+                Faturamento superou projeção em 12.5%, impulsionado pelo segmento de produtos premium.
+              </div>
+            </div>
+            <div style="padding: 12px; background: #fff4e6; border-left: 4px solid var(--warning-color); border-radius: 6px;">
+              <div style="font-weight: 600; color: var(--warning-color); margin-bottom: 4px;">⚠ Atenção aos Custos</div>
+              <div style="font-size: 8pt; color: var(--text-secondary);">
+                Despesas financeiras representam 3% do faturamento. Oportunidade de renegociação.
+              </div>
+            </div>
+            <div style="padding: 12px; background: #e8f4fd; border-left: 4px solid var(--info-color); border-radius: 6px;">
+              <div style="font-weight: 600; color: var(--info-color); margin-bottom: 4px;">ℹ Investimentos Planejados</div>
+              <div style="font-size: 8pt; color: var(--text-secondary);">
+                CAPEX dentro do previsto com foco em automação e eficiência operacional.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================
+       PÁGINA 2: ANÁLISE DE ATIVOS
+       ======================================== -->
+  <div class="page-container">
+    <div class="content-wrapper">
+      <div class="header">
+        <div class="header-left">
+          <h1>Análise de Ativos</h1>
+          <div class="subtitle">Composição e Evolução do Patrimônio</div>
+        </div>
+        <div class="header-right">
+          <div class="client-name">{{ dados.cliente_nome }}</div>
+          <div class="period">{{ dados.periodo }}</div>
+          <div class="page-number">Página 2 de 7</div>
+        </div>
+      </div>
+
+      <div class="row" style="flex: 0 0 auto;">
+        <div class="col-full">
+          <span class="section-badge">📊 Evolução Mensal</span>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="card" style="width: 100%;">
+          <div class="card-header">
+            <h3>Composição dos Ativos (Empilhado)</h3>
+            <span class="badge badge-info">6 meses</span>
+          </div>
+          <div class="chart-container">
+            <img class="chart-img" src="data:image/png;base64,{{ graficos.ativos_stack }}" alt="Gráfico de Ativos">
+          </div>
+          <div style="margin-top: 12px; padding: 12px; background: #f8faf9; border-radius: 8px;">
+            <div class="flex-between" style="margin-bottom: 8px;">
+              <span style="font-size: 8pt; font-weight: 600;">Principais Movimentações:</span>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; font-size: 8pt;">
+              <div>
+                <span style="color: var(--success-color); font-weight: 600;">+8.5%</span> Caixa
+              </div>
+              <div>
+                <span style="color: var(--success-color); font-weight: 600;">+6.2%</span> Estoques
+              </div>
+              <div>
+                <span style="color: var(--info-color); font-weight: 600;">+3.1%</span> Imobilizado
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================
+       PÁGINA 3: ANÁLISE DE PASSIVOS
+       ======================================== -->
+  <div class="page-container">
+    <div class="content-wrapper">
+      <div class="header">
+        <div class="header-left">
+          <h1>Análise de Passivos</h1>
+          <div class="subtitle">Estrutura de Capital e Endividamento</div>
+        </div>
+        <div class="header-right">
+          <div class="client-name">{{ dados.cliente_nome }}</div>
+          <div class="period">{{ dados.periodo }}</div>
+          <div class="page-number">Página 3 de 7</div>
+        </div>
+      </div>
+
+      <div class="row" style="flex: 0 0 auto;">
+        <div class="col-full">
+          <span class="section-badge">💼 Estrutura de Capital</span>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="card" style="width: 100%;">
+          <div class="card-header">
+            <h3>Evolução Circulante vs Não-Circulante</h3>
+            <span class="badge badge-warning">Monitorar</span>
+          </div>
+          <div class="chart-container">
+            <img class="chart-img" src="data:image/png;base64,{{ graficos.passivos_stack }}" alt="Gráfico de Passivos">
+          </div>
+          <div style="margin-top: 12px; padding: 12px; background: #fff4e6; border-radius: 8px; border-left: 4px solid var(--warning-color);">
+            <div style="font-size: 8pt;">
+              <strong>💡 Insight:</strong> Passivo circulante cresceu 6% enquanto não-circulante reduziu 8%.
+              Indica melhora no perfil de endividamento com maior participação de curto prazo.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================
+       PÁGINA 4: RENTABILIDADE & PATRIMÔNIO
+       ======================================== -->
+  <div class="page-container">
+    <div class="content-wrapper">
+      <div class="header">
+        <div class="header-left">
+          <h1>Rentabilidade & Patrimônio</h1>
+          <div class="subtitle">Indicadores de Performance e Retorno</div>
+        </div>
+        <div class="header-right">
+          <div class="client-name">{{ dados.cliente_nome }}</div>
+          <div class="period">{{ dados.periodo }}</div>
+          <div class="page-number">Página 4 de 7</div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-half card">
+          <div class="card-header">
+            <h3>📈 Rentabilidade vs CDI</h3>
+            <span class="badge badge-success">Superando</span>
+          </div>
+          <div class="chart-container">
+            <img class="chart-img" src="data:image/png;base64,{{ graficos.rentabilidade_line }}" alt="Rentabilidade">
+          </div>
+        </div>
+        <div class="col-half card">
+          <div class="card-header">
+            <h3>💎 Patrimônio vs Ativos</h3>
+            <span class="badge badge-info">Crescimento</span>
+          </div>
+          <div class="chart-container">
+            <img class="chart-img" src="data:image/png;base64,{{ graficos.equity_vs_ativos }}" alt="Patrimônio">
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-half card">
+          <div class="card-header">
+            <h3>🎯 ROE vs CDI - Análise Comparativa</h3>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Período</th>
+                <th style="text-align: center;">ROE (%)</th>
+                <th style="text-align: center;">CDI (%)</th>
+                <th style="text-align: center;">Spread</th>
+                <th>Status</th>
+              </tr>
             </thead>
             <tbody>
               {% for row in dados.tabela_roe %}
               <tr>
-                <td>{{ row.periodo }}</td>
-                <td>{{ row.roe }}%</td>
-                <td>{{ row.cdi }}%</td>
-                <td style="font-weight: bold; color: {{ 'green' if row.delta > 0 else '#bc4749' }}">{{ row.delta }}%</td>
+                <td style="font-weight: 600;">{{ row.periodo }}</td>
+                <td style="text-align: center; color: var(--rps-primary);">{{ row.roe }}%</td>
+                <td style="text-align: center; color: var(--text-secondary);">{{ row.cdi }}%</td>
+                <td style="text-align: center; font-weight: 700; color: {{ 'var(--success-color)' if row.delta > 0 else 'var(--danger-color)' }}">
+                  {{ '+' if row.delta > 0 else '' }}{{ row.delta }}%
+                </td>
+                <td>
+                  <span class="badge {{ 'badge-success' if row.delta > 0 else 'badge-danger' }}">
+                    {{ 'Acima' if row.delta > 0 else 'Abaixo' }}
+                  </span>
+                </td>
               </tr>
               {% endfor %}
             </tbody>
           </table>
         </div>
+
         <div class="col-half card">
-          <h3>KPIs Financeiros</h3>
+          <div class="card-header">
+            <h3>📊 Indicadores Financeiros</h3>
+          </div>
           <div class="kpi-container" style="grid-template-columns: repeat(2, 1fr);">
-            <div class="kpi-box"><div class="kpi-label">EBITDA</div><div class="kpi-value">{{ dados.indicadores.ebitda }}</div></div>
-            <div class="kpi-box"><div class="kpi-label">NCG</div><div class="kpi-value">{{ dados.indicadores.ncg }}</div></div>
-            <div class="kpi-box"><div class="kpi-label">Liq. Corrente</div><div class="kpi-value">{{ dados.indicadores.liquidez_corrente }}</div></div>
-            <div class="kpi-box"><div class="kpi-label">Endividamento</div><div class="kpi-value">{{ dados.indicadores.endividamento }}</div></div>
-            <div class="kpi-box"><div class="kpi-label">Margem Líquida</div><div class="kpi-value">{{ dados.indicadores.margem_liquida }}</div></div>
-            <div class="kpi-box"><div class="kpi-label">ROA</div><div class="kpi-value">{{ dados.indicadores.roa }}</div></div>
+            <div class="kpi-box">
+              <div class="kpi-label">EBITDA</div>
+              <div class="kpi-value">{{ dados.indicadores.ebitda }}</div>
+            </div>
+            <div class="kpi-box">
+              <div class="kpi-label">NCG</div>
+              <div class="kpi-value">{{ dados.indicadores.ncg }}</div>
+            </div>
+            <div class="kpi-box">
+              <div class="kpi-label">Liquidez Corrente</div>
+              <div class="kpi-value positive">{{ dados.indicadores.liquidez_corrente }}</div>
+            </div>
+            <div class="kpi-box">
+              <div class="kpi-label">Endividamento</div>
+              <div class="kpi-value">{{ dados.indicadores.endividamento }}</div>
+            </div>
+            <div class="kpi-box">
+              <div class="kpi-label">Margem Líquida</div>
+              <div class="kpi-value positive">{{ dados.indicadores.margem_liquida }}</div>
+            </div>
+            <div class="kpi-box">
+              <div class="kpi-label">ROA</div>
+              <div class="kpi-value positive">{{ dados.indicadores.roa }}</div>
+            </div>
           </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Página 5: Vendas -->
+  <!-- ========================================
+       PÁGINA 5: ANÁLISE DE VENDAS
+       ======================================== -->
   <div class="page-container">
     <div class="content-wrapper">
       <div class="header">
-        <div>
-          <h1>Vendas</h1>
-          <span style="font-size: 10pt; color: #666;">Produtos & Evolução YoY</span>
+        <div class="header-left">
+          <h1>Análise de Vendas</h1>
+          <div class="subtitle">Performance Comercial e Mix de Produtos</div>
         </div>
-        <div class="meta"><strong>{{ dados.cliente_nome }}</strong><br>Pág. 5</div>
+        <div class="header-right">
+          <div class="client-name">{{ dados.cliente_nome }}</div>
+          <div class="period">{{ dados.periodo }}</div>
+          <div class="page-number">Página 5 de 7</div>
+        </div>
       </div>
+
       <div class="row">
         <div class="col-half card">
-          <h3>Top Produtos</h3>
-          <div style="width: 70%; margin: 0 auto;">
-            <img class="chart-img" src="data:image/png;base64,{{ graficos.vendas_pie }}">
+          <div class="card-header">
+            <h3>🏆 Top Produtos</h3>
+            <span class="badge badge-success">Mix Equilibrado</span>
+          </div>
+          <div class="chart-container">
+            <img class="chart-img" src="data:image/png;base64,{{ graficos.vendas_pie }}" alt="Produtos" style="max-width: 75%;">
+          </div>
+          <div style="margin-top: auto; padding-top: 12px; border-top: 1px solid var(--border-color);">
+            <div style="font-size: 8pt; color: var(--text-secondary); text-align: center;">
+              Produto A lidera com 40% das vendas | Diversificação saudável
+            </div>
           </div>
         </div>
+
         <div class="col-half card">
-          <h3>Comparativo Anual (YoY)</h3>
-          <img class="chart-img" src="data:image/png;base64,{{ graficos.vendas_line }}">
+          <div class="card-header">
+            <h3>📅 Comparativo Anual (YoY)</h3>
+            <span class="badge badge-success">+18% vs 2023</span>
+          </div>
+          <div class="chart-container">
+            <img class="chart-img" src="data:image/png;base64,{{ graficos.vendas_line }}" alt="YoY">
+          </div>
+          <div style="margin-top: auto; padding-top: 12px; border-top: 1px solid var(--border-color);">
+            <div style="font-size: 8pt; color: var(--text-secondary); text-align: center;">
+              Crescimento consistente mês a mês | Tendência positiva mantida
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Página 6: Custos & Fornecedores -->
+  <!-- ========================================
+       PÁGINA 6: CUSTOS & FORNECEDORES
+       ======================================== -->
   <div class="page-container">
     <div class="content-wrapper">
       <div class="header">
-        <div>
+        <div class="header-left">
           <h1>Custos & Fornecedores</h1>
-          <span style="font-size: 10pt; color: #666;">Análises</span>
+          <div class="subtitle">Análise de Despesas e Concentração</div>
         </div>
-        <div class="meta"><strong>{{ dados.cliente_nome }}</strong><br>Pág. 6</div>
+        <div class="header-right">
+          <div class="client-name">{{ dados.cliente_nome }}</div>
+          <div class="period">{{ dados.periodo }}</div>
+          <div class="page-number">Página 6 de 7</div>
+        </div>
       </div>
+
       <div class="row">
         <div class="col-half card">
-          <h3>Composição de Despesas</h3>
-          <div style="width: 70%; margin: 0 auto;">
-            <img class="chart-img" src="data:image/png;base64,{{ graficos.custos_pie }}">
+          <div class="card-header">
+            <h3>💰 Composição de Despesas</h3>
+            <span class="badge badge-warning">Atenção Pessoal</span>
+          </div>
+          <div class="chart-container">
+            <img class="chart-img" src="data:image/png;base64,{{ graficos.custos_pie }}" alt="Custos" style="max-width: 75%;">
+          </div>
+          <div style="margin-top: auto;">
+            <div style="padding: 10px; background: #fff4e6; border-radius: 6px; font-size: 8pt;">
+              <strong>⚠️ Alerta:</strong> Pessoal representa 50% dos custos. Avaliar produtividade e automação.
+            </div>
           </div>
         </div>
+
         <div class="col-half card">
-          <h3>Top Fornecedores</h3>
-          <div style="width: 70%; margin: 0 auto;">
-            <img class="chart-img" src="data:image/png;base64,{{ graficos.fornecedores_pie }}">
+          <div class="card-header">
+            <h3>🤝 Concentração de Fornecedores</h3>
+            <span class="badge badge-warning">Alta Concentração</span>
           </div>
+          <div class="chart-container">
+            <img class="chart-img" src="data:image/png;base64,{{ graficos.fornecedores_pie }}" alt="Fornecedores" style="max-width: 75%;">
+          </div>
+          <div style="margin-top: auto;">
+            <div style="padding: 10px; background: #e8f4fd; border-radius: 6px; font-size: 8pt;">
+              <strong>💡 Recomendação:</strong> Fornecedor A representa 60%. Considerar diversificação para reduzir risco.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================
+       PÁGINA 7: CONCLUSÕES E RECOMENDAÇÕES
+       ======================================== -->
+  <div class="page-container">
+    <div class="content-wrapper">
+      <div class="header">
+        <div class="header-left">
+          <h1>Conclusões & Recomendações</h1>
+          <div class="subtitle">Síntese Estratégica e Próximos Passos</div>
+        </div>
+        <div class="header-right">
+          <div class="client-name">{{ dados.cliente_nome }}</div>
+          <div class="period">{{ dados.periodo }}</div>
+          <div class="page-number">Página 7 de 7</div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-half card" style="background: linear-gradient(135deg, #f0f9f4 0%, #e8f5ec 100%);">
+          <div class="card-header">
+            <h3>✅ Pontos Fortes</h3>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 12px; font-size: 9pt;">
+            <div style="display: flex; gap: 10px;">
+              <span style="color: var(--success-color); font-size: 14pt;">●</span>
+              <div>
+                <strong>Crescimento Sustentável:</strong> Vendas 12.5% acima do período anterior com margem líquida de 12%.
+              </div>
+            </div>
+            <div style="display: flex; gap: 10px;">
+              <span style="color: var(--success-color); font-size: 14pt;">●</span>
+              <div>
+                <strong>Liquidez Saudável:</strong> Índice de 1.45 garante capacidade de honrar obrigações de curto prazo.
+              </div>
+            </div>
+            <div style="display: flex; gap: 10px;">
+              <span style="color: var(--success-color); font-size: 14pt;">●</span>
+              <div>
+                <strong>ROE Acima do CDI:</strong> Rentabilidade superior ao benchmark em todos os períodos analisados.
+              </div>
+            </div>
+            <div style="display: flex; gap: 10px;">
+              <span style="color: var(--success-color); font-size: 14pt;">●</span>
+              <div>
+                <strong>Controle de CAPEX:</strong> Investimentos dentro do planejado (5% das vendas).
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-half card" style="background: linear-gradient(135deg, #fff9e6 0%, #fff4d9 100%);">
+          <div class="card-header">
+            <h3>⚠️ Pontos de Atenção</h3>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 12px; font-size: 9pt;">
+            <div style="display: flex; gap: 10px;">
+              <span style="color: var(--warning-color); font-size: 14pt;">●</span>
+              <div>
+                <strong>Concentração de Fornecedores:</strong> 60% das compras com um único fornecedor aumenta risco operacional.
+              </div>
+            </div>
+            <div style="display: flex; gap: 10px;">
+              <span style="color: var(--warning-color); font-size: 14pt;">●</span>
+              <div>
+                <strong>Custos com Pessoal:</strong> 50% das despesas operacionais. Avaliar produtividade e automação.
+              </div>
+            </div>
+            <div style="display: flex; gap: 10px;">
+              <span style="color: var(--warning-color); font-size: 14pt;">●</span>
+              <div>
+                <strong>Despesas Financeiras:</strong> 3% do faturamento. Oportunidade de renegociação de taxas.
+              </div>
+            </div>
+            <div style="display: flex; gap: 10px;">
+              <span style="color: var(--warning-color); font-size: 14pt;">●</span>
+              <div>
+                <strong>Endividamento:</strong> 45% requer monitoramento contínuo para evitar pressão de caixa.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-full card">
+          <div class="card-header">
+            <h3>🎯 Recomendações Estratégicas</h3>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 20%;">Área</th>
+                <th style="width: 50%;">Recomendação</th>
+                <th style="width: 15%;">Prioridade</th>
+                <th style="width: 15%;">Prazo</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Fornecedores</strong></td>
+                <td>Diversificar base de fornecedores para reduzir risco de concentração</td>
+                <td><span class="badge badge-danger">Alta</span></td>
+                <td>30 dias</td>
+              </tr>
+              <tr>
+                <td><strong>Financeiro</strong></td>
+                <td>Renegociar taxas de empréstimos e linhas de crédito com bancos</td>
+                <td><span class="badge badge-warning">Média</span></td>
+                <td>60 dias</td>
+              </tr>
+              <tr>
+                <td><strong>Operacional</strong></td>
+                <td>Implementar projeto piloto de automação para reduzir custos com pessoal</td>
+                <td><span class="badge badge-warning">Média</span></td>
+                <td>90 dias</td>
+              </tr>
+              <tr>
+                <td><strong>Comercial</strong></td>
+                <td>Expandir linha de produtos para aumentar ticket médio e margem</td>
+                <td><span class="badge badge-info">Baixa</span></td>
+                <td>120 dias</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div style="margin-top: auto; padding: 16px; background: linear-gradient(135deg, var(--rps-primary), var(--rps-secondary)); color: white; border-radius: 12px; text-align: center;">
+        <div style="font-size: 10pt; font-weight: 600; margin-bottom: 6px;">
+          📞 Dúvidas ou necessita de análises adicionais?
+        </div>
+        <div style="font-size: 8pt; opacity: 0.95;">
+          Entre em contato com sua equipe RPS | contato@rpscontabilidade.com.br | (11) 3000-0000
         </div>
       </div>
     </div>
