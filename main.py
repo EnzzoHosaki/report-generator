@@ -171,12 +171,12 @@ if __name__ == '__main__':
     debug = os.environ.get('DEBUG', '1') == '1'
     port = int(os.environ.get('PORT', '5000'))
     print(f"""
-    ╔══════════════════════════════════════════╗
-    ║   🚀 RPS REPORT SYSTEM - INICIANDO     ║
-    ╠══════════════════════════════════════════╣
-    ║  Servidor: http://localhost:{port}         ║
-    ║  Modo: {'DEBUG ⚠️ ' if debug else 'PRODUCTION ✓'}                    ║
-    ║  WebPDF: WeasyPrint (A4 Landscape)      ║
-    ╚══════════════════════════════════════════╝
+    ╔═══════════════════════════════════════════════════════╗
+    ║   RPS REPORT SYSTEM - INICIANDO                       ║
+    ╠═══════════════════════════════════════════════════════╣
+    ║  Servidor: http://localhost:{port}                    ║
+    ║  Modo: {'DEBUG' if debug else 'PRODUCTION'}           ║                    
+    ║  WebPDF: WeasyPrint (A4 Landscape)                    ║
+    ╚═══════════════════════════════════════════════════════╝
     """)
     app.run(debug=debug, port=port, host='0.0.0.0')

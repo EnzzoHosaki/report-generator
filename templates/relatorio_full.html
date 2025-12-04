@@ -196,8 +196,8 @@
             <h3>Composição dos Ativos (Empilhado)</h3>
             <span class="badge badge-info">6 meses</span>
           </div>
-          <div class="chart-container">
-            <img class="chart-img" src="data:image/png;base64,{{ graficos.ativos_stack }}" alt="Gráfico de Ativos">
+          <div class="chart-container" style="max-height: 300px; overflow: hidden;">
+            <img class="chart-img" src="data:image/png;base64,{{ graficos.ativos_stack }}" alt="Gráfico de Ativos" style="max-width: 90%; height: auto;">
           </div>
           <div style="margin-top: 12px; padding: 12px; background: #f8faf9; border-radius: 8px;">
             <div class="flex-between" style="margin-bottom: 8px;">
@@ -249,8 +249,8 @@
             <h3>Evolução Circulante vs Não-Circulante</h3>
             <span class="badge badge-warning">Monitorar</span>
           </div>
-          <div class="chart-container">
-            <img class="chart-img" src="data:image/png;base64,{{ graficos.passivos_stack }}" alt="Gráfico de Passivos">
+          <div class="chart-container" style="max-height: 300px; overflow: hidden;">
+            <img class="chart-img" src="data:image/png;base64,{{ graficos.passivos_stack }}" alt="Gráfico de Passivos" style="max-width: 90%; height: auto;">
           </div>
           <div style="margin-top: 12px; padding: 12px; background: #fff4e6; border-radius: 8px; border-left: 4px solid var(--warning-color);">
             <div style="font-size: 8pt;">
@@ -264,24 +264,24 @@
   </div>
 
   <!-- ========================================
-       PÁGINA 4: RENTABILIDADE & PATRIMÔNIO
+       PÁGINA 4: RENTABILIDADE & PATRIMÔNIO (PARTE 1)
        ======================================== -->
   <div class="page-container">
     <div class="content-wrapper">
       <div class="header">
         <div class="header-left">
           <h1>Rentabilidade & Patrimônio</h1>
-          <div class="subtitle">Indicadores de Performance e Retorno</div>
+          <div class="subtitle">Análise de Retorno vs Referencial</div>
         </div>
         <div class="header-right">
           <div class="client-name">{{ dados.cliente_nome }}</div>
           <div class="period">{{ dados.periodo }}</div>
-          <div class="page-number">Página 4 de 7</div>
+          <div class="page-number">Página 4 de 8</div>
         </div>
       </div>
 
       <div class="row">
-        <div class="col-half card">
+        <div class="col-full card">
           <div class="card-header">
             <h3><i class="fas fa-chart-area icon"></i>Rentabilidade vs CDI</h3>
             <span class="badge badge-success">Superando</span>
@@ -290,7 +290,10 @@
             <img class="chart-img" src="data:image/png;base64,{{ graficos.rentabilidade_line }}" alt="Rentabilidade">
           </div>
         </div>
-        <div class="col-half card">
+      </div>
+
+      <div class="row">
+        <div class="col-full card">
           <div class="card-header">
             <h3><i class="fas fa-gem icon"></i>Patrimônio vs Ativos</h3>
             <span class="badge badge-info">Crescimento</span>
@@ -300,9 +303,28 @@
           </div>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- ========================================
+       PÁGINA 5: RENTABILIDADE & PATRIMÔNIO (PARTE 2)
+       ======================================== -->
+  <div class="page-container">
+    <div class="content-wrapper">
+      <div class="header">
+        <div class="header-left">
+          <h1>Rentabilidade & Patrimônio</h1>
+          <div class="subtitle">Indicadores de Performance Detalhados</div>
+        </div>
+        <div class="header-right">
+          <div class="client-name">{{ dados.cliente_nome }}</div>
+          <div class="period">{{ dados.periodo }}</div>
+          <div class="page-number">Página 5 de 8</div>
+        </div>
+      </div>
 
       <div class="row">
-        <div class="col-half card">
+        <div class="col-full card">
           <div class="card-header">
             <h3><i class="fas fa-target icon"></i>ROE vs CDI - Análise Comparativa</h3>
           </div>
@@ -335,12 +357,14 @@
             </tbody>
           </table>
         </div>
+      </div>
 
-        <div class="col-half card">
+      <div class="row">
+        <div class="col-full card">
           <div class="card-header">
             <h3><i class="fas fa-chart-bar icon"></i>Indicadores Financeiros</h3>
           </div>
-          <div class="kpi-container" style="grid-template-columns: repeat(2, 1fr);">
+          <div class="kpi-container" style="grid-template-columns: repeat(3, 1fr);">
             <div class="kpi-box">
               <div class="kpi-label">EBITDA</div>
               <div class="kpi-value">{{ dados.indicadores.ebitda }}</div>
@@ -372,7 +396,7 @@
   </div>
 
   <!-- ========================================
-       PÁGINA 5: ANÁLISE DE VENDAS
+       PÁGINA 6: ANÁLISE DE VENDAS
        ======================================== -->
   <div class="page-container">
     <div class="content-wrapper">
@@ -384,7 +408,7 @@
         <div class="header-right">
           <div class="client-name">{{ dados.cliente_nome }}</div>
           <div class="period">{{ dados.periodo }}</div>
-          <div class="page-number">Página 5 de 7</div>
+          <div class="page-number">Página 6 de 8</div>
         </div>
       </div>
 
@@ -423,7 +447,7 @@
   </div>
 
   <!-- ========================================
-       PÁGINA 6: CUSTOS & FORNECEDORES
+       PÁGINA 7: CUSTOS & FORNECEDORES
        ======================================== -->
   <div class="page-container">
     <div class="content-wrapper">
@@ -435,7 +459,7 @@
         <div class="header-right">
           <div class="client-name">{{ dados.cliente_nome }}</div>
           <div class="period">{{ dados.periodo }}</div>
-          <div class="page-number">Página 6 de 7</div>
+          <div class="page-number">Página 7 de 8</div>
         </div>
       </div>
 
@@ -473,7 +497,7 @@
   </div>
 
   <!-- ========================================
-       PÁGINA 7: CONCLUSÕES E RECOMENDAÇÕES
+       PÁGINA 8: CONCLUSÕES E RECOMENDAÇÕES
        ======================================== -->
   <div class="page-container">
     <div class="content-wrapper">
@@ -485,7 +509,7 @@
         <div class="header-right">
           <div class="client-name">{{ dados.cliente_nome }}</div>
           <div class="period">{{ dados.periodo }}</div>
-          <div class="page-number">Página 7 de 7</div>
+          <div class="page-number">Página 8 de 8</div>
         </div>
       </div>
 
@@ -598,13 +622,39 @@
           </table>
         </div>
       </div>
+    </div>
+  </div>
 
-      <div style="margin-top: auto; padding: 16px; background: linear-gradient(135deg, var(--rps-primary), var(--rps-secondary)); color: white; border-radius: 12px; text-align: center;">
-        <div style="font-size: 10pt; font-weight: 600; margin-bottom: 6px;">
+  <!-- ========================================
+       PÁGINA 9: DÚVIDAS E CRÉDITOS
+       ======================================== -->
+  <div class="page-container">
+    <div class="content-wrapper" style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; text-align: center;">
+      <div style="margin-bottom: 40px;">
+        <div style="font-size: 14pt; font-weight: 700; color: var(--rps-primary); margin-bottom: 16px;">
           <i class="fas fa-phone icon"></i>Dúvidas ou necessita de análises adicionais?
         </div>
-        <div style="font-size: 8pt; opacity: 0.95;">
-          Entre em contato com sua equipe RPS | contato@rpscontabilidade.com.br | (11) 3000-0000
+        <div style="font-size: 11pt; color: var(--text-secondary); line-height: 1.6; margin-bottom: 24px;">
+          Entre em contato com sua equipe RPS
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 8px; font-size: 10pt; color: var(--text-secondary);">
+          <div><i class="fas fa-envelope icon"></i>contato@rpscontabilidade.com.br</div>
+          <div><i class="fas fa-phone icon"></i>(11) 3000-0000</div>
+        </div>
+      </div>
+
+      <div style="border-top: 2px solid var(--border-color); padding-top: 30px; width: 100%;">
+        <div style="font-size: 9pt; color: var(--text-secondary); margin-bottom: 8px;">
+          <strong>Relatório preparado por:</strong>
+        </div>
+        <div style="font-size: 11pt; font-weight: 600; color: var(--rps-primary); margin-bottom: 20px;">
+          RPS Assessoria Contábil Administrativa
+        </div>
+        <div style="font-size: 8pt; color: var(--text-secondary); line-height: 1.8;">
+          <div>Especializada em Controladoria Estratégica e Análise Financeira</div>
+          <div style="margin-top: 12px; opacity: 0.7;">
+            Este relatório é confidencial e destinado exclusivamente ao cliente.
+          </div>
         </div>
       </div>
     </div>
