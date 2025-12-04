@@ -141,6 +141,13 @@ def api_preview(cliente_id: int):
     })
 
 
+@app.route('/img/<path:filename>')
+def serve_img(filename):
+    """Servir imagens da pasta img"""
+    img_folder = os.path.join(os.path.dirname(__file__), 'img')
+    return send_file(os.path.join(img_folder, filename), mimetype='image/png')
+
+
 # Rotas de compatibilidade com versão antiga
 @app.route('/relatorio/<int:cliente_id>')
 def visualizar_relatorio(cliente_id: int):
