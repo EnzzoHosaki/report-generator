@@ -7,10 +7,14 @@ from typing import List
 import matplotlib.pyplot as plt
 from flask import Flask, render_template, make_response, request, redirect, url_for, send_file, jsonify
 from weasyprint import HTML, CSS
+from dotenv import load_dotenv
 
-from reporting.mock_data_provider import MockDataProvider
+from reporting.database_data_provider import DatabaseDataProvider
 from reporting.chart_service import ChartService
 from reporting.report_service import ReportService
+
+# Carregar variáveis de ambiente do arquivo .env
+load_dotenv()
 
 # Configurações Iniciais
 warnings.simplefilter(action='ignore', category=FutureWarning)
@@ -26,7 +30,14 @@ COLOR_TERTIARY = '#1a1a1a'
 COLOR_BG = '#fafbfa'
 
 # --- DEPENDÊNCIAS DE DOMÍNIO ---
-data_provider = MockDataProvider(locale='pt_BR')
+# Inicializar DatabaseDataProvider com credenciais do banco
+data_provider = DatabaseDataProvider(
+    host=os.getenv('DB_HOST', '192.168.10.46'),
+    port=int(os.getenv('DB_PORT', '5433')),
+    database=os.getenv('DB_NAME', 'dw_athenas'),
+    user=os.getenv('DB_USER', 'postgres'),
+    password=os.getenv('DB_PASSWORD', 'admin'),
+)
 chart_service = ChartService(primary=COLOR_PRIMARY, secondary=COLOR_SECONDARY, tertiary=COLOR_TERTIARY, bg=COLOR_BG)
 report_service = ReportService(data_provider, chart_service)
 
@@ -34,7 +45,27 @@ report_service = ReportService(data_provider, chart_service)
 @app.route('/')
 def home():
     """Dashboard moderno com cards de clientes e estatísticas"""
-    clientes = data_provider.listar_clientes()
+    empresas = data_provider.listar_clientes()
+    
+    # Paginação
+    page = request.args.get('page', 1, type=int)
+    items_per_page = 15
+    total_items = len(empresas)
+    total_pages = (total_items + items_per_page - 1) // items_per_page
+    
+    # Garantir que page é válida
+    if page < 1:
+        page = 1
+    elif page > total_pages and total_pages > 0:
+        page = total_pages
+    
+    # Calcular índices
+    start_idx = (page - 1) * items_per_page
+    end_idx = start_idx + items_per_page
+    empresas_page = empresas[start_idx:end_idx]
+    
+    # Gerar lista de IDs da página para o ZIP
+    ids_pagina = ','.join(str(e['codigo']) for e in empresas_page)
     
     # Gerar períodos disponíveis (últimos 6 meses) em português
     meses_pt = {
@@ -53,9 +84,13 @@ def home():
         periodos.append(f"{mes_pt}/{ano}")
     
     return render_template('dashboard.html', 
-                         clientes=clientes,
+                         empresas=empresas_page,
                          periodos=periodos,
-                         total_clientes=len(clientes))
+                         total_empresas=total_items,
+                         current_page=page,
+                         total_pages=total_pages,
+                         items_per_page=items_per_page,
+                         ids_pagina=ids_pagina)
 
 
 @app.route('/report/view/<int:cliente_id>')
@@ -120,10 +155,17 @@ def report_pdf_batch():
 @app.route('/api/clientes')
 def api_clientes():
     """API REST para listar clientes"""
-    clientes = data_provider.listar_clientes()
+    empresas = data_provider.listar_clientes()
     return jsonify({
-        "total": len(clientes),
-        "clientes": [{"id": cid, "nome": f"Cliente {cid}"} for cid in clientes]
+        "total": len(empresas),
+        "clientes": [
+            {
+                "codigo": empresa['codigo'],
+                "nome": empresa.get('nome', ''),
+                "fantasia": empresa.get('fantaisa', '')
+            }
+            for empresa in empresas
+        ]
     })
 
 
