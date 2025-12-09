@@ -234,6 +234,10 @@
       color: white;
     }
 
+    .client-info {
+      min-width: 0; /* permite que o h3 faça ellipsis dentro do flex */
+    }
+
     .client-info h3 {
       font-size: 16pt;
       font-weight: 700;
@@ -243,7 +247,7 @@
       overflow: hidden;
       text-overflow: ellipsis;
       position: relative;
-      display: inline-block;
+      display: block;
       max-width: 100%;
       cursor: default;
     }
@@ -257,7 +261,7 @@
       background: rgba(26, 51, 38, 0.9);
       color: white;
       border-radius: 8px;
-      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
+      box-shadow: none;
       font-size: 9pt;
       line-height: 1.2;
       opacity: 0;
