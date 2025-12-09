@@ -46,10 +46,40 @@ report_service = ReportService(data_provider, chart_service)
 def home():
     """Dashboard moderno com cards de clientes e estatísticas"""
     empresas = data_provider.listar_clientes()
+
+    # Filtros
+    query = (request.args.get('q') or '').strip()
+    sort = request.args.get('sort', 'nome')
+    direction = request.args.get('dir', 'asc')
+    min_id = request.args.get('min_id', type=int)
+    max_id = request.args.get('max_id', type=int)
+    items_per_page = request.args.get('per_page', 15, type=int)
+    items_per_page = max(5, min(items_per_page or 15, 100))
+
+    if query:
+        q = query.lower()
+        empresas = [
+            e for e in empresas
+            if q in str(e.get('codigo', '')).lower()
+            or q in (e.get('nome', '') or '').lower()
+            or q in (e.get('fantaisa', '') or '').lower()
+        ]
+
+    if min_id is not None:
+        empresas = [e for e in empresas if e.get('codigo') is not None and e['codigo'] >= min_id]
+    if max_id is not None:
+        empresas = [e for e in empresas if e.get('codigo') is not None and e['codigo'] <= max_id]
+
+    # Ordenação
+    key_map = {
+        'nome': lambda e: (e.get('nome') or '').lower(),
+        'codigo': lambda e: e.get('codigo') or 0,
+    }
+    key_func = key_map.get(sort, key_map['nome'])
+    empresas = sorted(empresas, key=key_func, reverse=(direction == 'desc'))
     
     # Paginação
     page = request.args.get('page', 1, type=int)
-    items_per_page = 15
     total_items = len(empresas)
     total_pages = (total_items + items_per_page - 1) // items_per_page
     
@@ -90,7 +120,12 @@ def home():
                          current_page=page,
                          total_pages=total_pages,
                          items_per_page=items_per_page,
-                         ids_pagina=ids_pagina)
+                         ids_pagina=ids_pagina,
+                         query=query,
+                         sort=sort,
+                         direction=direction,
+                         min_id=min_id,
+                         max_id=max_id)
 
 
 @app.route('/report/view/<int:cliente_id>')

@@ -470,7 +470,8 @@
     </div>
 
     <!-- Filtros -->
-    <div class="filters">
+    <form class="filters" id="filtersForm" method="get">
+      <input type="hidden" name="page" id="pageInput" value="{{ current_page }}">
       <div class="filter-group">
         <label><i class="fas fa-calendar icon"></i>Período</label>
         <select id="periodoSelect">
@@ -481,12 +482,42 @@
       </div>
       <div class="filter-group">
         <label><i class="fas fa-search icon"></i>Buscar Cliente</label>
-        <input type="text" id="searchInput" placeholder="Digite o ID ou nome...">
+        <input type="text" id="searchInput" name="q" value="{{ query }}" placeholder="Digite o ID ou nome...">
       </div>
-      <div class="filter-group" style="flex: 0 0 auto; margin-top: 24px;">
-        <button class="btn btn-secondary" onclick="resetFilters()"><i class="fas fa-redo icon"></i>Limpar</button>
+      <div class="filter-group">
+        <label><i class="fas fa-sort icon"></i>Ordenar</label>
+        <select name="sort" id="sortSelect">
+          <option value="nome" {% if sort == 'nome' %}selected{% endif %}>Nome</option>
+          <option value="codigo" {% if sort == 'codigo' %}selected{% endif %}>Código</option>
+        </select>
       </div>
-    </div>
+      <div class="filter-group">
+        <label><i class="fas fa-arrow-up icon"></i>Direção</label>
+        <select name="dir" id="dirSelect">
+          <option value="asc" {% if direction == 'asc' %}selected{% endif %}>Crescente</option>
+          <option value="desc" {% if direction == 'desc' %}selected{% endif %}>Decrescente</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label><i class="fas fa-sliders-h icon"></i>Itens por página</label>
+        <select name="per_page" id="perPageSelect">
+          {% for n in [15, 30, 50] %}
+          <option value="{{ n }}" {% if items_per_page == n %}selected{% endif %}>{{ n }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="filter-group">
+        <label><i class="fas fa-filter icon"></i>Cód. entre</label>
+        <div style="display: flex; gap: 8px;">
+          <input type="number" name="min_id" id="minId" value="{{ min_id or '' }}" placeholder="mín" style="width: 90px;">
+          <input type="number" name="max_id" id="maxId" value="{{ max_id or '' }}" placeholder="máx" style="width: 90px;">
+        </div>
+      </div>
+      <div class="filter-group" style="flex: 0 0 auto; margin-top: 24px; display: flex; gap: 10px;">
+        <button class="btn btn-primary" type="submit"><i class="fas fa-search icon"></i>Aplicar</button>
+        <button class="btn btn-secondary" type="button" onclick="resetFilters()"><i class="fas fa-redo icon"></i>Limpar</button>
+      </div>
+    </form>
 
     <!-- Grid de Clientes -->
     <div class="clients-grid" id="clientsGrid">
@@ -531,8 +562,8 @@
     {% if total_pages > 1 %}
     <div class="pagination">
       {% if current_page > 1 %}
-      <a href="/?page=1" class="pagination-link" title="Primeira página"><i class="fas fa-step-backward"></i></a>
-      <a href="/?page={{ current_page - 1 }}" class="pagination-link" title="Página anterior"><i class="fas fa-chevron-left"></i></a>
+      <a href="#" data-page="1" class="pagination-link" title="Primeira página"><i class="fas fa-step-backward"></i></a>
+      <a href="#" data-page="{{ current_page - 1 }}" class="pagination-link" title="Página anterior"><i class="fas fa-chevron-left"></i></a>
       {% endif %}
 
       <div class="pagination-info">
@@ -540,9 +571,10 @@
         <span style="margin-left: 16px; color: var(--text-secondary);">{{ total_empresas }} empresas</span>
       </div>
 
-      {% if current_page < total_pages %} <a href="/?page={{ current_page + 1 }}" class="pagination-link" title="Próxima página"><i class="fas fa-chevron-right"></i></a>
-        <a href="/?page={{ total_pages }}" class="pagination-link" title="Última página"><i class="fas fa-step-forward"></i></a>
-        {% endif %}
+      {% if current_page < total_pages %}
+      <a href="#" data-page="{{ current_page + 1 }}" class="pagination-link" title="Próxima página"><i class="fas fa-chevron-right"></i></a>
+      <a href="#" data-page="{{ total_pages }}" class="pagination-link" title="Última página"><i class="fas fa-step-forward"></i></a>
+      {% endif %}
     </div>
     {% endif %}
 
@@ -573,22 +605,41 @@
       }, 3000);
     }
 
-    // Filtro de busca
     const searchInput = document.getElementById('searchInput');
-    const clientCards = document.querySelectorAll('.client-card');
+    const filtersForm = document.getElementById('filtersForm');
+    const pageInput = document.getElementById('pageInput');
+    const periodoSelect = document.getElementById('periodoSelect');
+    const perPageSelect = document.getElementById('perPageSelect');
 
-    searchInput.addEventListener('input', (e) => {
-      const search = e.target.value.toLowerCase();
-      clientCards.forEach(card => {
-        const id = card.dataset.clientId;
-        const name = card.querySelector('.client-info h3').textContent.toLowerCase();
-        const match = id.includes(search) || name.includes(search);
-        card.style.display = match ? 'block' : 'none';
+    function submitFilters() {
+      pageInput.value = 1; // reset para página 1 ao aplicar filtros
+      filtersForm.submit();
+    }
+
+    // Submeter ao pressionar Enter no campo de busca
+    searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        submitFilters();
+      }
+    });
+
+    // Mudança em selects principais
+    [perPageSelect, document.getElementById('sortSelect'), document.getElementById('dirSelect')].forEach(sel => {
+      sel.addEventListener('change', submitFilters);
+    });
+
+    // Paginação preservando filtros
+    document.querySelectorAll('.pagination-link').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const page = e.currentTarget.dataset.page;
+        pageInput.value = page;
+        filtersForm.submit();
       });
     });
 
     // Atualizar período nos links
-    const periodoSelect = document.getElementById('periodoSelect');
     periodoSelect.addEventListener('change', (e) => {
       const periodo = e.target.value;
       document.querySelectorAll('.client-actions a, .batch-actions a').forEach(link => {
@@ -601,9 +652,13 @@
     // Reset filters
     function resetFilters() {
       searchInput.value = '';
-      periodoSelect.selectedIndex = 0;
-      clientCards.forEach(card => card.style.display = 'block');
-      periodoSelect.dispatchEvent(new Event('change'));
+      document.getElementById('minId').value = '';
+      document.getElementById('maxId').value = '';
+      document.getElementById('sortSelect').value = 'nome';
+      document.getElementById('dirSelect').value = 'asc';
+      perPageSelect.value = 15;
+      pageInput.value = 1;
+      filtersForm.submit();
     }
 
     // Animações de entrada
@@ -618,7 +673,7 @@
       });
     });
 
-    clientCards.forEach(card => {
+    document.querySelectorAll('.client-card').forEach(card => {
       card.style.opacity = '0';
       card.style.transform = 'translateY(20px)';
       card.style.transition = 'all 0.5s ease';
