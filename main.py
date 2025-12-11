@@ -13,24 +13,19 @@ from reporting.database_data_provider import DatabaseDataProvider
 from reporting.chart_service import ChartService
 from reporting.report_service import ReportService
 
-# Carregar variáveis de ambiente do arquivo .env
 load_dotenv()
 
-# Configurações Iniciais
 warnings.simplefilter(action='ignore', category=FutureWarning)
 warnings.simplefilter(action='ignore', category=DeprecationWarning)
 plt.switch_backend('Agg')
 
 app = Flask(__name__)
 
-# --- CONFIGURAÇÃO DE CORES RPS ---
 COLOR_PRIMARY = '#2d5a3d'
 COLOR_SECONDARY = '#7fa88f'
 COLOR_TERTIARY = '#1a1a1a'
 COLOR_BG = '#fafbfa'
 
-# --- DEPENDÊNCIAS DE DOMÍNIO ---
-# Inicializar DatabaseDataProvider com credenciais do banco
 data_provider = DatabaseDataProvider(
     host=os.getenv('DB_HOST', '192.168.10.46'),
     port=int(os.getenv('DB_PORT', '5433')),
@@ -47,7 +42,6 @@ def home():
     """Dashboard moderno com cards de clientes e estatísticas"""
     empresas = data_provider.listar_clientes()
 
-    # Filtros
     query = (request.args.get('q') or '').strip()
     sort = request.args.get('sort', 'nome')
     direction = request.args.get('dir', 'asc')
@@ -70,7 +64,6 @@ def home():
     if max_id is not None:
         empresas = [e for e in empresas if e.get('codigo') is not None and e['codigo'] <= max_id]
 
-    # Ordenação
     key_map = {
         'nome': lambda e: (e.get('nome') or '').lower(),
         'codigo': lambda e: e.get('codigo') or 0,
@@ -78,26 +71,21 @@ def home():
     key_func = key_map.get(sort, key_map['nome'])
     empresas = sorted(empresas, key=key_func, reverse=(direction == 'desc'))
     
-    # Paginação
     page = request.args.get('page', 1, type=int)
     total_items = len(empresas)
     total_pages = (total_items + items_per_page - 1) // items_per_page
     
-    # Garantir que page é válida
     if page < 1:
         page = 1
     elif page > total_pages and total_pages > 0:
         page = total_pages
     
-    # Calcular índices
     start_idx = (page - 1) * items_per_page
     end_idx = start_idx + items_per_page
     empresas_page = empresas[start_idx:end_idx]
     
-    # Gerar lista de IDs da página para o ZIP
     ids_pagina = ','.join(str(e['codigo']) for e in empresas_page)
     
-    # Gerar períodos disponíveis (últimos 6 meses) em português
     meses_pt = {
         'January': 'Janeiro', 'February': 'Fevereiro', 'March': 'Março',
         'April': 'Abril', 'May': 'Maio', 'June': 'Junho',
@@ -225,7 +213,6 @@ def serve_img(filename):
     return send_file(os.path.join(img_folder, filename), mimetype='image/png')
 
 
-# Rotas de compatibilidade com versão antiga
 @app.route('/relatorio/<int:cliente_id>')
 def visualizar_relatorio(cliente_id: int):
     return redirect(url_for('report_view', cliente_id=cliente_id))
@@ -236,7 +223,6 @@ def baixar_pdf(cliente_id: int):
     return redirect(url_for('report_pdf', cliente_id=cliente_id))
 
 
-# Error handlers
 @app.errorhandler(404)
 def not_found(error):
     return render_template('error.html', 

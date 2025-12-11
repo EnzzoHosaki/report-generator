@@ -105,12 +105,14 @@
       margin-bottom: 30px;
       box-shadow: var(--shadow);
       display: flex;
-      gap: 20px;
-      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px 20px;
+      align-items: flex-end;
     }
 
     .filter-group {
-      flex: 1;
+      flex: 1 1 220px;
+      min-width: 220px;
     }
 
     .filter-group label {
@@ -121,6 +123,7 @@
       margin-bottom: 8px;
       text-transform: uppercase;
       letter-spacing: 0.5px;
+      white-space: nowrap;
     }
 
     .filter-group select,
@@ -139,6 +142,22 @@
       outline: none;
       border-color: var(--rps-primary);
       box-shadow: 0 0 0 3px rgba(45, 90, 61, 0.1);
+    }
+
+    .inline-inputs {
+      display: flex;
+      gap: 8px;
+    }
+
+    .inline-inputs input {
+      width: 100px;
+    }
+
+    .filter-actions {
+      flex: 0 0 auto;
+      display: flex;
+      gap: 10px;
+      align-items: flex-end;
     }
 
     .btn {
@@ -328,7 +347,7 @@
     /* Ações em Lote */
     .batch-actions {
       background: white;
-      height: 10vh;
+      height: 100%;
       padding: 30px;
       border-radius: 16px;
       box-shadow: var(--shadow);
@@ -487,33 +506,33 @@
       <div class="filter-group">
         <label><i class="fas fa-sort icon"></i>Ordenar</label>
         <select name="sort" id="sortSelect">
-          <option value="nome" {% if sort == 'nome' %}selected{% endif %}>Nome</option>
-          <option value="codigo" {% if sort == 'codigo' %}selected{% endif %}>Código</option>
+          <option value="nome" {% if sort=='nome' %}selected{% endif %}>Nome</option>
+          <option value="codigo" {% if sort=='codigo' %}selected{% endif %}>Código</option>
         </select>
       </div>
       <div class="filter-group">
         <label><i class="fas fa-arrow-up icon"></i>Direção</label>
         <select name="dir" id="dirSelect">
-          <option value="asc" {% if direction == 'asc' %}selected{% endif %}>Crescente</option>
-          <option value="desc" {% if direction == 'desc' %}selected{% endif %}>Decrescente</option>
+          <option value="asc" {% if direction=='asc' %}selected{% endif %}>Crescente</option>
+          <option value="desc" {% if direction=='desc' %}selected{% endif %}>Decrescente</option>
         </select>
       </div>
       <div class="filter-group">
         <label><i class="fas fa-sliders-h icon"></i>Itens por página</label>
         <select name="per_page" id="perPageSelect">
           {% for n in [15, 30, 50] %}
-          <option value="{{ n }}" {% if items_per_page == n %}selected{% endif %}>{{ n }}</option>
+          <option value="{{ n }}" {% if items_per_page==n %}selected{% endif %}>{{ n }}</option>
           {% endfor %}
         </select>
       </div>
       <div class="filter-group">
         <label><i class="fas fa-filter icon"></i>Cód. entre</label>
-        <div style="display: flex; gap: 8px;">
-          <input type="number" name="min_id" id="minId" value="{{ min_id or '' }}" placeholder="mín" style="width: 90px;">
-          <input type="number" name="max_id" id="maxId" value="{{ max_id or '' }}" placeholder="máx" style="width: 90px;">
+        <div class="inline-inputs">
+          <input type="number" name="min_id" id="minId" value="{{ min_id or '' }}" placeholder="mín">
+          <input type="number" name="max_id" id="maxId" value="{{ max_id or '' }}" placeholder="máx">
         </div>
       </div>
-      <div class="filter-group" style="flex: 0 0 auto; margin-top: 24px; display: flex; gap: 10px;">
+      <div class="filter-group filter-actions">
         <button class="btn btn-primary" type="submit"><i class="fas fa-search icon"></i>Aplicar</button>
         <button class="btn btn-secondary" type="button" onclick="resetFilters()"><i class="fas fa-redo icon"></i>Limpar</button>
       </div>
@@ -526,7 +545,7 @@
         <div class="client-header">
           <div class="client-icon"><i class="fas fa-building"></i></div>
           <div class="client-info">
-            <h3 class="client-name" data-full-name="{{ empresa.nome }}" title="{{ empresa.nome }}">{{ empresa.nome }}</h3>
+            <h3 class="client-name" data-full-name="{{ empresa.fantaisa or empresa.nome }}" title="{{ empresa.fantaisa or empresa.nome }}">{{ empresa.fantaisa or empresa.nome }}</h3>
             <p>ID: {{ empresa.codigo }} • Status: Ativo ✓</p>
           </div>
         </div>
@@ -571,10 +590,9 @@
         <span style="margin-left: 16px; color: var(--text-secondary);">{{ total_empresas }} empresas</span>
       </div>
 
-      {% if current_page < total_pages %}
-      <a href="#" data-page="{{ current_page + 1 }}" class="pagination-link" title="Próxima página"><i class="fas fa-chevron-right"></i></a>
-      <a href="#" data-page="{{ total_pages }}" class="pagination-link" title="Última página"><i class="fas fa-step-forward"></i></a>
-      {% endif %}
+      {% if current_page < total_pages %} <a href="#" data-page="{{ current_page + 1 }}" class="pagination-link" title="Próxima página"><i class="fas fa-chevron-right"></i></a>
+        <a href="#" data-page="{{ total_pages }}" class="pagination-link" title="Última página"><i class="fas fa-step-forward"></i></a>
+        {% endif %}
     </div>
     {% endif %}
 
