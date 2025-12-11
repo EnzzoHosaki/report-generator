@@ -193,120 +193,7 @@
   </div>
 
   <!-- ========================================
-       NOVA PÁGINA: DISTRIBUIÇÃO DE LUCROS
-       ======================================== -->
-  <div class="page-container">
-    <div class="content-wrapper">
-      <div class="header">
-        <div class="header-left">
-          <h1>Distribuição de Lucros</h1>
-          <div class="subtitle">Detalhamento dos Dividendos aos Sócios</div>
-        </div>
-        <div class="header-right">
-          <div class="client-name">{{ dados.cliente_nome }}</div>
-          <div class="period">{{ dados.periodo }}</div>
-          <div class="page-number">Página 2 de 9</div>
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="col-full card" style="background: linear-gradient(135deg, var(--rps-primary) 0%, var(--rps-primary-light) 100%); color: white;">
-          <div style="text-align: center; padding: 20px;">
-            <h2 style="font-size: 14pt; margin-bottom: 10px; opacity: 0.9;">Total Distribuído no Período</h2>
-            <div style="font-size: 36pt; font-weight: 700; font-family: 'Poppins', sans-serif;">{{ dados.distribuicao_lucros.total }}</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="col-full card">
-          <div class="card-header">
-            <h3><i class="fas fa-users icon"></i>Detalhamento por Sócio</h3>
-          </div>
-          <table style="font-size: 11pt;">
-            <thead>
-              <tr>
-                <th style="padding: 16px;">Sócio</th>
-                <th style="padding: 16px; text-align: center;">Participação</th>
-                <th style="padding: 16px; text-align: right;">Valor Recebido</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for socio in dados.distribuicao_lucros.socios %}
-              <tr>
-                <td style="padding: 16px; font-weight: 600;">{{ socio.nome }}</td>
-                <td style="padding: 16px; text-align: center;">
-                  <span class="badge badge-info">{{ socio.participacao }}</span>
-                </td>
-                <td style="padding: 16px; text-align: right; color: var(--rps-primary); font-weight: 700;">
-                  {{ socio.valor }}
-                </td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ========================================
-       NOVA PÁGINA: ESTUDO TRIBUTÁRIO
-       ======================================== -->
-  <div class="page-container">
-    <div class="content-wrapper">
-      <div class="header">
-        <div class="header-left">
-          <h1>Estudo Tributário</h1>
-          <div class="subtitle">Comparativo IRPJ e CSLL: Lucro Real vs Presumido</div>
-        </div>
-        <div class="header-right">
-          <div class="client-name">{{ dados.cliente_nome }}</div>
-          <div class="period">{{ dados.periodo }}</div>
-          <div class="page-number">Página 3 de 9</div>
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="col-half comparison-box">
-          <div class="comparison-label">Custo no Lucro Real</div>
-          <div class="comparison-value" style="color: var(--text-secondary);">{{ dados.estudo_tributario.lucro_real_valor }}</div>
-          <div style="font-size: 8pt; color: var(--text-secondary);">Baseado na apuração contábil efetiva</div>
-        </div>
-        <div class="col-half comparison-box" style="background: #f0f9f4; border-color: var(--success-color);">
-          <div class="comparison-label">Custo no Lucro Presumido</div>
-          <div class="comparison-value" style="color: var(--success-color);">{{ dados.estudo_tributario.lucro_presumido_valor }}</div>
-          <div style="font-size: 8pt; color: var(--text-secondary);">Baseado nas alíquotas de presunção</div>
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="col-full card">
-          <div class="card-header">
-            <h3><i class="fas fa-calculator icon"></i>Análise de Economia Tributária</h3>
-          </div>
-          <div style="display: flex; justify-content: space-around; padding: 20px; text-align: center;">
-            <div>
-              <div style="font-size: 10pt; color: var(--text-secondary);">Economia Mensal Estimada</div>
-              <div style="font-size: 20pt; font-weight: 700; color: var(--rps-primary);">{{ dados.estudo_tributario.economia_mensal }}</div>
-            </div>
-            <div style="width: 1px; background: var(--border-color);"></div>
-            <div>
-              <div style="font-size: 10pt; color: var(--text-secondary);">Projeção Anual</div>
-              <div style="font-size: 20pt; font-weight: 700; color: var(--success-color);">{{ dados.estudo_tributario.economia_anual }}</div>
-            </div>
-          </div>
-          <div style="margin-top: 20px; padding: 15px; background: #e8f4fd; border-radius: 8px; border-left: 4px solid var(--info-color);">
-            <strong><i class="fas fa-lightbulb icon"></i>Recomendação:</strong>
-            Com base nos dados atuais, o regime de <strong>{{ dados.estudo_tributario.recomendacao }}</strong> apresenta a melhor eficiência tributária para a empresa.
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ========================================
-       PÁGINA 4: ANÁLISE DE ATIVOS (ATUALIZADA)
+       PÁGINA 2: ANÁLISE DE ATIVOS (REORGANIZADO)
        ======================================== -->
   <div class="page-container">
     <div class="content-wrapper">
@@ -318,7 +205,7 @@
         <div class="header-right">
           <div class="client-name">{{ dados.cliente_nome }}</div>
           <div class="period">{{ dados.periodo }}</div>
-          <div class="page-number">Página 4 de 9</div>
+          <div class="page-number">Página 2 de 9</div>
         </div>
       </div>
 
@@ -352,7 +239,7 @@
   </div>
 
   <!-- ========================================
-       PÁGINA 5: ANÁLISE DE PASSIVOS
+       PÁGINA 3: ANÁLISE DE PASSIVOS (REORGANIZADO)
        ======================================== -->
   <div class="page-container">
     <div class="content-wrapper">
@@ -364,7 +251,7 @@
         <div class="header-right">
           <div class="client-name">{{ dados.cliente_nome }}</div>
           <div class="period">{{ dados.periodo }}</div>
-          <div class="page-number">Página 5 de 9</div>
+          <div class="page-number">Página 3 de 9</div>
         </div>
       </div>
 
@@ -395,7 +282,7 @@
   </div>
 
   <!-- ========================================
-       PÁGINA 6: RENTABILIDADE
+       PÁGINA 4: RENTABILIDADE (REORGANIZADO)
        ======================================== -->
   <div class="page-container">
     <div class="content-wrapper">
@@ -407,7 +294,7 @@
         <div class="header-right">
           <div class="client-name">{{ dados.cliente_nome }}</div>
           <div class="period">{{ dados.periodo }}</div>
-          <div class="page-number">Página 6 de 9</div>
+          <div class="page-number">Página 4 de 9</div>
         </div>
       </div>
 
@@ -472,7 +359,7 @@
   </div>
 
   <!-- ========================================
-       PÁGINA 7: ANÁLISE DE VENDAS (ATUALIZADA)
+       PÁGINA 5: ANÁLISE DE VENDAS (REORGANIZADO)
        ======================================== -->
   <div class="page-container">
     <div class="content-wrapper">
@@ -484,7 +371,7 @@
         <div class="header-right">
           <div class="client-name">{{ dados.cliente_nome }}</div>
           <div class="period">{{ dados.periodo }}</div>
-          <div class="page-number">Página 7 de 9</div>
+          <div class="page-number">Página 5 de 9</div>
         </div>
       </div>
 
@@ -522,7 +409,7 @@
   </div>
 
   <!-- ========================================
-       PÁGINA 8: CUSTOS & FORNECEDORES
+       PÁGINA 6: CUSTOS & FORNECEDORES (REORGANIZADO)
        ======================================== -->
   <div class="page-container">
     <div class="content-wrapper">
@@ -534,7 +421,7 @@
         <div class="header-right">
           <div class="client-name">{{ dados.cliente_nome }}</div>
           <div class="period">{{ dados.periodo }}</div>
-          <div class="page-number">Página 8 de 9</div>
+          <div class="page-number">Página 6 de 9</div>
         </div>
       </div>
 
@@ -563,6 +450,119 @@
           <div style="margin-top: auto; padding: 10px; background: #e8f4fd; border-radius: 6px; font-size: 8pt;">
             <strong><i class="fas fa-lightbulb icon"></i>Recomendação:</strong> Fornecedor A representa 60%. Considerar diversificação para reduzir risco.
           </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================
+       PÁGINA 7: ESTUDO TRIBUTÁRIO (REORGANIZADO)
+       ======================================== -->
+  <div class="page-container">
+    <div class="content-wrapper">
+      <div class="header">
+        <div class="header-left">
+          <h1>Estudo Tributário</h1>
+          <div class="subtitle">Comparativo IRPJ e CSLL: Lucro Real vs Presumido</div>
+        </div>
+        <div class="header-right">
+          <div class="client-name">{{ dados.cliente_nome }}</div>
+          <div class="period">{{ dados.periodo }}</div>
+          <div class="page-number">Página 7 de 9</div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-half comparison-box">
+          <div class="comparison-label">Custo no Lucro Real</div>
+          <div class="comparison-value" style="color: var(--text-secondary);">{{ dados.estudo_tributario.lucro_real_valor }}</div>
+          <div style="font-size: 8pt; color: var(--text-secondary);">Baseado na apuração contábil efetiva</div>
+        </div>
+        <div class="col-half comparison-box" style="background: #f0f9f4; border-color: var(--success-color);">
+          <div class="comparison-label">Custo no Lucro Presumido</div>
+          <div class="comparison-value" style="color: var(--success-color);">{{ dados.estudo_tributario.lucro_presumido_valor }}</div>
+          <div style="font-size: 8pt; color: var(--text-secondary);">Baseado nas alíquotas de presunção</div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-full card">
+          <div class="card-header">
+            <h3><i class="fas fa-calculator icon"></i>Análise de Economia Tributária</h3>
+          </div>
+          <div style="display: flex; justify-content: space-around; padding: 20px; text-align: center;">
+            <div>
+              <div style="font-size: 10pt; color: var(--text-secondary);">Economia Mensal Estimada</div>
+              <div style="font-size: 20pt; font-weight: 700; color: var(--rps-primary);">{{ dados.estudo_tributario.economia_mensal }}</div>
+            </div>
+            <div style="width: 1px; background: var(--border-color);"></div>
+            <div>
+              <div style="font-size: 10pt; color: var(--text-secondary);">Projeção Anual</div>
+              <div style="font-size: 20pt; font-weight: 700; color: var(--success-color);">{{ dados.estudo_tributario.economia_anual }}</div>
+            </div>
+          </div>
+          <div style="margin-top: 20px; padding: 15px; background: #e8f4fd; border-radius: 8px; border-left: 4px solid var(--info-color);">
+            <strong><i class="fas fa-lightbulb icon"></i>Recomendação:</strong>
+            Com base nos dados atuais, o regime de <strong>{{ dados.estudo_tributario.recomendacao }}</strong> apresenta a melhor eficiência tributária para a empresa.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================
+       PÁGINA 8: DISTRIBUIÇÃO DE LUCROS (REORGANIZADO)
+       ======================================== -->
+  <div class="page-container">
+    <div class="content-wrapper">
+      <div class="header">
+        <div class="header-left">
+          <h1>Distribuição de Lucros</h1>
+          <div class="subtitle">Detalhamento dos Dividendos aos Sócios</div>
+        </div>
+        <div class="header-right">
+          <div class="client-name">{{ dados.cliente_nome }}</div>
+          <div class="period">{{ dados.periodo }}</div>
+          <div class="page-number">Página 8 de 9</div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-full card" style="background: linear-gradient(135deg, var(--rps-primary) 0%, var(--rps-primary-light) 100%); color: white;">
+          <div style="text-align: center; padding: 20px;">
+            <h2 style="font-size: 14pt; margin-bottom: 10px; opacity: 0.9;">Total Distribuído no Período</h2>
+            <div style="font-size: 36pt; font-weight: 700; font-family: 'Poppins', sans-serif;">{{ dados.distribuicao_lucros.total }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-full card">
+          <div class="card-header">
+            <h3><i class="fas fa-users icon"></i>Detalhamento por Sócio</h3>
+          </div>
+          <table style="font-size: 11pt;">
+            <thead>
+              <tr>
+                <th style="padding: 16px;">Sócio</th>
+                <th style="padding: 16px; text-align: center;">Participação</th>
+                <th style="padding: 16px; text-align: right;">Valor Recebido</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for socio in dados.distribuicao_lucros.socios %}
+              <tr>
+                <td style="padding: 16px; font-weight: 600;">{{ socio.nome }}</td>
+                <td style="padding: 16px; text-align: center;">
+                  <span class="badge badge-info">{{ socio.participacao }}</span>
+                </td>
+                <td style="padding: 16px; text-align: right; color: var(--rps-primary); font-weight: 700;">
+                  {{ socio.valor }}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
