@@ -118,18 +118,20 @@ def home():
 
 @app.route('/report/view/<int:cliente_id>')
 def report_view(cliente_id: int):
-    """Visualização web do relatório com navegação entre páginas"""
+    """Visualização web do relatório com navegação entre páginas - Modo WEB"""
     periodo = request.args.get('periodo') or datetime.now().strftime('%B/%Y')
     contexto = report_service.montar_contexto(cliente_id, periodo)
-    return render_template('relatorio_full.html', **contexto)
+    # Adicionamos mode='web' para ativar gráficos interativos e menu
+    return render_template('relatorio_full.html', **contexto, mode='web')
 
 
 @app.route('/report/pdf/<int:cliente_id>')
 def report_pdf(cliente_id: int):
-    """Geração de PDF com WeasyPrint"""
+    """Geração de PDF com WeasyPrint - Modo PDF"""
     periodo = request.args.get('periodo') or datetime.now().strftime('%B/%Y')
     contexto = report_service.montar_contexto(cliente_id, periodo)
-    html_string = render_template('relatorio_full.html', **contexto)
+    # Adicionamos mode='pdf' para usar imagens estáticas e esconder menu
+    html_string = render_template('relatorio_full.html', **contexto, mode='pdf')
 
     css_file = os.path.join(app.static_folder, 'style.css')
     pdf_bytes = HTML(string=html_string, base_url=app.root_path).write_pdf(
@@ -162,7 +164,8 @@ def report_pdf_batch():
     with zipfile.ZipFile(buf, 'w', compression=zipfile.ZIP_DEFLATED) as zf:
         for cid in ids:
             contexto = report_service.montar_contexto(cid, periodo)
-            html_string = render_template('relatorio_full.html', **contexto)
+            # PDF em lote também usa mode='pdf'
+            html_string = render_template('relatorio_full.html', **contexto, mode='pdf')
             css_file = os.path.join(app.static_folder, 'style.css')
             pdf_bytes = HTML(string=html_string, base_url=app.root_path).write_pdf(
                 stylesheets=[CSS(filename=css_file)]

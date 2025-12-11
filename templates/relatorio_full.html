@@ -7,9 +7,38 @@
   <title>Relatório RPS - {{ dados.cliente_nome }}</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+  {% if mode == 'web' %}
+  <!-- Biblioteca de Gráficos Interativos (Apenas WEB) -->
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+  {% endif %}
+
   <style>
+    /* --- Estilos Gerais --- */
     .icon {
       margin-right: 4px;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    .snap-container {
+      height: 100vh;
+      width: 100%;
+      overflow-y: scroll;
+      scroll-snap-type: y mandatory;
+    }
+
+    .page-container {
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      position: relative;
+      /* Necessário para posicionamento relativo */
     }
 
     .comparison-box {
@@ -32,670 +61,1050 @@
       color: var(--text-secondary);
       text-transform: uppercase;
     }
+
+    /* --- ESTILOS ESPECÍFICOS PARA MODO WEB (Interativo) --- */
+      {
+      % if mode=='web' %
+    }
+
+    body {
+      background-color: #333;
+      overflow: hidden;
+    }
+
+    .snap-container {
+      background-color: #e8ece9;
+      padding-left: 0;
+    }
+
+    .page-container {
+      margin: 20px auto 40px auto;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    /* MENU LATERAL MINIMALISTA */
+    .sidenav-minimal {
+      position: fixed;
+      left: 30px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      z-index: 1000;
+    }
+
+    .nav-dot-container {
+      position: relative;
+      display: flex;
+      align-items: center;
+      height: 20px;
+      cursor: pointer;
+    }
+
+    .nav-bar {
+      width: 25px;
+      height: 4px;
+      background-color: #cbd5e1;
+      border-radius: 4px;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .nav-dot-container:hover .nav-bar {
+      width: 40px;
+      background-color: var(--rps-primary);
+    }
+
+    .nav-dot-container.active .nav-bar {
+      width: 45px;
+      background-color: var(--rps-accent);
+      box-shadow: 0 0 10px rgba(212, 175, 55, 0.4);
+    }
+
+    .nav-tooltip {
+      position: absolute;
+      left: 55px;
+      background-color: var(--text-primary);
+      color: white;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateX(-10px);
+      transition: all 0.3s ease;
+      white-space: nowrap;
+      pointer-events: none;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .nav-tooltip::before {
+      content: '';
+      position: absolute;
+      left: -4px;
+      top: 50%;
+      transform: translateY(-50%);
+      border-width: 4px 4px 4px 0;
+      border-style: solid;
+      border-color: transparent var(--text-primary) transparent transparent;
+    }
+
+    .nav-dot-container:hover .nav-tooltip {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(0);
+    }
+
+    /* BOTÕES FLUTUANTES */
+    .btn-floating {
+      position: fixed;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      z-index: 1001;
+      transition: all 0.3s;
+      border: none;
+      background-color: white;
+      color: var(--rps-primary);
+    }
+
+    .btn-floating:hover {
+      transform: scale(1.1);
+      background-color: var(--rps-primary);
+      color: white;
+    }
+
+    /* Botão Apresentação (Canto Inferior Direito) */
+    .btn-presentation {
+      bottom: 30px;
+      right: 30px;
+    }
+
+    /* Botão PDF (Canto Inferior ESQUERDO) - Sobrescreve estilo do style.css se necessário */
+    .fab-download {
+      position: fixed;
+      bottom: 30px;
+      left: 30px;
+      right: auto;
+      /* Remove alinhamento à direita */
+      z-index: 1001;
+    }
+
+    /* Controles de Slide (Setas) */
+    .slide-controls {
+      position: fixed;
+      bottom: 30px;
+      right: 100px;
+      /* Ao lado do botão de fullscreen */
+      display: flex;
+      gap: 10px;
+      z-index: 1001;
+    }
+
+    .btn-slide-nav {
+      width: 40px;
+      height: 40px;
+      font-size: 14px;
+    }
+
+    .apex-chart-container {
+      width: 100%;
+      min-height: 250px;
+    }
+
+    /* --- MODO TELA CHEIA (APRESENTAÇÃO) --- */
+    body.fullscreen-mode .btn-presentation {
+      /* Opcional: mudar ícone ou estilo quando ativo */
+      background-color: var(--rps-accent);
+      color: white;
+    }
+
+    /* Esconde botão PDF em tela cheia se desejar, ou mantenha visível */
+    body.fullscreen-mode .fab-download {
+      display: none;
+      /* Geralmente não se baixa PDF durante apresentação */
+    }
+
+    body.fullscreen-mode .snap-container {
+      background-color: #1a1a1a;
+      /* Ocultar Scrollbars */
+      scrollbar-width: none;
+      /* Firefox */
+      -ms-overflow-style: none;
+      /* IE 10+ */
+    }
+
+    body.fullscreen-mode .snap-container::-webkit-scrollbar {
+      display: none;
+      /* Chrome/Safari */
+    }
+
+    body.fullscreen-mode .page-container {
+      margin: 0;
+      max-width: 100%;
+      width: 100%;
+      height: 100vh;
+      border-radius: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 40px 10%;
+    }
+
+    body.fullscreen-mode .content-wrapper {
+      max-width: 1400px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    /* Menu lateral no fullscreen: ajusta cor para ficar visível no fundo escuro se necessário */
+    body.fullscreen-mode .nav-bar {
+      background-color: rgba(255, 255, 255, 0.3);
+    }
+
+    body.fullscreen-mode .nav-dot-container:hover .nav-bar {
+      background-color: white;
+    }
+
+    body.fullscreen-mode .nav-dot-container.active .nav-bar {
+      background-color: var(--rps-accent);
+    }
+
+      {
+      % endif %
+    }
+
+    @media print {
+
+      .sidenav-minimal,
+      .btn-floating,
+      .fab-download,
+      .slide-controls {
+        display: none !important;
+      }
+
+      .snap-container {
+        height: auto;
+        overflow: visible;
+      }
+
+      .page-container {
+        margin: 0;
+        box-shadow: none;
+        min-height: auto;
+        page-break-after: always;
+      }
+    }
   </style>
 </head>
 
 <body>
-  <!-- Botão FAB (só aparece na WEB) -->
-  <a href="/report/pdf/{{ dados.cliente_id }}" class="fab-download" target="_blank">
-    BAIXAR PDF
-  </a>
 
-  <!-- ========================================
-       PÁGINA 0: CAPA PREMIUM
-       ======================================== -->
-  <div class="page-container cover-page">
-    <div style="margin-bottom: 30px; text-align: center;">
-      <img src="{{ url_for('serve_img', filename='logo.png') }}" alt="RPS Logo" style="max-width: 250px; max-height: 140px; width: auto; height: auto; object-fit: contain;">
+  {% if mode == 'web' %}
+  <!-- WRAPPER DE SCROLL SNAP -->
+  <div class="snap-container" id="mainScroll">
+
+    <!-- MENU LATERAL MINIMALISTA -->
+    <div class="sidenav-minimal">
+      <a onclick="goToSlide('capa')" class="nav-dot-container" id="nav-capa">
+        <div class="nav-bar"></div>
+        <div class="nav-tooltip">Capa</div>
+      </a>
+      <a onclick="goToSlide('resumo')" class="nav-dot-container" id="nav-resumo">
+        <div class="nav-bar"></div>
+        <div class="nav-tooltip">Resumo Executivo</div>
+      </a>
+      <a onclick="goToSlide('distribuicao')" class="nav-dot-container" id="nav-distribuicao">
+        <div class="nav-bar"></div>
+        <div class="nav-tooltip">Distribuição de Lucros</div>
+      </a>
+      <a onclick="goToSlide('tributario')" class="nav-dot-container" id="nav-tributario">
+        <div class="nav-bar"></div>
+        <div class="nav-tooltip">Estudo Tributário</div>
+      </a>
+      <a onclick="goToSlide('ativos')" class="nav-dot-container" id="nav-ativos">
+        <div class="nav-bar"></div>
+        <div class="nav-tooltip">Análise de Ativos</div>
+      </a>
+      <a onclick="goToSlide('passivos')" class="nav-dot-container" id="nav-passivos">
+        <div class="nav-bar"></div>
+        <div class="nav-tooltip">Análise de Passivos</div>
+      </a>
+      <a onclick="goToSlide('rentabilidade')" class="nav-dot-container" id="nav-rentabilidade">
+        <div class="nav-bar"></div>
+        <div class="nav-tooltip">Rentabilidade</div>
+      </a>
+      <a onclick="goToSlide('vendas')" class="nav-dot-container" id="nav-vendas">
+        <div class="nav-bar"></div>
+        <div class="nav-tooltip">Vendas</div>
+      </a>
+      <a onclick="goToSlide('custos')" class="nav-dot-container" id="nav-custos">
+        <div class="nav-bar"></div>
+        <div class="nav-tooltip">Custos & Fornecedores</div>
+      </a>
+      <a onclick="goToSlide('conclusao')" class="nav-dot-container" id="nav-conclusao">
+        <div class="nav-bar"></div>
+        <div class="nav-tooltip">Conclusão</div>
+      </a>
+
+      <div style="height: 20px;"></div>
+
+      <a href="/" class="nav-dot-container" title="Sair do Relatório">
+        <div class="nav-bar" style="background-color: #ef4444;"></div>
+        <div class="nav-tooltip">Sair / Voltar</div>
+      </a>
     </div>
-    <h1 class="cover-title">Relatório Financeiro</h1>
-    <div class="cover-subtitle">Performance Financeira · Controladoria Estratégica</div>
-    <div class="cover-client-box">
-      <div class="cover-client-name">{{ dados.cliente_nome }}</div>
-      <div class="cover-date">{{ dados.periodo }}</div>
+
+    <!-- Controles de Slide (Setas) -->
+    <div class="slide-controls">
+      <button onclick="prevSlide()" class="btn-floating btn-slide-nav" title="Anterior (Seta Cima/Esq)">
+        <i class="fas fa-chevron-up"></i>
+      </button>
+      <button onclick="nextSlide()" class="btn-floating btn-slide-nav" title="Próximo (Seta Baixo/Dir)">
+        <i class="fas fa-chevron-down"></i>
+      </button>
     </div>
-    <div class="cover-footer">RPS Assessoria Contábil Administrativa</div>
-  </div>
 
-  <!-- ========================================
-       PÁGINA 1: RESUMO EXECUTIVO
+    <!-- Botão Apresentação -->
+    <button onclick="toggleFullScreen()" class="btn-floating btn-presentation" title="Alternar Tela Cheia">
+      <i class="fas fa-expand-arrows-alt fa-lg"></i>
+    </button>
+    {% endif %}
+
+    <!-- Botão FAB (WEB) - Agora na Esquerda -->
+    <a href="/report/pdf/{{ dados.cliente_id }}" class="fab-download" target="_blank" title="Baixar PDF">
+      BAIXAR PDF
+    </a>
+
+    <!-- ========================================
+       CONTEÚDO DAS PÁGINAS (Mantido idêntico)
        ======================================== -->
-  <div class="page-container">
-    <div class="content-wrapper">
-      <div class="header">
-        <div class="header-left">
-          <h1>Resumo Executivo</h1>
-          <div class="subtitle">Visão Consolidada dos Principais Indicadores</div>
-        </div>
-        <div class="header-right">
-          <div class="client-name">{{ dados.cliente_nome }}</div>
-          <div class="period">{{ dados.periodo }}</div>
-          <div class="page-number">Página 1 de 9</div>
-        </div>
+
+    <!-- CAPA -->
+    <div id="capa" class="page-container cover-page">
+      <div style="margin-bottom: 30px; text-align: center;">
+        <img src="{{ url_for('serve_img', filename='logo.png') }}" alt="RPS Logo" style="max-width: 250px; max-height: 140px; width: auto; height: auto; object-fit: contain;">
       </div>
-
-      <div class="kpi-container">
-        <div class="kpi-box">
-          <div class="kpi-label"><i class="fas fa-money-bill-wave icon"></i>Vendas Líquidas</div>
-          <div class="kpi-value positive">{{ dados.kpis.vendas_liquidas }}</div>
-          <div class="kpi-trend positive">▲ 12.5% vs mês anterior</div>
-        </div>
-        <div class="kpi-box">
-          <div class="kpi-label"><i class="fas fa-chart-pie icon"></i>Carga Tributária</div>
-          <div class="kpi-value negative">{{ dados.kpis.carga_tributaria }}</div>
-          <div class="kpi-trend neutral">18% sobre vendas</div>
-        </div>
-        <div class="kpi-box">
-          <div class="kpi-label"><i class="fas fa-shopping-cart icon"></i>Compras</div>
-          <div class="kpi-value">{{ dados.kpis.compras }}</div>
-          <div class="kpi-trend positive">▼ 3.2% economia</div>
-        </div>
-        <div class="kpi-box">
-          <div class="kpi-label"><i class="fas fa-hard-hat icon"></i>CAPEX</div>
-          <div class="kpi-value">{{ dados.kpis.capex }}</div>
-          <div class="kpi-trend neutral">5% das vendas</div>
-        </div>
-        <div class="kpi-box">
-          <div class="kpi-label"><i class="fas fa-cogs icon"></i>Despesas Operacionais</div>
-          <div class="kpi-value">{{ dados.kpis.opex }}</div>
-          <div class="kpi-trend positive">Dentro do orçado</div>
-        </div>
-        <div class="kpi-box">
-          <div class="kpi-label"><i class="fas fa-credit-card icon"></i>Despesas Financeiras</div>
-          <div class="kpi-value">{{ dados.kpis.finex }}</div>
-          <div class="kpi-trend positive">▼ 1.5% redução</div>
-        </div>
-        <div class="kpi-box">
-          <div class="kpi-label"><i class="fas fa-file-invoice icon"></i>Outras Despesas</div>
-          <div class="kpi-value">{{ dados.kpis.outros }}</div>
-          <div class="kpi-trend neutral">Dentro da meta</div>
-        </div>
-        <div class="kpi-box" style="background: linear-gradient(135deg, #f0f9f4 0%, #e8f5ec 100%);">
-          <div class="kpi-label"><i class="fas fa-star icon"></i>Resultado Líquido</div>
-          <div class="kpi-value {{ 'positive' if dados.kpis.lucro_liquido_raw > 0 else 'negative' }}">
-            {{ dados.kpis.lucro_liquido }}
-          </div>
-          <div class="kpi-trend {{ 'positive' if dados.kpis.lucro_liquido_raw > 0 else 'negative' }}">
-            {% if dados.kpis.lucro_liquido_raw > 0 %}▲ Performance positiva{% else %}▼ Atenção necessária{% endif %}
-          </div>
-        </div>
+      <h1 class="cover-title">Relatório Financeiro</h1>
+      <div class="cover-subtitle">Performance Financeira · Controladoria Estratégica</div>
+      <div class="cover-client-box">
+        <div class="cover-client-name">{{ dados.cliente_nome }}</div>
+        <div class="cover-date">{{ dados.periodo }}</div>
       </div>
+      <div class="cover-footer">RPS Assessoria Contábil Administrativa</div>
+    </div>
 
-      <div class="row">
-        <div class="col-half card">
-          <div class="card-header">
-            <h3><i class="fas fa-chart-line icon"></i>Análise de Tendência</h3>
-            <span class="badge badge-success">+12.5%</span>
+    <!-- RESUMO -->
+    <div id="resumo" class="page-container">
+      <div class="content-wrapper">
+        <div class="header">
+          <div class="header-left">
+            <h1>Resumo Executivo</h1>
+            <div class="subtitle">Visão Consolidada dos Principais Indicadores</div>
           </div>
-          <p class="text-muted" style="font-size: 9pt; margin-bottom: 12px;">
-            Crescimento consistente nas vendas líquidas com controle efetivo de despesas operacionais.
-            Margem líquida mantida acima da meta de 10%.
-          </p>
-          <table>
-            <thead>
-              <tr>
-                <th>Indicador</th>
-                <th>Valor</th>
-                <th>Meta</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>Margem Bruta</td>
-                <td class="table-highlight">42%</td>
-                <td>40%</td>
-                <td><span class="badge badge-success">OK</span></td>
-              </tr>
-              <tr>
-                <td>Margem EBITDA</td>
-                <td class="table-highlight">15%</td>
-                <td>12%</td>
-                <td><span class="badge badge-success">OK</span></td>
-              </tr>
-              <tr>
-                <td>Margem Líquida</td>
-                <td class="table-highlight">12%</td>
-                <td>10%</td>
-                <td><span class="badge badge-success">OK</span></td>
-              </tr>
-            </tbody>
-          </table>
+          <div class="header-right">
+            <div class="client-name">{{ dados.cliente_nome }}</div>
+            <div class="period">{{ dados.periodo }}</div>
+            <div class="page-number">Página 1 de 9</div>
+          </div>
+        </div>
+        <!-- Conteúdo KPI... -->
+        <div class="kpi-container">
+          <div class="kpi-box">
+            <div class="kpi-label"><i class="fas fa-money-bill-wave icon"></i>Vendas Líquidas</div>
+            <div class="kpi-value positive">{{ dados.kpis.vendas_liquidas }}</div>
+            <div class="kpi-trend positive">▲ 12.5% vs mês anterior</div>
+          </div>
+          <div class="kpi-box">
+            <div class="kpi-label"><i class="fas fa-chart-pie icon"></i>Carga Tributária</div>
+            <div class="kpi-value negative">{{ dados.kpis.carga_tributaria }}</div>
+            <div class="kpi-trend neutral">18% sobre vendas</div>
+          </div>
+          <div class="kpi-box">
+            <div class="kpi-label"><i class="fas fa-shopping-cart icon"></i>Compras</div>
+            <div class="kpi-value">{{ dados.kpis.compras }}</div>
+            <div class="kpi-trend positive">▼ 3.2% economia</div>
+          </div>
+          <div class="kpi-box">
+            <div class="kpi-label"><i class="fas fa-hard-hat icon"></i>CAPEX</div>
+            <div class="kpi-value">{{ dados.kpis.capex }}</div>
+            <div class="kpi-trend neutral">5% das vendas</div>
+          </div>
+          <div class="kpi-box">
+            <div class="kpi-label"><i class="fas fa-cogs icon"></i>Despesas Operacionais</div>
+            <div class="kpi-value">{{ dados.kpis.opex }}</div>
+            <div class="kpi-trend positive">Dentro do orçado</div>
+          </div>
+          <div class="kpi-box">
+            <div class="kpi-label"><i class="fas fa-credit-card icon"></i>Despesas Financeiras</div>
+            <div class="kpi-value">{{ dados.kpis.finex }}</div>
+            <div class="kpi-trend positive">▼ 1.5% redução</div>
+          </div>
+          <div class="kpi-box">
+            <div class="kpi-label"><i class="fas fa-file-invoice icon"></i>Outras Despesas</div>
+            <div class="kpi-value">{{ dados.kpis.outros }}</div>
+            <div class="kpi-trend neutral">Dentro da meta</div>
+          </div>
+          <div class="kpi-box" style="background: linear-gradient(135deg, #f0f9f4 0%, #e8f5ec 100%);">
+            <div class="kpi-label"><i class="fas fa-star icon"></i>Resultado Líquido</div>
+            <div class="kpi-value {{ 'positive' if dados.kpis.lucro_liquido_raw > 0 else 'negative' }}">
+              {{ dados.kpis.lucro_liquido }}
+            </div>
+            <div class="kpi-trend {{ 'positive' if dados.kpis.lucro_liquido_raw > 0 else 'negative' }}">
+              {% if dados.kpis.lucro_liquido_raw > 0 %}▲ Performance positiva{% else %}▼ Atenção necessária{% endif %}
+            </div>
+          </div>
         </div>
 
-        <div class="col-half card">
-          <div class="card-header">
-            <h3><i class="fas fa-bullseye icon"></i>Destaques do Período</h3>
+        <div class="row">
+          <div class="col-half card">
+            <div class="card-header">
+              <h3><i class="fas fa-chart-line icon"></i>Análise de Tendência</h3>
+              <span class="badge badge-success">+12.5%</span>
+            </div>
+            <p class="text-muted" style="font-size: 9pt; margin-bottom: 12px;">
+              Crescimento consistente nas vendas líquidas com controle efetivo de despesas operacionais.
+              Margem líquida mantida acima da meta de 10%.
+            </p>
+            <table>
+              <thead>
+                <tr>
+                  <th>Indicador</th>
+                  <th>Valor</th>
+                  <th>Meta</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Margem Bruta</td>
+                  <td class="table-highlight">42%</td>
+                  <td>40%</td>
+                  <td><span class="badge badge-success">OK</span></td>
+                </tr>
+                <tr>
+                  <td>Margem EBITDA</td>
+                  <td class="table-highlight">15%</td>
+                  <td>12%</td>
+                  <td><span class="badge badge-success">OK</span></td>
+                </tr>
+                <tr>
+                  <td>Margem Líquida</td>
+                  <td class="table-highlight">12%</td>
+                  <td>10%</td>
+                  <td><span class="badge badge-success">OK</span></td>
+                </tr>
+              </tbody>
+            </table>
           </div>
-          <div style="display: flex; flex-direction: column; gap: 14px;">
-            <div style="padding: 12px; background: #f0f9f4; border-left: 4px solid var(--success-color); border-radius: 6px;">
-              <div style="font-weight: 600; color: var(--success-color); margin-bottom: 4px;"><i class="fas fa-check icon"></i>Vendas Acima da Meta</div>
-              <div style="font-size: 8pt; color: var(--text-secondary);">
-                Faturamento superou projeção em 12.5%, impulsionado pelo segmento de produtos premium.
+          <div class="col-half card">
+            <div class="card-header">
+              <h3><i class="fas fa-bullseye icon"></i>Destaques do Período</h3>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 14px;">
+              <div style="padding: 12px; background: #f0f9f4; border-left: 4px solid var(--success-color); border-radius: 6px;">
+                <div style="font-weight: 600; color: var(--success-color); margin-bottom: 4px;"><i class="fas fa-check icon"></i>Vendas Acima da Meta</div>
+                <div style="font-size: 8pt; color: var(--text-secondary);">
+                  Faturamento superou projeção em 12.5%, impulsionado pelo segmento de produtos premium.
+                </div>
+              </div>
+              <div style="padding: 12px; background: #fff4e6; border-left: 4px solid var(--warning-color); border-radius: 6px;">
+                <div style="font-weight: 600; color: var(--warning-color); margin-bottom: 4px;"><i class="fas fa-exclamation-circle icon"></i>Atenção aos Custos</div>
+                <div style="font-size: 8pt; color: var(--text-secondary);">
+                  Despesas financeiras representam 3% do faturamento. Oportunidade de renegociação.
+                </div>
               </div>
             </div>
-            <div style="padding: 12px; background: #fff4e6; border-left: 4px solid var(--warning-color); border-radius: 6px;">
-              <div style="font-weight: 600; color: var(--warning-color); margin-bottom: 4px;"><i class="fas fa-exclamation-circle icon"></i>Atenção aos Custos</div>
-              <div style="font-size: 8pt; color: var(--text-secondary);">
-                Despesas financeiras representam 3% do faturamento. Oportunidade de renegociação.
-              </div>
-            </div>
-            <div style="padding: 12px; background: #e8f4fd; border-left: 4px solid var(--info-color); border-radius: 6px;">
-              <div style="font-weight: 600; color: var(--info-color); margin-bottom: 4px;"><i class="fas fa-info-circle icon"></i>Investimentos Planejados</div>
-              <div style="font-size: 8pt; color: var(--text-secondary);">
-                CAPEX dentro do previsto com foco em automação e eficiência operacional.
-              </div>
-            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- ========================================
-       PÁGINA 2: ANÁLISE DE ATIVOS (REORGANIZADO)
-       ======================================== -->
-  <div class="page-container">
-    <div class="content-wrapper">
-      <div class="header">
-        <div class="header-left">
-          <h1>Análise de Ativos</h1>
-          <div class="subtitle">Evolução Monetária e Composição Percentual</div>
-        </div>
-        <div class="header-right">
-          <div class="client-name">{{ dados.cliente_nome }}</div>
-          <div class="period">{{ dados.periodo }}</div>
-          <div class="page-number">Página 2 de 9</div>
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="col-full card">
-          <div class="card-header">
-            <h3><i class="fas fa-chart-line icon"></i>Evolução dos Ativos (R$)</h3>
-            <span class="badge badge-success">Crescimento Constante</span>
+    <!-- DISTRIBUIÇÃO -->
+    <div id="distribuicao" class="page-container">
+      <div class="content-wrapper">
+        <div class="header">
+          <div class="header-left">
+            <h1>Distribuição de Lucros</h1>
+            <div class="subtitle">Detalhamento dos Dividendos aos Sócios</div>
           </div>
-          <div class="chart-container" style="max-height: 250px;">
-            <img class="chart-img" src="data:image/png;base64,{{ graficos.ativos_evolucao_valor }}" alt="Evolução Ativos R$">
+          <div class="header-right">
+            <div class="client-name">{{ dados.cliente_nome }}</div>
+            <div class="period">{{ dados.periodo }}</div>
+            <div class="page-number">Página 2 de 9</div>
           </div>
         </div>
-      </div>
-
-      <div class="row">
-        <div class="col-full card">
-          <div class="card-header">
-            <h3><i class="fas fa-chart-bar icon"></i>Composição do Ativo (%)</h3>
-            <span class="badge badge-info">Estrutura Estável</span>
-          </div>
-          <div class="chart-container" style="max-height: 250px;">
-            <img class="chart-img" src="data:image/png;base64,{{ graficos.ativos_composicao_perc }}" alt="Composição Ativos %">
-          </div>
-          <div style="margin-top: 10px; font-size: 9pt; text-align: center; color: var(--text-secondary);">
-            O gráfico acima representa 100% dos ativos em cada mês, divididos proporcionalmente entre Caixa, Estoques e Imobilizado.
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ========================================
-       PÁGINA 3: ANÁLISE DE PASSIVOS (REORGANIZADO)
-       ======================================== -->
-  <div class="page-container">
-    <div class="content-wrapper">
-      <div class="header">
-        <div class="header-left">
-          <h1>Análise de Passivos</h1>
-          <div class="subtitle">Estrutura de Capital e Endividamento</div>
-        </div>
-        <div class="header-right">
-          <div class="client-name">{{ dados.cliente_nome }}</div>
-          <div class="period">{{ dados.periodo }}</div>
-          <div class="page-number">Página 3 de 9</div>
-        </div>
-      </div>
-
-      <div class="row" style="flex: 0 0 auto;">
-        <div class="col-full">
-          <span class="section-badge"><i class="fas fa-briefcase icon"></i>Estrutura de Capital</span>
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="card" style="width: 100%;">
-          <div class="card-header">
-            <h3>Evolução Circulante vs Não-Circulante</h3>
-            <span class="badge badge-warning">Monitorar</span>
-          </div>
-          <div class="chart-container" style="max-height: 250px; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-            <img class="chart-img" src="data:image/png;base64,{{ graficos.passivos_stack }}" alt="Gráfico de Passivos" style="max-width: 85%; max-height: 240px; width: auto; height: auto;">
-          </div>
-          <div style="margin-top: auto; padding: 12px; background: #fff4e6; border-radius: 8px; border-left: 4px solid var(--warning-color);">
-            <div style="font-size: 8pt;">
-              <strong><i class="fas fa-lightbulb icon"></i>Insight:</strong> Passivo circulante cresceu 6% enquanto não-circulante reduziu 8%.
-              Indica melhora no perfil de endividamento com maior participação de curto prazo.
+        <div class="row">
+          <div class="col-full card" style="background: linear-gradient(135deg, var(--rps-primary) 0%, var(--rps-primary-light) 100%); color: white;">
+            <div style="text-align: center; padding: 20px;">
+              <h2 style="font-size: 14pt; margin-bottom: 10px; opacity: 0.9;">Total Distribuído no Período</h2>
+              <div style="font-size: 36pt; font-weight: 700; font-family: 'Poppins', sans-serif;">{{ dados.distribuicao_lucros.total }}</div>
             </div>
           </div>
         </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ========================================
-       PÁGINA 4: RENTABILIDADE (REORGANIZADO)
-       ======================================== -->
-  <div class="page-container">
-    <div class="content-wrapper">
-      <div class="header">
-        <div class="header-left">
-          <h1>Rentabilidade & Patrimônio</h1>
-          <div class="subtitle">Análise de Retorno vs Referencial</div>
-        </div>
-        <div class="header-right">
-          <div class="client-name">{{ dados.cliente_nome }}</div>
-          <div class="period">{{ dados.periodo }}</div>
-          <div class="page-number">Página 4 de 9</div>
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="col-half card">
-          <div class="card-header">
-            <h3><i class="fas fa-chart-area icon"></i>Rentabilidade vs CDI</h3>
-            <span class="badge badge-success">Superando</span>
-          </div>
-          <div class="chart-container">
-            <img class="chart-img" src="data:image/png;base64,{{ graficos.rentabilidade_line }}" alt="Rentabilidade">
-          </div>
-        </div>
-
-        <div class="col-half card">
-          <div class="card-header">
-            <h3><i class="fas fa-gem icon"></i>Patrimônio vs Ativos</h3>
-            <span class="badge badge-info">Crescimento</span>
-          </div>
-          <div class="chart-container">
-            <img class="chart-img" src="data:image/png;base64,{{ graficos.equity_vs_ativos }}" alt="Patrimônio">
-          </div>
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="col-full card">
-          <div class="card-header">
-            <h3><i class="fas fa-target icon"></i>ROE vs CDI - Análise Comparativa</h3>
-          </div>
-          <table>
-            <thead>
-              <tr>
-                <th>Período</th>
-                <th style="text-align: center;">ROE (%)</th>
-                <th style="text-align: center;">CDI (%)</th>
-                <th style="text-align: center;">Spread</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for row in dados.tabela_roe %}
-              <tr>
-                <td style="font-weight: 600;">{{ row.periodo }}</td>
-                <td style="text-align: center; color: var(--rps-primary);">{{ row.roe }}%</td>
-                <td style="text-align: center; color: var(--text-secondary);">{{ row.cdi }}%</td>
-                <td style="text-align: center; font-weight: 700; color: {{ 'var(--success-color)' if row.delta > 0 else 'var(--danger-color)' }}">
-                  {{ '+' if row.delta > 0 else '' }}{{ row.delta }}%
-                </td>
-                <td>
-                  <span class="badge {{ 'badge-success' if row.delta > 0 else 'badge-danger' }}">
-                    {{ 'Acima' if row.delta > 0 else 'Abaixo' }}
-                  </span>
-                </td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ========================================
-       PÁGINA 5: ANÁLISE DE VENDAS (REORGANIZADO)
-       ======================================== -->
-  <div class="page-container">
-    <div class="content-wrapper">
-      <div class="header">
-        <div class="header-left">
-          <h1>Análise de Vendas</h1>
-          <div class="subtitle">Top Produtos e Comparativos</div>
-        </div>
-        <div class="header-right">
-          <div class="client-name">{{ dados.cliente_nome }}</div>
-          <div class="period">{{ dados.periodo }}</div>
-          <div class="page-number">Página 5 de 9</div>
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="col-half card">
-          <div class="card-header">
-            <h3><i class="fas fa-trophy icon"></i>Top 5 - Faturamento</h3>
-          </div>
-          <div class="chart-container">
-            <img class="chart-img" src="data:image/png;base64,{{ graficos.top_produtos_faturamento }}" alt="Top Faturamento">
-          </div>
-        </div>
-
-        <div class="col-half card">
-          <div class="card-header">
-            <h3><i class="fas fa-boxes icon"></i>Top 5 - Quantidade</h3>
-          </div>
-          <div class="chart-container">
-            <img class="chart-img" src="data:image/png;base64,{{ graficos.top_produtos_quantidade }}" alt="Top Quantidade">
-          </div>
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="col-full card">
-          <div class="card-header">
-            <h3><i class="fas fa-calendar-alt icon"></i>Comparativo Anual (YoY)</h3>
-          </div>
-          <div class="chart-container" style="height: 200px;">
-            <img class="chart-img" src="data:image/png;base64,{{ graficos.vendas_line }}" alt="YoY">
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ========================================
-       PÁGINA 6: CUSTOS & FORNECEDORES (REORGANIZADO)
-       ======================================== -->
-  <div class="page-container">
-    <div class="content-wrapper">
-      <div class="header">
-        <div class="header-left">
-          <h1>Custos & Fornecedores</h1>
-          <div class="subtitle">Análise de Despesas e Concentração</div>
-        </div>
-        <div class="header-right">
-          <div class="client-name">{{ dados.cliente_nome }}</div>
-          <div class="period">{{ dados.periodo }}</div>
-          <div class="page-number">Página 6 de 9</div>
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="col-half card">
-          <div class="card-header">
-            <h3><i class="fas fa-wallet icon"></i>Composição de Despesas</h3>
-            <span class="badge badge-warning">Atenção Pessoal</span>
-          </div>
-          <div class="chart-container">
-            <img class="chart-img" src="data:image/png;base64,{{ graficos.custos_pie }}" alt="Custos" style="max-width: 75%;">
-          </div>
-          <div style="margin-top: auto; padding: 12px; background: #fff4e6; border-radius: 6px; font-size: 8pt;">
-            <strong><i class="fas fa-exclamation-triangle icon"></i>Alerta:</strong> Pessoal representa 50% dos custos. Avaliar produtividade e automação.
-          </div>
-        </div>
-
-        <div class="col-half card">
-          <div class="card-header">
-            <h3><i class="fas fa-handshake icon"></i>Concentração de Fornecedores</h3>
-            <span class="badge badge-warning">Alta Concentração</span>
-          </div>
-          <div class="chart-container">
-            <img class="chart-img" src="data:image/png;base64,{{ graficos.fornecedores_pie }}" alt="Fornecedores" style="max-width: 75%;">
-          </div>
-          <div style="margin-top: auto; padding: 10px; background: #e8f4fd; border-radius: 6px; font-size: 8pt;">
-            <strong><i class="fas fa-lightbulb icon"></i>Recomendação:</strong> Fornecedor A representa 60%. Considerar diversificação para reduzir risco.
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ========================================
-       PÁGINA 7: ESTUDO TRIBUTÁRIO (REORGANIZADO)
-       ======================================== -->
-  <div class="page-container">
-    <div class="content-wrapper">
-      <div class="header">
-        <div class="header-left">
-          <h1>Estudo Tributário</h1>
-          <div class="subtitle">Comparativo IRPJ e CSLL: Lucro Real vs Presumido</div>
-        </div>
-        <div class="header-right">
-          <div class="client-name">{{ dados.cliente_nome }}</div>
-          <div class="period">{{ dados.periodo }}</div>
-          <div class="page-number">Página 7 de 9</div>
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="col-half comparison-box">
-          <div class="comparison-label">Custo no Lucro Real</div>
-          <div class="comparison-value" style="color: var(--text-secondary);">{{ dados.estudo_tributario.lucro_real_valor }}</div>
-          <div style="font-size: 8pt; color: var(--text-secondary);">Baseado na apuração contábil efetiva</div>
-        </div>
-        <div class="col-half comparison-box" style="background: #f0f9f4; border-color: var(--success-color);">
-          <div class="comparison-label">Custo no Lucro Presumido</div>
-          <div class="comparison-value" style="color: var(--success-color);">{{ dados.estudo_tributario.lucro_presumido_valor }}</div>
-          <div style="font-size: 8pt; color: var(--text-secondary);">Baseado nas alíquotas de presunção</div>
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="col-full card">
-          <div class="card-header">
-            <h3><i class="fas fa-calculator icon"></i>Análise de Economia Tributária</h3>
-          </div>
-          <div style="display: flex; justify-content: space-around; padding: 20px; text-align: center;">
-            <div>
-              <div style="font-size: 10pt; color: var(--text-secondary);">Economia Mensal Estimada</div>
-              <div style="font-size: 20pt; font-weight: 700; color: var(--rps-primary);">{{ dados.estudo_tributario.economia_mensal }}</div>
+        <div class="row">
+          <div class="col-full card">
+            <div class="card-header">
+              <h3><i class="fas fa-users icon"></i>Detalhamento por Sócio</h3>
             </div>
-            <div style="width: 1px; background: var(--border-color);"></div>
-            <div>
-              <div style="font-size: 10pt; color: var(--text-secondary);">Projeção Anual</div>
-              <div style="font-size: 20pt; font-weight: 700; color: var(--success-color);">{{ dados.estudo_tributario.economia_anual }}</div>
+            <table style="font-size: 11pt;">
+              <thead>
+                <tr>
+                  <th style="padding: 16px;">Sócio</th>
+                  <th style="padding: 16px; text-align: center;">Participação</th>
+                  <th style="padding: 16px; text-align: right;">Valor Recebido</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for socio in dados.distribuicao_lucros.socios %}
+                <tr>
+                  <td style="padding: 16px; font-weight: 600;">{{ socio.nome }}</td>
+                  <td style="padding: 16px; text-align: center;">
+                    <span class="badge badge-info">{{ socio.participacao }}</span>
+                  </td>
+                  <td style="padding: 16px; text-align: right; color: var(--rps-primary); font-weight: 700;">
+                    {{ socio.valor }}
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TRIBUTÁRIO -->
+    <div id="tributario" class="page-container">
+      <div class="content-wrapper">
+        <div class="header">
+          <div class="header-left">
+            <h1>Estudo Tributário</h1>
+            <div class="subtitle">Comparativo IRPJ e CSLL: Lucro Real vs Presumido</div>
+          </div>
+          <div class="header-right">
+            <div class="client-name">{{ dados.cliente_nome }}</div>
+            <div class="period">{{ dados.periodo }}</div>
+            <div class="page-number">Página 3 de 9</div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-half comparison-box">
+            <div class="comparison-label">Custo no Lucro Real</div>
+            <div class="comparison-value" style="color: var(--text-secondary);">{{ dados.estudo_tributario.lucro_real_valor }}</div>
+            <div style="font-size: 8pt; color: var(--text-secondary);">Baseado na apuração contábil efetiva</div>
+          </div>
+          <div class="col-half comparison-box" style="background: #f0f9f4; border-color: var(--success-color);">
+            <div class="comparison-label">Custo no Lucro Presumido</div>
+            <div class="comparison-value" style="color: var(--success-color);">{{ dados.estudo_tributario.lucro_presumido_valor }}</div>
+            <div style="font-size: 8pt; color: var(--text-secondary);">Baseado nas alíquotas de presunção</div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-full card">
+            <div class="card-header">
+              <h3><i class="fas fa-calculator icon"></i>Análise de Economia Tributária</h3>
             </div>
-          </div>
-          <div style="margin-top: 20px; padding: 15px; background: #e8f4fd; border-radius: 8px; border-left: 4px solid var(--info-color);">
-            <strong><i class="fas fa-lightbulb icon"></i>Recomendação:</strong>
-            Com base nos dados atuais, o regime de <strong>{{ dados.estudo_tributario.recomendacao }}</strong> apresenta a melhor eficiência tributária para a empresa.
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ========================================
-       PÁGINA 8: DISTRIBUIÇÃO DE LUCROS (REORGANIZADO)
-       ======================================== -->
-  <div class="page-container">
-    <div class="content-wrapper">
-      <div class="header">
-        <div class="header-left">
-          <h1>Distribuição de Lucros</h1>
-          <div class="subtitle">Detalhamento dos Dividendos aos Sócios</div>
-        </div>
-        <div class="header-right">
-          <div class="client-name">{{ dados.cliente_nome }}</div>
-          <div class="period">{{ dados.periodo }}</div>
-          <div class="page-number">Página 8 de 9</div>
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="col-full card" style="background: linear-gradient(135deg, var(--rps-primary) 0%, var(--rps-primary-light) 100%); color: white;">
-          <div style="text-align: center; padding: 20px;">
-            <h2 style="font-size: 14pt; margin-bottom: 10px; opacity: 0.9;">Total Distribuído no Período</h2>
-            <div style="font-size: 36pt; font-weight: 700; font-family: 'Poppins', sans-serif;">{{ dados.distribuicao_lucros.total }}</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="col-full card">
-          <div class="card-header">
-            <h3><i class="fas fa-users icon"></i>Detalhamento por Sócio</h3>
-          </div>
-          <table style="font-size: 11pt;">
-            <thead>
-              <tr>
-                <th style="padding: 16px;">Sócio</th>
-                <th style="padding: 16px; text-align: center;">Participação</th>
-                <th style="padding: 16px; text-align: right;">Valor Recebido</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for socio in dados.distribuicao_lucros.socios %}
-              <tr>
-                <td style="padding: 16px; font-weight: 600;">{{ socio.nome }}</td>
-                <td style="padding: 16px; text-align: center;">
-                  <span class="badge badge-info">{{ socio.participacao }}</span>
-                </td>
-                <td style="padding: 16px; text-align: right; color: var(--rps-primary); font-weight: 700;">
-                  {{ socio.valor }}
-                </td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ========================================
-       PÁGINA 9: CONCLUSÕES E RECOMENDAÇÕES
-       ======================================== -->
-  <div class="page-container">
-    <div class="content-wrapper">
-      <div class="header">
-        <div class="header-left">
-          <h1>Conclusões & Recomendações</h1>
-          <div class="subtitle">Síntese Estratégica e Próximos Passos</div>
-        </div>
-        <div class="header-right">
-          <div class="client-name">{{ dados.cliente_nome }}</div>
-          <div class="period">{{ dados.periodo }}</div>
-          <div class="page-number">Página 9 de 9</div>
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="col-half card" style="background: linear-gradient(135deg, #f0f9f4 0%, #e8f5ec 100%);">
-          <div class="card-header">
-            <h3><i class="fas fa-check-circle icon"></i>Pontos Fortes</h3>
-          </div>
-          <div style="display: flex; flex-direction: column; gap: 12px; font-size: 9pt;">
-            <div style="display: flex; gap: 10px;">
-              <span style="color: var(--success-color); font-size: 14pt;">●</span>
+            <div style="display: flex; justify-content: space-around; padding: 20px; text-align: center;">
               <div>
-                <strong>Crescimento Sustentável:</strong> Vendas 12.5% acima do período anterior com margem líquida de 12%.
+                <div style="font-size: 10pt; color: var(--text-secondary);">Economia Mensal Estimada</div>
+                <div style="font-size: 20pt; font-weight: 700; color: var(--rps-primary);">{{ dados.estudo_tributario.economia_mensal }}</div>
+              </div>
+              <div style="width: 1px; background: var(--border-color);"></div>
+              <div>
+                <div style="font-size: 10pt; color: var(--text-secondary);">Projeção Anual</div>
+                <div style="font-size: 20pt; font-weight: 700; color: var(--success-color);">{{ dados.estudo_tributario.economia_anual }}</div>
               </div>
             </div>
-            <div style="display: flex; gap: 10px;">
-              <span style="color: var(--success-color); font-size: 14pt;">●</span>
-              <div>
-                <strong>Liquidez Saudável:</strong> Índice de 1.45 garante capacidade de honrar obrigações de curto prazo.
-              </div>
-            </div>
-            <div style="display: flex; gap: 10px;">
-              <span style="color: var(--success-color); font-size: 14pt;">●</span>
-              <div>
-                <strong>ROE Acima do CDI:</strong> Rentabilidade superior ao benchmark em todos os períodos analisados.
-              </div>
-            </div>
-            <div style="display: flex; gap: 10px;">
-              <span style="color: var(--success-color); font-size: 14pt;">●</span>
-              <div>
-                <strong>Controle de CAPEX:</strong> Investimentos dentro do planejado (5% das vendas).
-              </div>
+            <div style="margin-top: 20px; padding: 15px; background: #e8f4fd; border-radius: 8px; border-left: 4px solid var(--info-color);">
+              <strong><i class="fas fa-lightbulb icon"></i>Recomendação:</strong>
+              Com base nos dados atuais, o regime de <strong>{{ dados.estudo_tributario.recomendacao }}</strong> apresenta a melhor eficiência tributária para a empresa.
             </div>
           </div>
-        </div>
-
-        <div class="col-half card" style="background: linear-gradient(135deg, #fff9e6 0%, #fff4d9 100%);">
-          <div class="card-header">
-            <h3><i class="fas fa-exclamation-triangle icon"></i>Pontos de Atenção</h3>
-          </div>
-          <div style="display: flex; flex-direction: column; gap: 12px; font-size: 9pt;">
-            <div style="display: flex; gap: 10px;">
-              <span style="color: var(--warning-color); font-size: 14pt;">●</span>
-              <div>
-                <strong>Concentração de Fornecedores:</strong> 60% das compras com um único fornecedor aumenta risco operacional.
-              </div>
-            </div>
-            <div style="display: flex; gap: 10px;">
-              <span style="color: var(--warning-color); font-size: 14pt;">●</span>
-              <div>
-                <strong>Custos com Pessoal:</strong> 50% das despesas operacionais. Avaliar produtividade e automação.
-              </div>
-            </div>
-            <div style="display: flex; gap: 10px;">
-              <span style="color: var(--warning-color); font-size: 14pt;">●</span>
-              <div>
-                <strong>Despesas Financeiras:</strong> 3% do faturamento. Oportunidade de renegociação de taxas.
-              </div>
-            </div>
-            <div style="display: flex; gap: 10px;">
-              <span style="color: var(--warning-color); font-size: 14pt;">●</span>
-              <div>
-                <strong>Endividamento:</strong> 45% requer monitoramento contínuo para evitar pressão de caixa.
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="col-full card">
-          <div class="card-header">
-            <h3><i class="fas fa-lightbulb icon"></i>Recomendações Estratégicas</h3>
-          </div>
-          <table>
-            <thead>
-              <tr>
-                <th style="width: 20%;">Área</th>
-                <th style="width: 50%;">Recomendação</th>
-                <th style="width: 15%;">Prioridade</th>
-                <th style="width: 15%;">Prazo</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td><strong>Fornecedores</strong></td>
-                <td>Diversificar base de fornecedores para reduzir risco de concentração</td>
-                <td><span class="badge badge-danger">Alta</span></td>
-                <td>30 dias</td>
-              </tr>
-              <tr>
-                <td><strong>Financeiro</strong></td>
-                <td>Renegociar taxas de empréstimos e linhas de crédito com bancos</td>
-                <td><span class="badge badge-warning">Média</span></td>
-                <td>60 dias</td>
-              </tr>
-              <tr>
-                <td><strong>Operacional</strong></td>
-                <td>Implementar projeto piloto de automação para reduzir custos com pessoal</td>
-                <td><span class="badge badge-warning">Média</span></td>
-                <td>90 dias</td>
-              </tr>
-              <tr>
-                <td><strong>Comercial</strong></td>
-                <td>Expandir linha de produtos para aumentar ticket médio e margem</td>
-                <td><span class="badge badge-info">Baixa</span></td>
-                <td>120 dias</td>
-              </tr>
-            </tbody>
-          </table>
         </div>
       </div>
     </div>
-  </div>
+
+    <!-- ATIVOS -->
+    <div id="ativos" class="page-container">
+      <div class="content-wrapper">
+        <div class="header">
+          <div class="header-left">
+            <h1>Análise de Ativos</h1>
+            <div class="subtitle">Evolução Monetária e Composição Percentual</div>
+          </div>
+          <div class="header-right">
+            <div class="client-name">{{ dados.cliente_nome }}</div>
+            <div class="period">{{ dados.periodo }}</div>
+            <div class="page-number">Página 4 de 9</div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-full card">
+            <div class="card-header">
+              <h3><i class="fas fa-chart-line icon"></i>Evolução dos Ativos (R$)</h3>
+              <span class="badge badge-success">Crescimento Constante</span>
+            </div>
+            <div class="chart-container" style="max-height: 250px;">
+              {% if mode == 'web' %}
+              <div id="chart-ativos-evolucao" class="apex-chart-container"></div>
+              {% else %}
+              <img class="chart-img" src="data:image/png;base64,{{ graficos.ativos_evolucao_valor }}" alt="Evolução Ativos R$">
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-full card">
+            <div class="card-header">
+              <h3><i class="fas fa-chart-bar icon"></i>Composição do Ativo (%)</h3>
+              <span class="badge badge-info">Estrutura Estável</span>
+            </div>
+            <div class="chart-container" style="max-height: 250px;">
+              {% if mode == 'web' %}
+              <div id="chart-ativos-composicao" class="apex-chart-container"></div>
+              {% else %}
+              <img class="chart-img" src="data:image/png;base64,{{ graficos.ativos_composicao_perc }}" alt="Composição Ativos %">
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PASSIVOS -->
+    <div id="passivos" class="page-container">
+      <div class="content-wrapper">
+        <div class="header">
+          <div class="header-left">
+            <h1>Análise de Passivos</h1>
+            <div class="subtitle">Estrutura de Capital e Endividamento</div>
+          </div>
+          <div class="header-right">
+            <div class="client-name">{{ dados.cliente_nome }}</div>
+            <div class="period">{{ dados.periodo }}</div>
+            <div class="page-number">Página 5 de 9</div>
+          </div>
+        </div>
+        <div class="row" style="flex: 0 0 auto;">
+          <div class="col-full">
+            <span class="section-badge"><i class="fas fa-briefcase icon"></i>Estrutura de Capital</span>
+          </div>
+        </div>
+        <div class="row">
+          <div class="card" style="width: 100%;">
+            <div class="card-header">
+              <h3>Evolução Circulante vs Não-Circulante</h3>
+              <span class="badge badge-warning">Monitorar</span>
+            </div>
+            <div class="chart-container" style="max-height: 250px; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+              {% if mode == 'web' %}
+              <div id="chart-passivos" class="apex-chart-container"></div>
+              {% else %}
+              <img class="chart-img" src="data:image/png;base64,{{ graficos.passivos_stack }}" alt="Gráfico de Passivos" style="max-width: 85%; max-height: 240px; width: auto; height: auto;">
+              {% endif %}
+            </div>
+            <div style="margin-top: auto; padding: 12px; background: #fff4e6; border-radius: 8px; border-left: 4px solid var(--warning-color);">
+              <div style="font-size: 8pt;">
+                <strong><i class="fas fa-lightbulb icon"></i>Insight:</strong> Passivo circulante cresceu 6% enquanto não-circulante reduziu 8%.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RENTABILIDADE -->
+    <div id="rentabilidade" class="page-container">
+      <div class="content-wrapper">
+        <div class="header">
+          <div class="header-left">
+            <h1>Rentabilidade & Patrimônio</h1>
+            <div class="subtitle">Análise de Retorno vs Referencial</div>
+          </div>
+          <div class="header-right">
+            <div class="client-name">{{ dados.cliente_nome }}</div>
+            <div class="period">{{ dados.periodo }}</div>
+            <div class="page-number">Página 6 de 9</div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-half card">
+            <div class="card-header">
+              <h3><i class="fas fa-chart-area icon"></i>Rentabilidade vs CDI</h3>
+              <span class="badge badge-success">Superando</span>
+            </div>
+            <div class="chart-container">
+              {% if mode == 'web' %}
+              <div id="chart-rentabilidade" class="apex-chart-container"></div>
+              {% else %}
+              <img class="chart-img" src="data:image/png;base64,{{ graficos.rentabilidade_line }}" alt="Rentabilidade">
+              {% endif %}
+            </div>
+          </div>
+          <div class="col-half card">
+            <div class="card-header">
+              <h3><i class="fas fa-gem icon"></i>Patrimônio vs Ativos</h3>
+              <span class="badge badge-info">Crescimento</span>
+            </div>
+            <div class="chart-container">
+              {% if mode == 'web' %}
+              <div id="chart-equity" class="apex-chart-container"></div>
+              {% else %}
+              <img class="chart-img" src="data:image/png;base64,{{ graficos.equity_vs_ativos }}" alt="Patrimônio">
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-full card">
+            <div class="card-header">
+              <h3><i class="fas fa-target icon"></i>ROE vs CDI - Análise Comparativa</h3>
+            </div>
+            <table>
+              <thead>
+                <tr>
+                  <th>Período</th>
+                  <th style="text-align: center;">ROE (%)</th>
+                  <th style="text-align: center;">CDI (%)</th>
+                  <th style="text-align: center;">Spread</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for row in dados.tabela_roe %}
+                <tr>
+                  <td style="font-weight: 600;">{{ row.periodo }}</td>
+                  <td style="text-align: center; color: var(--rps-primary);">{{ row.roe }}%</td>
+                  <td style="text-align: center; color: var(--text-secondary);">{{ row.cdi }}%</td>
+                  <td style="text-align: center; font-weight: 700; color: {{ 'var(--success-color)' if row.delta > 0 else 'var(--danger-color)' }}">
+                    {{ '+' if row.delta > 0 else '' }}{{ row.delta }}%
+                  </td>
+                  <td>
+                    <span class="badge {{ 'badge-success' if row.delta > 0 else 'badge-danger' }}">
+                      {{ 'Acima' if row.delta > 0 else 'Abaixo' }}
+                    </span>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VENDAS -->
+    <div id="vendas" class="page-container">
+      <div class="content-wrapper">
+        <div class="header">
+          <div class="header-left">
+            <h1>Análise de Vendas</h1>
+            <div class="subtitle">Top Produtos e Comparativos</div>
+          </div>
+          <div class="header-right">
+            <div class="client-name">{{ dados.cliente_nome }}</div>
+            <div class="period">{{ dados.periodo }}</div>
+            <div class="page-number">Página 7 de 9</div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-half card">
+            <div class="card-header">
+              <h3><i class="fas fa-trophy icon"></i>Top 5 - Faturamento</h3>
+            </div>
+            <div class="chart-container">
+              {% if mode == 'web' %}
+              <div id="chart-top-fat" class="apex-chart-container"></div>
+              {% else %}
+              <img class="chart-img" src="data:image/png;base64,{{ graficos.top_produtos_faturamento }}" alt="Top Faturamento">
+              {% endif %}
+            </div>
+          </div>
+          <div class="col-half card">
+            <div class="card-header">
+              <h3><i class="fas fa-boxes icon"></i>Top 5 - Quantidade</h3>
+            </div>
+            <div class="chart-container">
+              {% if mode == 'web' %}
+              <div id="chart-top-qtd" class="apex-chart-container"></div>
+              {% else %}
+              <img class="chart-img" src="data:image/png;base64,{{ graficos.top_produtos_quantidade }}" alt="Top Quantidade">
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-full card">
+            <div class="card-header">
+              <h3><i class="fas fa-calendar-alt icon"></i>Comparativo Anual (YoY)</h3>
+            </div>
+            <div class="chart-container" style="height: 200px;">
+              {% if mode == 'web' %}
+              <div id="chart-vendas-yoy" class="apex-chart-container"></div>
+              {% else %}
+              <img class="chart-img" src="data:image/png;base64,{{ graficos.vendas_line }}" alt="YoY">
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CUSTOS -->
+    <div id="custos" class="page-container">
+      <div class="content-wrapper">
+        <div class="header">
+          <div class="header-left">
+            <h1>Custos & Fornecedores</h1>
+            <div class="subtitle">Análise de Despesas e Concentração</div>
+          </div>
+          <div class="header-right">
+            <div class="client-name">{{ dados.cliente_nome }}</div>
+            <div class="period">{{ dados.periodo }}</div>
+            <div class="page-number">Página 8 de 9</div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-half card">
+            <div class="card-header">
+              <h3><i class="fas fa-wallet icon"></i>Composição de Despesas</h3>
+              <span class="badge badge-warning">Atenção Pessoal</span>
+            </div>
+            <div class="chart-container">
+              {% if mode == 'web' %}
+              <div id="chart-custos" class="apex-chart-container"></div>
+              {% else %}
+              <img class="chart-img" src="data:image/png;base64,{{ graficos.custos_pie }}" alt="Custos" style="max-width: 75%;">
+              {% endif %}
+            </div>
+            <div style="margin-top: auto; padding: 12px; background: #fff4e6; border-radius: 6px; font-size: 8pt;">
+              <strong><i class="fas fa-exclamation-triangle icon"></i>Alerta:</strong> Pessoal representa 50% dos custos. Avaliar produtividade e automação.
+            </div>
+          </div>
+          <div class="col-half card">
+            <div class="card-header">
+              <h3><i class="fas fa-handshake icon"></i>Concentração de Fornecedores</h3>
+              <span class="badge badge-warning">Alta Concentração</span>
+            </div>
+            <div class="chart-container">
+              {% if mode == 'web' %}
+              <div id="chart-fornecedores" class="apex-chart-container"></div>
+              {% else %}
+              <img class="chart-img" src="data:image/png;base64,{{ graficos.fornecedores_pie }}" alt="Fornecedores" style="max-width: 75%;">
+              {% endif %}
+            </div>
+            <div style="margin-top: auto; padding: 10px; background: #e8f4fd; border-radius: 6px; font-size: 8pt;">
+              <strong><i class="fas fa-lightbulb icon"></i>Recomendação:</strong> Fornecedor A representa 60%. Considerar diversificação para reduzir risco.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONCLUSÃO -->
+    <div id="conclusao" class="page-container">
+      <div class="content-wrapper">
+        <div class="header">
+          <div class="header-left">
+            <h1>Conclusões & Recomendações</h1>
+            <div class="subtitle">Síntese Estratégica e Próximos Passos</div>
+          </div>
+          <div class="header-right">
+            <div class="client-name">{{ dados.cliente_nome }}</div>
+            <div class="period">{{ dados.periodo }}</div>
+            <div class="page-number">Página 9 de 9</div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-half card" style="background: linear-gradient(135deg, #f0f9f4 0%, #e8f5ec 100%);">
+            <div class="card-header">
+              <h3><i class="fas fa-check-circle icon"></i>Pontos Fortes</h3>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 12px; font-size: 9pt;">
+              <div style="display: flex; gap: 10px;">
+                <span style="color: var(--success-color); font-size: 14pt;">●</span>
+                <div>
+                  <strong>Crescimento Sustentável:</strong> Vendas 12.5% acima do período anterior com margem líquida de 12%.
+                </div>
+              </div>
+              <div style="display: flex; gap: 10px;">
+                <span style="color: var(--success-color); font-size: 14pt;">●</span>
+                <div>
+                  <strong>Liquidez Saudável:</strong> Índice de 1.45 garante capacidade de honrar obrigações de curto prazo.
+                </div>
+              </div>
+              <div style="display: flex; gap: 10px;">
+                <span style="color: var(--success-color); font-size: 14pt;">●</span>
+                <div>
+                  <strong>ROE Acima do CDI:</strong> Rentabilidade superior ao benchmark em todos os períodos analisados.
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-half card" style="background: linear-gradient(135deg, #fff9e6 0%, #fff4d9 100%);">
+            <div class="card-header">
+              <h3><i class="fas fa-exclamation-triangle icon"></i>Pontos de Atenção</h3>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 12px; font-size: 9pt;">
+              <div style="display: flex; gap: 10px;">
+                <span style="color: var(--warning-color); font-size: 14pt;">●</span>
+                <div>
+                  <strong>Concentração de Fornecedores:</strong> 60% das compras com um único fornecedor aumenta risco operacional.
+                </div>
+              </div>
+              <div style="display: flex; gap: 10px;">
+                <span style="color: var(--warning-color); font-size: 14pt;">●</span>
+                <div>
+                  <strong>Custos com Pessoal:</strong> 50% das despesas operacionais. Avaliar produtividade e automação.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-full card">
+            <div class="card-header">
+              <h3><i class="fas fa-lightbulb icon"></i>Recomendações Estratégicas</h3>
+            </div>
+            <table>
+              <thead>
+                <tr>
+                  <th style="width: 20%;">Área</th>
+                  <th style="width: 50%;">Recomendação</th>
+                  <th style="width: 15%;">Prioridade</th>
+                  <th style="width: 15%;">Prazo</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Fornecedores</strong></td>
+                  <td>Diversificar base de fornecedores para reduzir risco de concentração</td>
+                  <td><span class="badge badge-danger">Alta</span></td>
+                  <td>30 dias</td>
+                </tr>
+                <tr>
+                  <td><strong>Financeiro</strong></td>
+                  <td>Renegociar taxas de empréstimos e linhas de crédito com bancos</td>
+                  <td><span class="badge badge-warning">Média</span></td>
+                  <td>60 dias</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {% if mode == 'web' %}
+  </div> <!-- Fecha snap-container -->
+
+  <script>
+    const colors = {
+      primary: '#2d5a3d',
+      secondary: '#7fa88f',
+      tertiary: '#1a1a1a',
+      accent: '#d4af37',
+      bg: '#fafbfa'
+    };
+    const commonOptions = {
+      chart: {
+        fontFamily: 'Inter, sans-serif',
+        toolbar: { show: false },
+        zoom: { enabled: false },
+        animations: { enabled: true, easing: 'easeinout', speed: 800 }
+      },
+      dataLabels: { enabled: false },
+      stroke: { curve: 'smooth', width: 3 },
+      colors: [colors.primary, colors.secondary, '#d1d9d0', colors.tertiary]
+    };
+    const rawData = {{ raw_data | tojson }};
+
+    function renderCharts() {
+      new ApexCharts(document.querySelector("#chart-ativos-evolucao"), { ...commonOptions, series: [{ name: 'Total Ativos', data: rawData.ativos.total }], chart: { type: 'line', height: 250 }, xaxis: { categories: rawData.meses }, yaxis: { labels: { formatter: (val) => `R$ ${val}k` } } }).render();
+      new ApexCharts(document.querySelector("#chart-ativos-composicao"), { ...commonOptions, series: [{ name: 'Caixa', data: rawData.ativos.caixa }, { name: 'Estoques', data: rawData.ativos.estoques }, { name: 'Imobilizado', data: rawData.ativos.imobilizado }], chart: { type: 'bar', height: 250, stacked: true, stackType: '100%' }, xaxis: { categories: rawData.meses }, plotOptions: { bar: { horizontal: false, borderRadius: 4 } } }).render();
+      new ApexCharts(document.querySelector("#chart-passivos"), { ...commonOptions, series: [{ name: 'Não Circulante', data: rawData.passivos.nao_circulante }, { name: 'Circulante', data: rawData.passivos.circulante }], chart: { type: 'area', height: 250, stacked: true }, colors: [colors.tertiary, colors.secondary], xaxis: { categories: rawData.meses } }).render();
+      new ApexCharts(document.querySelector("#chart-rentabilidade"), { ...commonOptions, series: [{ name: 'RPS', data: rawData.rentabilidade.rps }, { name: 'CDI', data: rawData.rentabilidade.cdi }], chart: { type: 'line', height: 250 }, stroke: { dashArray: [0, 5] }, xaxis: { categories: rawData.meses }, yaxis: { labels: { formatter: (val) => `${val}%` } } }).render();
+      new ApexCharts(document.querySelector("#chart-equity"), { ...commonOptions, series: [{ name: 'Patrimônio Líquido', data: rawData.rentabilidade.pl }, { name: 'Ativos Totais', data: rawData.rentabilidade.ativos }], chart: { type: 'line', height: 250 }, xaxis: { categories: rawData.meses } }).render();
+      new ApexCharts(document.querySelector("#chart-top-fat"), { ...commonOptions, series: [{ name: 'Faturamento', data: rawData.produtos.fat_values }], chart: { type: 'bar', height: 250 }, plotOptions: { bar: { horizontal: true, borderRadius: 4 } }, xaxis: { categories: rawData.produtos.fat_labels }, colors: [colors.primary] }).render();
+      new ApexCharts(document.querySelector("#chart-top-qtd"), { ...commonOptions, series: [{ name: 'Quantidade', data: rawData.produtos.qtd_values }], chart: { type: 'bar', height: 250 }, plotOptions: { bar: { horizontal: true, borderRadius: 4 } }, xaxis: { categories: rawData.produtos.qtd_labels }, colors: [colors.secondary] }).render();
+      new ApexCharts(document.querySelector("#chart-vendas-yoy"), { ...commonOptions, series: [{ name: '2024', data: rawData.vendas.atual }, { name: '2023', data: rawData.vendas.anterior }], chart: { type: 'line', height: 200 }, xaxis: { categories: rawData.meses } }).render();
+      new ApexCharts(document.querySelector("#chart-custos"), { ...commonOptions, series: rawData.custos.values, labels: rawData.custos.labels, chart: { type: 'donut', height: 250 }, colors: [colors.primary, colors.secondary, '#d8e2d8', colors.tertiary] }).render();
+      new ApexCharts(document.querySelector("#chart-fornecedores"), { ...commonOptions, series: rawData.fornecedores.values, labels: rawData.fornecedores.labels, chart: { type: 'donut', height: 250 }, colors: [colors.primary, colors.secondary, '#d8e2d8'] }).render();
+    }
+    document.addEventListener('DOMContentLoaded', renderCharts);
+
+    const pageIds = ['capa', 'resumo', 'distribuicao', 'tributario', 'ativos', 'passivos', 'rentabilidade', 'vendas', 'custos', 'conclusao'];
+    let currentIndex = 0;
+
+    function goToSlide(id) {
+      document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Scroll Spy & Atualização do Índice
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          // Atualiza menu lateral
+          document.querySelectorAll('.nav-dot-container').forEach(el => el.classList.remove('active'));
+          const navId = 'nav-' + entry.target.id;
+          const navItem = document.getElementById(navId);
+          if (navItem) navItem.classList.add('active');
+
+          // Atualiza índice atual
+          currentIndex = pageIds.indexOf(entry.target.id);
+        }
+      });
+    }, { root: document.getElementById('mainScroll'), threshold: 0.5 });
+
+    document.querySelectorAll('.page-container').forEach(page => observer.observe(page));
+
+    // Navegação Sequencial
+    function nextSlide() {
+      if (currentIndex < pageIds.length - 1) {
+        goToSlide(pageIds[currentIndex + 1]);
+      }
+    }
+
+    function prevSlide() {
+      if (currentIndex > 0) {
+        goToSlide(pageIds[currentIndex - 1]);
+      }
+    }
+
+    // Controle por Teclado
+    document.addEventListener('keydown', (e) => {
+      if (e.key === "ArrowDown" || e.key === "ArrowRight") {
+        e.preventDefault();
+        nextSlide();
+      } else if (e.key === "ArrowUp" || e.key === "ArrowLeft") {
+        e.preventDefault();
+        prevSlide();
+      }
+    });
+
+    // Toggle Fullscreen
+    function toggleFullScreen() {
+      if (!document.fullscreenElement) {
+        document.body.classList.add('fullscreen-mode');
+        document.documentElement.requestFullscreen().catch(err => console.log(err));
+      } else {
+        document.exitFullscreen();
+        document.body.classList.remove('fullscreen-mode');
+      }
+    }
+    document.addEventListener('fullscreenchange', () => {
+      if (!document.fullscreenElement) document.body.classList.remove('fullscreen-mode');
+    });
+  </script>
+  {% endif %}
 
 </body>
 
