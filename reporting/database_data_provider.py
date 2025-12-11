@@ -3,6 +3,7 @@ import psycopg2
 from psycopg2.extras import RealDictCursor
 from typing import Dict, Any, List
 from datetime import datetime
+import random
 
 from .data_provider import DataProvider
 
@@ -21,16 +22,6 @@ class DatabaseDataProvider(DataProvider):
         user: str = "postgres",
         password: str = "admin",
     ) -> None:
-        """
-        Inicializa a conexão com o banco de dados PostgreSQL.
-        
-        Args:
-            host: Host do banco de dados
-            port: Porta do banco de dados
-            database: Nome do banco de dados
-            user: Usuário do banco de dados
-            password: Senha do banco de dados
-        """
         self.host = host
         self.port = port
         self.database = database
@@ -56,9 +47,6 @@ class DatabaseDataProvider(DataProvider):
         return f"R$ {val:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
 
     def listar_clientes(self) -> List[Dict[str, Any]]:
-        """
-        Retorna lista de empresas da tabela tabempresas com codigo, nome e fantasia.
-        """
         if self._empresas_cache is not None:
             return self._empresas_cache
 
@@ -77,17 +65,15 @@ class DatabaseDataProvider(DataProvider):
     def obter_contexto_dados(self, cliente_id: int, periodo: str) -> Dict[str, Any]:
         """
         Gera/retorna o contexto de DADOS do relatório.
-        Por enquanto usa dados mock, mas a estrutura está pronta para integração real.
+        Inclui dados simulados para as novas páginas solicitadas.
         """
         # Buscar dados da empresa
         empresas = self.listar_clientes()
         empresa = next((e for e in empresas if e["codigo"] == cliente_id), None)
 
         if empresa is None:
-            # Fallback para empresa genérica
             cliente_nome = f"Empresa {cliente_id}"
         else:
-            # Usar nome da empresa ou fantasia
             cliente_nome = empresa.get("fantaisa") or empresa.get("nome")
 
         # Dados básicos
@@ -97,8 +83,7 @@ class DatabaseDataProvider(DataProvider):
             "periodo": periodo or datetime.now().strftime("%B/%Y"),
         }
 
-        # KPIs (ainda usando valores simulados, mas com nome real da empresa)
-        import random
+        # KPIs simulados
         vendas = random.uniform(500000, 1000000)
         impostos = vendas * 0.18
         compras = vendas * 0.40
@@ -134,6 +119,41 @@ class DatabaseDataProvider(DataProvider):
             {"periodo": "6 M", "roe": 8.2, "cdi": 5.5, "delta": 2.7},
             {"periodo": "12 M", "roe": 15.1, "cdi": 11.2, "delta": 3.9},
         ]
+        
+        # --- NOVOS DADOS SIMULADOS PARA NOVAS PÁGINAS ---
+
+        # 1. Distribuição de Lucros
+        total_distribuido = lucro * 0.6 # Exemplo: 60% do lucro distribuído
+        socios = [
+            {"nome": "Sócio Fundador A", "perc": 50, "valor": total_distribuido * 0.50},
+            {"nome": "Sócio Diretor B", "perc": 30, "valor": total_distribuido * 0.30},
+            {"nome": "Sócio Investidor C", "perc": 20, "valor": total_distribuido * 0.20},
+        ]
+        distribuicao_lucros = {
+            "total": self._fmt_brl(total_distribuido),
+            "socios": [
+                {
+                    "nome": s["nome"],
+                    "participacao": f"{s['perc']}%",
+                    "valor": self._fmt_brl(s["valor"])
+                } for s in socios
+            ]
+        }
+
+        # 2. Estudo Tributário (Comparativo Presumido vs Real)
+        # Simulação: Lucro Presumido geralmente paga menos se margem real > presunção
+        # Aqui simulamos que o Real seria mais caro para justificar o planejamento
+        imposto_real = vendas * 0.08 # Exemplo fictício
+        imposto_presumido = vendas * 0.05
+        economia = imposto_real - imposto_presumido
+        
+        estudo_tributario = {
+            "lucro_real_valor": self._fmt_brl(imposto_real),
+            "lucro_presumido_valor": self._fmt_brl(imposto_presumido),
+            "economia_anual": self._fmt_brl(economia * 12), # Projeção anual
+            "economia_mensal": self._fmt_brl(economia),
+            "recomendacao": "Lucro Presumido" if imposto_presumido < imposto_real else "Lucro Real"
+        }
 
         return {
             "dados": {
@@ -143,14 +163,14 @@ class DatabaseDataProvider(DataProvider):
                 "kpis": kpis,
                 "indicadores": indicadores,
                 "tabela_roe": tabela_roe,
+                "distribuicao_lucros": distribuicao_lucros,
+                "estudo_tributario": estudo_tributario
             }
         }
 
     def close(self):
-        """Fecha a conexão com o banco de dados."""
         if self._connection and not self._connection.closed:
             self._connection.close()
 
     def __del__(self):
-        """Garante fechamento da conexão ao destruir o objeto."""
         self.close()

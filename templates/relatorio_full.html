@@ -11,6 +11,27 @@
     .icon {
       margin-right: 4px;
     }
+
+    .comparison-box {
+      background: #f8faf9;
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      border: 1px solid var(--border-color);
+    }
+
+    .comparison-value {
+      font-size: 16pt;
+      font-weight: 700;
+      color: var(--rps-primary);
+      margin: 10px 0;
+    }
+
+    .comparison-label {
+      font-size: 9pt;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+    }
   </style>
 </head>
 
@@ -49,7 +70,7 @@
         <div class="header-right">
           <div class="client-name">{{ dados.cliente_nome }}</div>
           <div class="period">{{ dados.periodo }}</div>
-          <div class="page-number">Página 1 de 7</div>
+          <div class="page-number">Página 1 de 9</div>
         </div>
       </div>
 
@@ -172,52 +193,112 @@
   </div>
 
   <!-- ========================================
-       PÁGINA 2: ANÁLISE DE ATIVOS
+       NOVA PÁGINA: DISTRIBUIÇÃO DE LUCROS
        ======================================== -->
   <div class="page-container">
     <div class="content-wrapper">
       <div class="header">
         <div class="header-left">
-          <h1>Análise de Ativos</h1>
-          <div class="subtitle">Composição e Evolução do Patrimônio</div>
+          <h1>Distribuição de Lucros</h1>
+          <div class="subtitle">Detalhamento dos Dividendos aos Sócios</div>
         </div>
         <div class="header-right">
           <div class="client-name">{{ dados.cliente_nome }}</div>
           <div class="period">{{ dados.periodo }}</div>
-          <div class="page-number">Página 2 de 7</div>
-        </div>
-      </div>
-
-      <div class="row" style="flex: 0 0 auto;">
-        <div class="col-full">
-          <span class="section-badge"><i class="fas fa-chart-bar icon"></i>Evolução Mensal</span>
+          <div class="page-number">Página 2 de 9</div>
         </div>
       </div>
 
       <div class="row">
-        <div class="card" style="width: 100%;">
+        <div class="col-full card" style="background: linear-gradient(135deg, var(--rps-primary) 0%, var(--rps-primary-light) 100%); color: white;">
+          <div style="text-align: center; padding: 20px;">
+            <h2 style="font-size: 14pt; margin-bottom: 10px; opacity: 0.9;">Total Distribuído no Período</h2>
+            <div style="font-size: 36pt; font-weight: 700; font-family: 'Poppins', sans-serif;">{{ dados.distribuicao_lucros.total }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-full card">
           <div class="card-header">
-            <h3>Composição dos Ativos (Empilhado)</h3>
-            <span class="badge badge-info">6 meses</span>
+            <h3><i class="fas fa-users icon"></i>Detalhamento por Sócio</h3>
           </div>
-          <div class="chart-container" style="max-height: 250px; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-            <img class="chart-img" src="data:image/png;base64,{{ graficos.ativos_stack }}" alt="Gráfico de Ativos" style="max-width: 85%; max-height: 240px; width: auto; height: auto;">
+          <table style="font-size: 11pt;">
+            <thead>
+              <tr>
+                <th style="padding: 16px;">Sócio</th>
+                <th style="padding: 16px; text-align: center;">Participação</th>
+                <th style="padding: 16px; text-align: right;">Valor Recebido</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for socio in dados.distribuicao_lucros.socios %}
+              <tr>
+                <td style="padding: 16px; font-weight: 600;">{{ socio.nome }}</td>
+                <td style="padding: 16px; text-align: center;">
+                  <span class="badge badge-info">{{ socio.participacao }}</span>
+                </td>
+                <td style="padding: 16px; text-align: right; color: var(--rps-primary); font-weight: 700;">
+                  {{ socio.valor }}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================
+       NOVA PÁGINA: ESTUDO TRIBUTÁRIO
+       ======================================== -->
+  <div class="page-container">
+    <div class="content-wrapper">
+      <div class="header">
+        <div class="header-left">
+          <h1>Estudo Tributário</h1>
+          <div class="subtitle">Comparativo IRPJ e CSLL: Lucro Real vs Presumido</div>
+        </div>
+        <div class="header-right">
+          <div class="client-name">{{ dados.cliente_nome }}</div>
+          <div class="period">{{ dados.periodo }}</div>
+          <div class="page-number">Página 3 de 9</div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-half comparison-box">
+          <div class="comparison-label">Custo no Lucro Real</div>
+          <div class="comparison-value" style="color: var(--text-secondary);">{{ dados.estudo_tributario.lucro_real_valor }}</div>
+          <div style="font-size: 8pt; color: var(--text-secondary);">Baseado na apuração contábil efetiva</div>
+        </div>
+        <div class="col-half comparison-box" style="background: #f0f9f4; border-color: var(--success-color);">
+          <div class="comparison-label">Custo no Lucro Presumido</div>
+          <div class="comparison-value" style="color: var(--success-color);">{{ dados.estudo_tributario.lucro_presumido_valor }}</div>
+          <div style="font-size: 8pt; color: var(--text-secondary);">Baseado nas alíquotas de presunção</div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-full card">
+          <div class="card-header">
+            <h3><i class="fas fa-calculator icon"></i>Análise de Economia Tributária</h3>
           </div>
-          <div style="margin-top: 2vh; padding: 12px; background: #f8faf9; border-radius: 8px;">
-            <div class="flex-between" style="margin-bottom: 8px;">
-              <span style="font-size: 8pt; font-weight: 600;">Principais Movimentações:</span>
+          <div style="display: flex; justify-content: space-around; padding: 20px; text-align: center;">
+            <div>
+              <div style="font-size: 10pt; color: var(--text-secondary);">Economia Mensal Estimada</div>
+              <div style="font-size: 20pt; font-weight: 700; color: var(--rps-primary);">{{ dados.estudo_tributario.economia_mensal }}</div>
             </div>
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; font-size: 8pt;">
-              <div>
-                <span style="color: var(--success-color); font-weight: 600;">+8.5%</span> Caixa
-              </div>
-              <div>
-                <span style="color: var(--success-color); font-weight: 600;">+6.2%</span> Estoques
-              </div>
-              <div>
-                <span style="color: var(--info-color); font-weight: 600;">+3.1%</span> Imobilizado
-              </div>
+            <div style="width: 1px; background: var(--border-color);"></div>
+            <div>
+              <div style="font-size: 10pt; color: var(--text-secondary);">Projeção Anual</div>
+              <div style="font-size: 20pt; font-weight: 700; color: var(--success-color);">{{ dados.estudo_tributario.economia_anual }}</div>
             </div>
+          </div>
+          <div style="margin-top: 20px; padding: 15px; background: #e8f4fd; border-radius: 8px; border-left: 4px solid var(--info-color);">
+            <strong><i class="fas fa-lightbulb icon"></i>Recomendação:</strong>
+            Com base nos dados atuais, o regime de <strong>{{ dados.estudo_tributario.recomendacao }}</strong> apresenta a melhor eficiência tributária para a empresa.
           </div>
         </div>
       </div>
@@ -225,7 +306,53 @@
   </div>
 
   <!-- ========================================
-       PÁGINA 3: ANÁLISE DE PASSIVOS
+       PÁGINA 4: ANÁLISE DE ATIVOS (ATUALIZADA)
+       ======================================== -->
+  <div class="page-container">
+    <div class="content-wrapper">
+      <div class="header">
+        <div class="header-left">
+          <h1>Análise de Ativos</h1>
+          <div class="subtitle">Evolução Monetária e Composição Percentual</div>
+        </div>
+        <div class="header-right">
+          <div class="client-name">{{ dados.cliente_nome }}</div>
+          <div class="period">{{ dados.periodo }}</div>
+          <div class="page-number">Página 4 de 9</div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-full card">
+          <div class="card-header">
+            <h3><i class="fas fa-chart-line icon"></i>Evolução dos Ativos (R$)</h3>
+            <span class="badge badge-success">Crescimento Constante</span>
+          </div>
+          <div class="chart-container" style="max-height: 250px;">
+            <img class="chart-img" src="data:image/png;base64,{{ graficos.ativos_evolucao_valor }}" alt="Evolução Ativos R$">
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-full card">
+          <div class="card-header">
+            <h3><i class="fas fa-chart-bar icon"></i>Composição do Ativo (%)</h3>
+            <span class="badge badge-info">Estrutura Estável</span>
+          </div>
+          <div class="chart-container" style="max-height: 250px;">
+            <img class="chart-img" src="data:image/png;base64,{{ graficos.ativos_composicao_perc }}" alt="Composição Ativos %">
+          </div>
+          <div style="margin-top: 10px; font-size: 9pt; text-align: center; color: var(--text-secondary);">
+            O gráfico acima representa 100% dos ativos em cada mês, divididos proporcionalmente entre Caixa, Estoques e Imobilizado.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================
+       PÁGINA 5: ANÁLISE DE PASSIVOS
        ======================================== -->
   <div class="page-container">
     <div class="content-wrapper">
@@ -237,7 +364,7 @@
         <div class="header-right">
           <div class="client-name">{{ dados.cliente_nome }}</div>
           <div class="period">{{ dados.periodo }}</div>
-          <div class="page-number">Página 3 de 7</div>
+          <div class="page-number">Página 5 de 9</div>
         </div>
       </div>
 
@@ -268,7 +395,7 @@
   </div>
 
   <!-- ========================================
-       PÁGINA 4: RENTABILIDADE & PATRIMÔNIO (PARTE 1)
+       PÁGINA 6: RENTABILIDADE
        ======================================== -->
   <div class="page-container">
     <div class="content-wrapper">
@@ -280,7 +407,7 @@
         <div class="header-right">
           <div class="client-name">{{ dados.cliente_nome }}</div>
           <div class="period">{{ dados.periodo }}</div>
-          <div class="page-number">Página 4 de 8</div>
+          <div class="page-number">Página 6 de 9</div>
         </div>
       </div>
 
@@ -303,25 +430,6 @@
           <div class="chart-container">
             <img class="chart-img" src="data:image/png;base64,{{ graficos.equity_vs_ativos }}" alt="Patrimônio">
           </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ========================================
-       PÁGINA 5: RENTABILIDADE & PATRIMÔNIO (PARTE 2)
-       ======================================== -->
-  <div class="page-container">
-    <div class="content-wrapper">
-      <div class="header">
-        <div class="header-left">
-          <h1>Rentabilidade & Patrimônio</h1>
-          <div class="subtitle">Indicadores de Performance Detalhados</div>
-        </div>
-        <div class="header-right">
-          <div class="client-name">{{ dados.cliente_nome }}</div>
-          <div class="period">{{ dados.periodo }}</div>
-          <div class="page-number">Página 5 de 8</div>
         </div>
       </div>
 
@@ -360,88 +468,53 @@
           </table>
         </div>
       </div>
-
-      <div class="row">
-        <div class="col-full card">
-          <div class="card-header">
-            <h3><i class="fas fa-chart-bar icon"></i>Indicadores Financeiros</h3>
-          </div>
-          <div class="kpi-container" style="grid-template-columns: repeat(3, 1fr);">
-            <div class="kpi-box">
-              <div class="kpi-label">EBITDA</div>
-              <div class="kpi-value">{{ dados.indicadores.ebitda }}</div>
-            </div>
-            <div class="kpi-box">
-              <div class="kpi-label">NCG</div>
-              <div class="kpi-value">{{ dados.indicadores.ncg }}</div>
-            </div>
-            <div class="kpi-box">
-              <div class="kpi-label">Liquidez Corrente</div>
-              <div class="kpi-value positive">{{ dados.indicadores.liquidez_corrente }}</div>
-            </div>
-            <div class="kpi-box">
-              <div class="kpi-label">Endividamento</div>
-              <div class="kpi-value">{{ dados.indicadores.endividamento }}</div>
-            </div>
-            <div class="kpi-box">
-              <div class="kpi-label">Margem Líquida</div>
-              <div class="kpi-value positive">{{ dados.indicadores.margem_liquida }}</div>
-            </div>
-            <div class="kpi-box">
-              <div class="kpi-label">ROA</div>
-              <div class="kpi-value positive">{{ dados.indicadores.roa }}</div>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   </div>
 
   <!-- ========================================
-       PÁGINA 6: ANÁLISE DE VENDAS
+       PÁGINA 7: ANÁLISE DE VENDAS (ATUALIZADA)
        ======================================== -->
   <div class="page-container">
     <div class="content-wrapper">
       <div class="header">
         <div class="header-left">
           <h1>Análise de Vendas</h1>
-          <div class="subtitle">Performance Comercial e Mix de Produtos</div>
+          <div class="subtitle">Top Produtos e Comparativos</div>
         </div>
         <div class="header-right">
           <div class="client-name">{{ dados.cliente_nome }}</div>
           <div class="period">{{ dados.periodo }}</div>
-          <div class="page-number">Página 6 de 8</div>
+          <div class="page-number">Página 7 de 9</div>
         </div>
       </div>
 
       <div class="row">
         <div class="col-half card">
           <div class="card-header">
-            <h3><i class="fas fa-trophy icon"></i>Top Produtos</h3>
-            <span class="badge badge-success">Mix Equilibrado</span>
+            <h3><i class="fas fa-trophy icon"></i>Top 5 - Faturamento</h3>
           </div>
           <div class="chart-container">
-            <img class="chart-img" src="data:image/png;base64,{{ graficos.vendas_pie }}" alt="Produtos" style="max-width: 75%;">
-          </div>
-          <div style="margin-top: auto; padding-top: 12px; border-top: 1px solid var(--border-color);">
-            <div style="font-size: 8pt; color: var(--text-secondary); text-align: center;">
-              Produto A lidera com 40% das vendas | Diversificação saudável
-            </div>
+            <img class="chart-img" src="data:image/png;base64,{{ graficos.top_produtos_faturamento }}" alt="Top Faturamento">
           </div>
         </div>
 
         <div class="col-half card">
           <div class="card-header">
-            <h3><i class="fas fa-calendar-alt icon"></i>Comparativo Anual (YoY)</h3>
-            <span class="badge badge-success">+18% vs 2023</span>
+            <h3><i class="fas fa-boxes icon"></i>Top 5 - Quantidade</h3>
           </div>
           <div class="chart-container">
-            <img class="chart-img" src="data:image/png;base64,{{ graficos.vendas_line }}" alt="YoY">
+            <img class="chart-img" src="data:image/png;base64,{{ graficos.top_produtos_quantidade }}" alt="Top Quantidade">
           </div>
-          <div style="margin-top: auto; padding-top: 12px; border-top: 1px solid var(--border-color);">
-            <div style="font-size: 8pt; color: var(--text-secondary); text-align: center;">
-              Crescimento consistente mês a mês | Tendência positiva mantida
-            </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-full card">
+          <div class="card-header">
+            <h3><i class="fas fa-calendar-alt icon"></i>Comparativo Anual (YoY)</h3>
+          </div>
+          <div class="chart-container" style="height: 200px;">
+            <img class="chart-img" src="data:image/png;base64,{{ graficos.vendas_line }}" alt="YoY">
           </div>
         </div>
       </div>
@@ -449,7 +522,7 @@
   </div>
 
   <!-- ========================================
-       PÁGINA 7: CUSTOS & FORNECEDORES
+       PÁGINA 8: CUSTOS & FORNECEDORES
        ======================================== -->
   <div class="page-container">
     <div class="content-wrapper">
@@ -461,7 +534,7 @@
         <div class="header-right">
           <div class="client-name">{{ dados.cliente_nome }}</div>
           <div class="period">{{ dados.periodo }}</div>
-          <div class="page-number">Página 7 de 8</div>
+          <div class="page-number">Página 8 de 9</div>
         </div>
       </div>
 
@@ -496,7 +569,7 @@
   </div>
 
   <!-- ========================================
-       PÁGINA 8: CONCLUSÕES E RECOMENDAÇÕES
+       PÁGINA 9: CONCLUSÕES E RECOMENDAÇÕES
        ======================================== -->
   <div class="page-container">
     <div class="content-wrapper">
@@ -508,7 +581,7 @@
         <div class="header-right">
           <div class="client-name">{{ dados.cliente_nome }}</div>
           <div class="period">{{ dados.periodo }}</div>
-          <div class="page-number">Página 8 de 8</div>
+          <div class="page-number">Página 9 de 9</div>
         </div>
       </div>
 
@@ -619,41 +692,6 @@
               </tr>
             </tbody>
           </table>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ========================================
-       PÁGINA 9: DÚVIDAS E CRÉDITOS
-       ======================================== -->
-  <div class="page-container">
-    <div class="content-wrapper" style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
-      <div style="margin-bottom: 40px;">
-        <div style="font-size: 14pt; font-weight: 700; color: var(--rps-primary); margin-bottom: 16px;">
-          <i class="fas fa-phone icon"></i>Dúvidas ou necessita de análises adicionais?
-        </div>
-        <div style="font-size: 11pt; color: var(--text-secondary); line-height: 1.6; margin-bottom: 24px;">
-          Entre em contato com sua equipe RPS
-        </div>
-        <div style="display: flex; flex-direction: column; gap: 8px; font-size: 10pt; color: var(--text-secondary);">
-          <div><i class="fas fa-envelope icon"></i>contato@rpscontabilidade.com.br</div>
-          <div><i class="fas fa-phone icon"></i>(11) 3000-0000</div>
-        </div>
-      </div>
-
-      <div style="border-top: 2px solid var(--border-color); padding-top: 30px; width: 100%;">
-        <div style="font-size: 9pt; color: var(--text-secondary); margin-bottom: 8px;">
-          <strong>Relatório preparado por:</strong>
-        </div>
-        <div style="font-size: 11pt; font-weight: 600; color: var(--rps-primary); margin-bottom: 20px;">
-          RPS Assessoria Contábil Administrativa
-        </div>
-        <div style="font-size: 8pt; color: var(--text-secondary); line-height: 1.8;">
-          <div>Especializada em Controladoria Estratégica e Análise Financeira</div>
-          <div style="margin-top: 12px; opacity: 0.7;">
-            Este relatório é confidencial e destinado exclusivamente ao cliente.
-          </div>
         </div>
       </div>
     </div>

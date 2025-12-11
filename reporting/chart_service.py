@@ -47,6 +47,15 @@ class ChartService:
         ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.25), ncol=legend_cols, frameon=False)
         sns.despine(left=True)
         return self._fig_to_b64(fig)
+        
+    def barras_horizontais(self, labels: List[str], values: List[float], color: str, title: str = "") -> str:
+        """Gráfico de barras horizontais simples para rankings (Top 5)"""
+        fig, ax = plt.subplots(figsize=(7, 3.5))
+        sns.barplot(x=values, y=labels, color=color, ax=ax, orient='h')
+        if title:
+            ax.set_title(title, fontsize=10, pad=10)
+        sns.despine(left=True, bottom=True)
+        return self._fig_to_b64(fig)
 
     def area_empilhada(self, df: pd.DataFrame, cores: List[str], alpha: float = 0.8, legend_cols: int = 2) -> str:
         fig, ax = plt.subplots(figsize=(7, 3.5))
@@ -60,6 +69,14 @@ class ChartService:
         fig, ax = plt.subplots(figsize=(7, 3.5))
         sns.lineplot(x=x, y=y1, marker="o", label=label1, ax=ax, color=self.tertiary)
         sns.lineplot(x=x, y=y2, marker="o", linestyle="--", label=label2, ax=ax, color=self.secondary)
+        ax.legend(frameon=False)
+        sns.despine()
+        return self._fig_to_b64(fig)
+        
+    def linhas_simples(self, x: Sequence, y: Sequence[float], label: str, color: str = None) -> str:
+        """Linha simples para evolução"""
+        fig, ax = plt.subplots(figsize=(7, 3.5))
+        sns.lineplot(x=x, y=y, marker="o", label=label, ax=ax, color=color or self.primary)
         ax.legend(frameon=False)
         sns.despine()
         return self._fig_to_b64(fig)

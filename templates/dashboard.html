@@ -97,22 +97,166 @@
       letter-spacing: 1px;
     }
 
-    /* Filtros */
-    .filters {
+    /* Área de Controle (Busca e Botões) */
+    .controls-area {
       background: white;
-      padding: 30px;
+      padding: 20px 30px;
       border-radius: 16px;
       margin-bottom: 30px;
       box-shadow: var(--shadow);
       display: flex;
-      flex-wrap: wrap;
-      gap: 16px 20px;
-      align-items: flex-end;
+      flex-direction: column;
+      gap: 20px;
     }
 
-    .filter-group {
-      flex: 1 1 220px;
-      min-width: 220px;
+    .search-row {
+      width: 100%;
+      position: relative;
+    }
+
+    .search-input-wrapper {
+      position: relative;
+      width: 100%;
+    }
+
+    .search-input-wrapper input {
+      width: 100%;
+      padding: 16px 20px;
+      padding-left: 50px;
+      border: 2px solid var(--border-color);
+      border-radius: 12px;
+      font-size: 12pt;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.3s;
+    }
+
+    .search-input-wrapper i {
+      position: absolute;
+      left: 18px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-secondary);
+      font-size: 14pt;
+    }
+
+    .search-input-wrapper input:focus {
+      outline: none;
+      border-color: var(--rps-primary);
+      box-shadow: 0 0 0 4px rgba(45, 90, 61, 0.1);
+    }
+
+    /* Autocomplete Dropdown */
+    .autocomplete-items {
+      position: absolute;
+      border: 1px solid var(--border-color);
+      border-top: none;
+      border-radius: 0 0 12px 12px;
+      z-index: 99;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background-color: white;
+      box-shadow: var(--shadow-md);
+      max-height: 300px;
+      overflow-y: auto;
+      display: none;
+    }
+
+    .autocomplete-items div {
+      padding: 12px 20px;
+      cursor: pointer;
+      border-bottom: 1px solid #f0f0f0;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .autocomplete-items div:last-child {
+      border-bottom: none;
+    }
+
+    .autocomplete-items div:hover {
+      background-color: #f8faf9;
+      color: var(--rps-primary);
+    }
+
+    .autocomplete-items div strong {
+      color: var(--rps-primary);
+    }
+
+    /* Botões de Ação na barra principal */
+    .actions-row {
+      display: flex;
+      justify-content: flex-end;
+      gap: 15px;
+    }
+
+    /* Modal de Filtros */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 30px;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 500px;
+      box-shadow: var(--shadow-lg);
+      animation: slideUp 0.3s ease;
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(20px);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 16px;
+    }
+
+    .modal-header h2 {
+      font-size: 18pt;
+      color: var(--rps-primary);
+    }
+
+    .close-modal {
+      background: none;
+      border: none;
+      font-size: 18pt;
+      cursor: pointer;
+      color: var(--text-secondary);
+    }
+
+    .filter-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 20px;
     }
 
     .filter-group label {
@@ -123,11 +267,9 @@
       margin-bottom: 8px;
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      white-space: nowrap;
     }
 
-    .filter-group select,
-    .filter-group input {
+    .filter-group select {
       width: 100%;
       padding: 12px 16px;
       border: 2px solid var(--border-color);
@@ -137,29 +279,19 @@
       transition: all 0.3s;
     }
 
-    .filter-group select:focus,
-    .filter-group input:focus {
+    .filter-group select:focus {
       outline: none;
       border-color: var(--rps-primary);
-      box-shadow: 0 0 0 3px rgba(45, 90, 61, 0.1);
     }
 
-    .inline-inputs {
+    .modal-footer {
+      margin-top: 30px;
       display: flex;
-      gap: 8px;
+      justify-content: flex-end;
+      gap: 12px;
     }
 
-    .inline-inputs input {
-      width: 100px;
-    }
-
-    .filter-actions {
-      flex: 0 0 auto;
-      display: flex;
-      gap: 10px;
-      align-items: flex-end;
-    }
-
+    /* Botões */
     .btn {
       padding: 12px 24px;
       border: none;
@@ -194,6 +326,11 @@
     .btn-secondary:hover {
       background: var(--rps-primary);
       color: white;
+    }
+
+    .btn-icon {
+      padding: 12px;
+      font-size: 14pt;
     }
 
     /* Grid de Clientes */
@@ -255,7 +392,6 @@
 
     .client-info {
       min-width: 0;
-      /* permite que o h3 faça ellipsis dentro do flex */
     }
 
     .client-info h3 {
@@ -266,38 +402,6 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      position: relative;
-      display: block;
-      max-width: 100%;
-      cursor: default;
-    }
-
-    .client-info h3::after {
-      content: attr(data-full-name);
-      position: absolute;
-      left: 0;
-      top: -34px;
-      padding: 6px 10px;
-      background: rgba(26, 51, 38, 0.9);
-      color: white;
-      border-radius: 8px;
-      box-shadow: none;
-      font-size: 9pt;
-      line-height: 1.2;
-      opacity: 0;
-      visibility: hidden;
-      transform: translateY(4px);
-      transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
-      white-space: normal;
-      max-width: 260px;
-      pointer-events: none;
-      z-index: 10;
-    }
-
-    .client-info h3:hover::after {
-      opacity: 1;
-      visibility: visible;
-      transform: translateY(0);
     }
 
     .client-info p {
@@ -359,16 +463,23 @@
     }
 
     /* Paginação */
+    .pagination-container {
+      background: white;
+      padding: 24px;
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      margin: 40px 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+
     .pagination {
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 16px;
-      margin: 40px 0;
-      padding: 24px;
-      background: white;
-      border-radius: 16px;
-      box-shadow: var(--shadow);
       flex-wrap: wrap;
     }
 
@@ -391,41 +502,33 @@
       background: var(--rps-primary-light);
       border-color: var(--rps-primary-light);
       transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(45, 90, 61, 0.3);
     }
 
     .pagination-info {
       font-size: 11pt;
       color: var(--text-primary);
-      white-space: nowrap;
     }
 
-    .batch-actions h3 {
-      font-size: 16pt;
-      font-weight: 600;
-      margin-bottom: 16px;
-      color: var(--text-primary);
+    .per-page-control {
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
 
-    .batch-actions p {
-      font-size: 10pt;
-      color: var(--text-secondary);
-      margin-bottom: 20px;
+    .per-page-control select {
+      padding: 8px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-family: 'Inter', sans-serif;
     }
 
     /* Footer */
     .footer {
       text-align: center;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
       padding: 32px 20px 20px;
       margin-top: 32px;
       color: var(--text-secondary);
       font-size: 9pt;
-      width: 100%;
-      gap: 6px;
     }
 
     /* Loading */
@@ -488,215 +591,335 @@
       </div>
     </div>
 
-    <!-- Filtros -->
-    <form class="filters" id="filtersForm" method="get">
+    <!-- Área de Controle -->
+    <form id="mainForm" method="get">
       <input type="hidden" name="page" id="pageInput" value="{{ current_page }}">
-      <div class="filter-group">
-        <label><i class="fas fa-calendar icon"></i>Período</label>
-        <select id="periodoSelect">
-          {% for p in periodos %}
-          <option value="{{ p }}" {% if loop.first %}selected{% endif %}>{{ p }}</option>
-          {% endfor %}
-        </select>
-      </div>
-      <div class="filter-group">
-        <label><i class="fas fa-search icon"></i>Buscar Cliente</label>
-        <input type="text" id="searchInput" name="q" value="{{ query }}" placeholder="Digite o ID ou nome...">
-      </div>
-      <div class="filter-group">
-        <label><i class="fas fa-sort icon"></i>Ordenar</label>
-        <select name="sort" id="sortSelect">
-          <option value="nome" {% if sort=='nome' %}selected{% endif %}>Nome</option>
-          <option value="codigo" {% if sort=='codigo' %}selected{% endif %}>Código</option>
-        </select>
-      </div>
-      <div class="filter-group">
-        <label><i class="fas fa-arrow-up icon"></i>Direção</label>
-        <select name="dir" id="dirSelect">
-          <option value="asc" {% if direction=='asc' %}selected{% endif %}>Crescente</option>
-          <option value="desc" {% if direction=='desc' %}selected{% endif %}>Decrescente</option>
-        </select>
-      </div>
-      <div class="filter-group">
-        <label><i class="fas fa-sliders-h icon"></i>Itens por página</label>
-        <select name="per_page" id="perPageSelect">
-          {% for n in [15, 30, 50] %}
-          <option value="{{ n }}" {% if items_per_page==n %}selected{% endif %}>{{ n }}</option>
-          {% endfor %}
-        </select>
-      </div>
-      <div class="filter-group">
-        <label><i class="fas fa-filter icon"></i>Cód. entre</label>
-        <div class="inline-inputs">
-          <input type="number" name="min_id" id="minId" value="{{ min_id or '' }}" placeholder="mín">
-          <input type="number" name="max_id" id="maxId" value="{{ max_id or '' }}" placeholder="máx">
-        </div>
-      </div>
-      <div class="filter-group filter-actions">
-        <button class="btn btn-primary" type="submit"><i class="fas fa-search icon"></i>Aplicar</button>
-        <button class="btn btn-secondary" type="button" onclick="resetFilters()"><i class="fas fa-redo icon"></i>Limpar</button>
-      </div>
-    </form>
 
-    <!-- Grid de Clientes -->
-    <div class="clients-grid" id="clientsGrid">
-      {% for empresa in empresas %}
-      <div class="client-card" data-client-id="{{ empresa.codigo }}">
-        <div class="client-header">
-          <div class="client-icon"><i class="fas fa-building"></i></div>
-          <div class="client-info">
-            <h3 class="client-name" data-full-name="{{ empresa.fantaisa or empresa.nome }}" title="{{ empresa.fantaisa or empresa.nome }}">{{ empresa.fantaisa or empresa.nome }}</h3>
-            <p>ID: {{ empresa.codigo }} • Status: Ativo ✓</p>
+      <!-- Campos ocultos que serão preenchidos pelo Modal -->
+      <input type="hidden" name="sort" id="hiddenSort" value="{{ sort }}">
+      <input type="hidden" name="dir" id="hiddenDir" value="{{ direction }}">
+      <input type="hidden" name="periodo" id="hiddenPeriodo" value="{{ periodos[0] }}">
+
+      <div class="controls-area">
+        <!-- Linha 1: Barra de Pesquisa (Full Width) -->
+        <div class="search-row">
+          <div class="search-input-wrapper">
+            <i class="fas fa-search"></i>
+            <input type="text" id="searchInput" name="q" value="{{ query }}" placeholder="Pesquise por nome, fantasia ou código..." autocomplete="off">
+            <div id="autocompleteList" class="autocomplete-items"></div>
           </div>
         </div>
 
-        <div class="client-stats">
-          <div class="mini-stat">
-            <div class="mini-stat-value">R$ 850K</div>
-            <div class="mini-stat-label">Vendas</div>
-          </div>
-          <div class="mini-stat">
-            <div class="mini-stat-value">12%</div>
-            <div class="mini-stat-label">Margem</div>
-          </div>
-          <div class="mini-stat">
-            <div class="mini-stat-value">+15%</div>
-            <div class="mini-stat-label">Crescimento</div>
-          </div>
-        </div>
-
-        <div class="client-actions">
-          <a href="/report/view/{{ empresa.codigo }}?periodo={{ periodos[0] }}" class="btn btn-secondary" title="Visualizar no navegador">
-            <i class="fas fa-eye icon"></i>Visualizar
-          </a>
-          <a href="/report/pdf/{{ empresa.codigo }}?periodo={{ periodos[0] }}" class="btn btn-primary" onclick="showLoading()" title="Baixar PDF">
-            <i class="fas fa-download icon"></i>PDF
-          </a>
+        <!-- Linha 2: Botões de Ação -->
+        <div class="actions-row">
+          <button type="button" class="btn btn-secondary" onclick="openFilters()">
+            <i class="fas fa-filter icon"></i>Filtros Avançados
+          </button>
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-check icon"></i>Aplicar
+          </button>
+          <button type="button" class="btn btn-secondary" onclick="resetFilters()">
+            <i class="fas fa-redo icon"></i>Limpar
+          </button>
         </div>
       </div>
-      {% endfor %}
-    </div>
 
-    <!-- Paginação -->
-    {% if total_pages > 1 %}
-    <div class="pagination">
-      {% if current_page > 1 %}
-      <a href="#" data-page="1" class="pagination-link" title="Primeira página"><i class="fas fa-step-backward"></i></a>
-      <a href="#" data-page="{{ current_page - 1 }}" class="pagination-link" title="Página anterior"><i class="fas fa-chevron-left"></i></a>
+      <!-- Modal de Filtros -->
+      <div class="modal-overlay" id="filterModal">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h2><i class="fas fa-sliders-h icon"></i>Configurar Filtros</h2>
+            <button type="button" class="close-modal" onclick="closeFilters()">&times;</button>
+          </div>
+
+          <div class="filter-grid">
+            <div class="filter-group">
+              <label><i class="fas fa-calendar icon"></i>Período</label>
+              <!-- Este select atualiza o hidden input ao fechar/aplicar -->
+              <select id="modalPeriodoSelect" onchange="document.getElementById('hiddenPeriodo').value = this.value">
+                {% for p in periodos %}
+                <option value="{{ p }}" {% if request.args.get('periodo')==p or (not request.args.get('periodo') and loop.first) %}selected{% endif %}>{{ p }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="filter-group">
+              <label><i class="fas fa-sort icon"></i>Ordenar por</label>
+              <select id="modalSortSelect" onchange="document.getElementById('hiddenSort').value = this.value">
+                <option value="nome" {% if sort=='nome' %}selected{% endif %}>Nome</option>
+                <option value="codigo" {% if sort=='codigo' %}selected{% endif %}>Código</option>
+              </select>
+            </div>
+
+            <div class="filter-group">
+              <label><i class="fas fa-arrow-up icon"></i>Direção</label>
+              <select id="modalDirSelect" onchange="document.getElementById('hiddenDir').value = this.value">
+                <option value="asc" {% if direction=='asc' %}selected{% endif %}>Crescente (A-Z)</option>
+                <option value="desc" {% if direction=='desc' %}selected{% endif %}>Decrescente (Z-A)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="closeFilters()">Cancelar</button>
+            <button type="button" class="btn btn-primary" onclick="closeFilters(); document.getElementById('mainForm').submit();">Aplicar Filtros</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Paginação e Itens por Página (no final do form) -->
+      {% if total_pages > 0 %}
+      <div class="clients-grid">
+        {% for empresa in empresas %}
+        <div class="client-card">
+          <div class="client-header">
+            <div class="client-icon"><i class="fas fa-building"></i></div>
+            <div class="client-info">
+              <h3 title="{{ empresa.fantaisa or empresa.nome }}">{{ empresa.fantaisa or empresa.nome }}</h3>
+              <p>ID: {{ empresa.codigo }} • Status: Ativo ✓</p>
+            </div>
+          </div>
+
+          <div class="client-stats">
+            <div class="mini-stat">
+              <div class="mini-stat-value">R$ --</div>
+              <div class="mini-stat-label">Vendas</div>
+            </div>
+            <div class="mini-stat">
+              <div class="mini-stat-value">--</div>
+              <div class="mini-stat-label">Margem</div>
+            </div>
+            <div class="mini-stat">
+              <div class="mini-stat-value">--</div>
+              <div class="mini-stat-label">Trend</div>
+            </div>
+          </div>
+
+          <div class="client-actions">
+            <!-- Usamos um pequeno script inline para garantir que o periodo atual seja passado -->
+            <a href="#" onclick="goToReport('/report/view/{{ empresa.codigo }}')" class="btn btn-secondary">
+              <i class="fas fa-eye icon"></i>Visualizar
+            </a>
+            <a href="#" onclick="goToReport('/report/pdf/{{ empresa.codigo }}'); showLoading();" class="btn btn-primary">
+              <i class="fas fa-download icon"></i>PDF
+            </a>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <div class="pagination-container">
+        <div class="pagination">
+          {% if current_page > 1 %}
+          <a href="#" onclick="changePage(1)" class="pagination-link"><i class="fas fa-step-backward"></i></a>
+          <a href="#" onclick="changePage({{ current_page - 1 }})" class="pagination-link"><i class="fas fa-chevron-left"></i></a>
+          {% endif %}
+
+          <div class="pagination-info">
+            Página <strong>{{ current_page }}</strong> de <strong>{{ total_pages }}</strong>
+          </div>
+
+          {% if current_page < total_pages %} <a href="#" onclick="changePage({{ current_page + 1 }})" class="pagination-link"><i class="fas fa-chevron-right"></i></a>
+            <a href="#" onclick="changePage({{ total_pages }})" class="pagination-link"><i class="fas fa-step-forward"></i></a>
+            {% endif %}
+        </div>
+
+        <div class="per-page-control">
+          <label for="perPageSelect" style="font-size: 10pt; color: var(--text-secondary); font-weight: 600;">Itens por página:</label>
+          <select name="per_page" id="perPageSelect" onchange="this.form.submit()">
+            {% for n in [15, 30, 50, 100] %}
+            <option value="{{ n }}" {% if items_per_page==n %}selected{% endif %}>{{ n }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+      {% else %}
+      <div style="text-align: center; padding: 50px;">
+        <h3>Nenhum cliente encontrado.</h3>
+        <p>Tente ajustar os filtros de busca.</p>
+      </div>
       {% endif %}
 
-      <div class="pagination-info">
-        Página <strong>{{ current_page }}</strong> de <strong>{{ total_pages }}</strong>
-        <span style="margin-left: 16px; color: var(--text-secondary);">{{ total_empresas }} empresas</span>
+      <!-- Ações em Lote (exibidas apenas se houver resultados) -->
+      {% if total_pages > 0 %}
+      <div class="batch-actions">
+        <h3><i class="fas fa-box icon"></i>Geração em Lote</h3>
+        <p>Baixe todos os relatórios desta página em um arquivo ZIP</p>
+        <button type="button" class="btn btn-primary" onclick="downloadBatch()" style="font-size: 12pt; padding: 16px 32px;">
+          <i class="fas fa-download icon"></i>Baixar Relatórios da Página (ZIP)
+        </button>
       </div>
+      {% endif %}
 
-      {% if current_page < total_pages %} <a href="#" data-page="{{ current_page + 1 }}" class="pagination-link" title="Próxima página"><i class="fas fa-chevron-right"></i></a>
-        <a href="#" data-page="{{ total_pages }}" class="pagination-link" title="Última página"><i class="fas fa-step-forward"></i></a>
-        {% endif %}
-    </div>
-    {% endif %}
+    </form>
 
-    <!-- Ações em Lote -->
-    <div class="batch-actions">
-      <h3><i class="fas fa-box icon"></i>Geração em Lote</h3>
-      <p>Baixe todos os relatórios de uma vez em um arquivo ZIP</p>
-      <a href="/report/pdf-batch?ids={{ ids_pagina }}&periodo={{ periodos[0] }}" class="btn btn-primary" onclick="showLoading()" style="font-size: 12pt; padding: 16px 32px;">
-        <i class="fas fa-download icon"></i>Baixar Relatórios da Página (ZIP)
-      </a>
-    </div>
-
-    <!-- Footer -->
     <div class="footer">
       <p>RPS Contabilidade © 2025 | Excelência e Precisão em Números</p>
-      <p style="margin-top: 8px; font-size: 8pt;">
-        Powered by Flask + WeasyPrint | Design System v2.0
-      </p>
     </div>
   </div>
 
   <script>
-    // Loading overlay
+    // --- Lógica do Modal ---
+    const filterModal = document.getElementById('filterModal');
+
+    function openFilters() {
+      filterModal.classList.add('active');
+    }
+
+    function closeFilters() {
+      filterModal.classList.remove('active');
+    }
+
+    // Fechar modal ao clicar fora
+    filterModal.addEventListener('click', (e) => {
+      if (e.target === filterModal) closeFilters();
+    });
+
+    // --- Lógica de Navegação e Submit ---
+    const mainForm = document.getElementById('mainForm');
+    const pageInput = document.getElementById('pageInput');
+    const searchInput = document.getElementById('searchInput');
+
+    function changePage(pageNum) {
+      pageInput.value = pageNum;
+      mainForm.submit();
+    }
+
+    function resetFilters() {
+      searchInput.value = '';
+      document.getElementById('hiddenSort').value = 'nome';
+      document.getElementById('hiddenDir').value = 'asc';
+      document.getElementById('modalSortSelect').value = 'nome';
+      document.getElementById('modalDirSelect').value = 'asc';
+      pageInput.value = 1;
+      mainForm.submit();
+    }
+
+    function goToReport(baseUrl) {
+      const periodo = document.getElementById('hiddenPeriodo').value;
+      window.location.href = `${baseUrl}?periodo=${encodeURIComponent(periodo)}`;
+    }
+
+    function downloadBatch() {
+      const periodo = document.getElementById('hiddenPeriodo').value;
+      const ids = "{{ ids_pagina }}";
+      if (ids) {
+        showLoading();
+        window.location.href = `/report/pdf-batch?ids=${ids}&periodo=${encodeURIComponent(periodo)}`;
+      }
+    }
+
     function showLoading() {
       document.getElementById('loading').classList.add('active');
       setTimeout(() => {
         document.getElementById('loading').classList.remove('active');
-      }, 3000);
+      }, 5000); // Timeout de segurança
     }
 
-    const searchInput = document.getElementById('searchInput');
-    const filtersForm = document.getElementById('filtersForm');
-    const pageInput = document.getElementById('pageInput');
-    const periodoSelect = document.getElementById('periodoSelect');
-    const perPageSelect = document.getElementById('perPageSelect');
+    // --- Autocomplete Lógica ---
+    let currentFocus = -1;
 
-    function submitFilters() {
-      pageInput.value = 1; // reset para página 1 ao aplicar filtros
-      filtersForm.submit();
-    }
+    searchInput.addEventListener('input', function (e) {
+      const val = this.value;
+      closeAllLists();
+      if (!val) return false;
+      currentFocus = -1;
 
-    // Submeter ao pressionar Enter no campo de busca
-    searchInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
+      const listDiv = document.getElementById("autocompleteList");
+      listDiv.style.display = "block";
+      listDiv.innerHTML = '<div style="cursor: default; color: #999;">Buscando...</div>';
+
+      // Fetch API para buscar clientes
+      fetch('/api/clientes')
+        .then(response => response.json())
+        .then(data => {
+          const arr = data.clientes;
+          listDiv.innerHTML = ''; // Limpar "Buscando..."
+
+          let matches = 0;
+          for (let i = 0; i < arr.length; i++) {
+            const nome = arr[i].nome || '';
+            const fantasia = arr[i].fantasia || '';
+            const codigo = String(arr[i].codigo);
+            const searchStr = val.toUpperCase();
+
+            if (nome.toUpperCase().includes(searchStr) ||
+              fantasia.toUpperCase().includes(searchStr) ||
+              codigo.includes(searchStr)) {
+
+              matches++;
+              if (matches > 10) break; // Limite de sugestões
+
+              const itemDiv = document.createElement("DIV");
+              const displayText = fantasia || nome;
+
+              // Highlight match logic (simplificada)
+              itemDiv.innerHTML = `<strong>${displayText}</strong> <span style='font-size: 0.8em; color: #666;'>(${codigo})</span>`;
+              itemDiv.innerHTML += `<input type='hidden' value='${displayText}'>`;
+
+              itemDiv.addEventListener("click", function (e) {
+                searchInput.value = this.getElementsByTagName("input")[0].value;
+                closeAllLists();
+                mainForm.submit(); // Submeter ao selecionar
+              });
+              listDiv.appendChild(itemDiv);
+            }
+          }
+          if (matches === 0) {
+            listDiv.innerHTML = '<div style="cursor: default; color: #999;">Nenhum resultado</div>';
+          }
+        })
+        .catch(err => {
+          console.error(err);
+          listDiv.style.display = "none";
+        });
+    });
+
+    searchInput.addEventListener("keydown", function (e) {
+      let x = document.getElementById("autocompleteList");
+      if (x) x = x.getElementsByTagName("div");
+      if (e.keyCode == 40) { // DOWN
+        currentFocus++;
+        addActive(x);
+      } else if (e.keyCode == 38) { // UP
+        currentFocus--;
+        addActive(x);
+      } else if (e.keyCode == 13) { // ENTER
         e.preventDefault();
-        submitFilters();
+        if (currentFocus > -1) {
+          if (x) x[currentFocus].click();
+        } else {
+          mainForm.submit();
+        }
       }
     });
 
-    // Mudança em selects principais
-    [perPageSelect, document.getElementById('sortSelect'), document.getElementById('dirSelect')].forEach(sel => {
-      sel.addEventListener('change', submitFilters);
-    });
-
-    // Paginação preservando filtros
-    document.querySelectorAll('.pagination-link').forEach(link => {
-      link.addEventListener('click', (e) => {
-        e.preventDefault();
-        const page = e.currentTarget.dataset.page;
-        pageInput.value = page;
-        filtersForm.submit();
-      });
-    });
-
-    // Atualizar período nos links
-    periodoSelect.addEventListener('change', (e) => {
-      const periodo = e.target.value;
-      document.querySelectorAll('.client-actions a, .batch-actions a').forEach(link => {
-        const url = new URL(link.href);
-        url.searchParams.set('periodo', periodo);
-        link.href = url.toString();
-      });
-    });
-
-    // Reset filters
-    function resetFilters() {
-      searchInput.value = '';
-      document.getElementById('minId').value = '';
-      document.getElementById('maxId').value = '';
-      document.getElementById('sortSelect').value = 'nome';
-      document.getElementById('dirSelect').value = 'asc';
-      perPageSelect.value = 15;
-      pageInput.value = 1;
-      filtersForm.submit();
+    function addActive(x) {
+      if (!x) return false;
+      removeActive(x);
+      if (currentFocus >= x.length) currentFocus = 0;
+      if (currentFocus < 0) currentFocus = (x.length - 1);
+      x[currentFocus].style.backgroundColor = "#e8ece9";
     }
 
-    // Animações de entrada
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry, index) => {
-        if (entry.isIntersecting) {
-          setTimeout(() => {
-            entry.target.style.opacity = '1';
-            entry.target.style.transform = 'translateY(0)';
-          }, index * 50);
-        }
-      });
+    function removeActive(x) {
+      for (let i = 0; i < x.length; i++) {
+        x[i].style.backgroundColor = "";
+      }
+    }
+
+    function closeAllLists(elmnt) {
+      const x = document.getElementById("autocompleteList");
+      if (elmnt != searchInput && x) {
+        x.innerHTML = "";
+        x.style.display = "none";
+      }
+    }
+
+    document.addEventListener("click", function (e) {
+      closeAllLists(e.target);
     });
 
-    document.querySelectorAll('.client-card').forEach(card => {
-      card.style.opacity = '0';
-      card.style.transform = 'translateY(20px)';
-      card.style.transition = 'all 0.5s ease';
-      observer.observe(card);
-    });
   </script>
 </body>
 
