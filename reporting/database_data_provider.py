@@ -143,13 +143,31 @@ class DatabaseDataProvider(DataProvider):
         # 2. Estudo Tributário (Comparativo Presumido vs Real)
         # Simulação: Lucro Presumido geralmente paga menos se margem real > presunção
         # Aqui simulamos que o Real seria mais caro para justificar o planejamento
-        imposto_real = vendas * 0.08 # Exemplo fictício
-        imposto_presumido = vendas * 0.05
+        
+        # Cálculo Lucro Real (sobre lucro contábil efetivo)
+        base_lucro_real = lucro  # Lucro contábil efetivo
+        irpj_real = base_lucro_real * 0.15  # IRPJ 15%
+        if base_lucro_real > 60000:  # Adicional de 10% sobre o que exceder R$ 60k
+            irpj_real += (base_lucro_real - 60000) * 0.10
+        csll_real = base_lucro_real * 0.09  # CSLL 9%
+        imposto_real = irpj_real + csll_real
+        
+        # Cálculo Lucro Presumido (sobre presunção de receita)
+        # Presunção de 8% para serviços ou 32% para comércio - usando 8% aqui
+        base_presumida = vendas * 0.08
+        irpj_presumido = base_presumida * 0.15  # IRPJ 15%
+        csll_presumido = base_presumida * 0.09  # CSLL 9%
+        imposto_presumido = irpj_presumido + csll_presumido
+        
         economia = imposto_real - imposto_presumido
         
         estudo_tributario = {
             "lucro_real_valor": self._fmt_brl(imposto_real),
+            "lucro_real_irpj": self._fmt_brl(irpj_real),
+            "lucro_real_csll": self._fmt_brl(csll_real),
             "lucro_presumido_valor": self._fmt_brl(imposto_presumido),
+            "lucro_presumido_irpj": self._fmt_brl(irpj_presumido),
+            "lucro_presumido_csll": self._fmt_brl(csll_presumido),
             "economia_anual": self._fmt_brl(economia * 12), # Projeção anual
             "economia_mensal": self._fmt_brl(economia),
             "recomendacao": "Lucro Presumido" if imposto_presumido < imposto_real else "Lucro Real"

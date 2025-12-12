@@ -199,21 +199,35 @@
       z-index: 1001;
     }
 
-    /* Controles de Slide (Setas) */
+    /* Controles de Slide (Setas) - Discretos e Centralizados */
     .slide-controls {
       position: fixed;
-      bottom: 30px;
-      right: 100px;
-      /* Ao lado do botão de fullscreen */
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
       display: flex;
-      gap: 10px;
+      gap: 24px;
       z-index: 1001;
+      align-items: center;
     }
 
     .btn-slide-nav {
       width: 40px;
       height: 40px;
       font-size: 14px;
+      background-color: rgba(255, 255, 255, 0.15) !important;
+      color: rgba(45, 90, 61, 0.3) !important;
+      border: none;
+      box-shadow: none !important;
+      transition: all 0.3s ease;
+      position: relative !important;
+    }
+
+    .btn-slide-nav:hover {
+      background-color: rgba(45, 90, 61, 0.2) !important;
+      color: var(--rps-primary) !important;
+      box-shadow: 0 4px 12px rgba(45, 90, 61, 0.2) !important;
+      transform: scale(1.1);
     }
 
     .apex-chart-container {
@@ -277,6 +291,32 @@
 
     body.fullscreen-mode .nav-dot-container.active .nav-bar {
       background-color: var(--rps-accent);
+    }
+
+    /* Ocultar controles quando inativo em fullscreen */
+    body.fullscreen-mode.hide-controls .sidenav-minimal,
+    body.fullscreen-mode.hide-controls .slide-controls,
+    body.fullscreen-mode.hide-controls .btn-presentation,
+    body.fullscreen-mode.hide-controls .btn-period-settings {
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.5s ease;
+    }
+
+    body.fullscreen-mode .sidenav-minimal,
+    body.fullscreen-mode .slide-controls,
+    body.fullscreen-mode .btn-presentation,
+    body.fullscreen-mode .btn-period-settings {
+      transition: opacity 0.5s ease;
+    }
+
+    /* Ocultar cursor do mouse em fullscreen quando inativo */
+    body.fullscreen-mode.hide-controls {
+      cursor: none;
+    }
+
+    body.fullscreen-mode {
+      cursor: auto;
     }
 
     /* === ÍCONE DE ENGRENAGEM PARA FILTROS DE PERÍODO === */
@@ -585,9 +625,11 @@
       }
 
       .slide-controls {
-        bottom: 20px;
-        right: 70px;
-        gap: 5px;
+        bottom: 30px;
+        right: auto;
+        left: 50%;
+        transform: translateX(-50%);
+        gap: 12px;
       }
 
       .btn-slide-nav {
@@ -693,8 +735,11 @@
       }
 
       .slide-controls {
-        bottom: 15px;
-        right: 60px;
+        bottom: 20px;
+        right: auto;
+        left: 50%;
+        transform: translateX(-50%);
+        gap: 10px;
       }
 
       .btn-floating {
@@ -805,9 +850,25 @@
         <div class="nav-bar"></div>
         <div class="nav-tooltip">Resumo Executivo</div>
       </a>
+      <a onclick="goToSlide('ativos')" class="nav-dot-container" id="nav-ativos">
+        <div class="nav-bar"></div>
+        <div class="nav-tooltip">Análise de Ativos</div>
+      </a>
+      <a onclick="goToSlide('passivos')" class="nav-dot-container" id="nav-passivos">
+        <div class="nav-bar"></div>
+        <div class="nav-tooltip">Análise de Passivos</div>
+      </a>
       <a onclick="goToSlide('custos')" class="nav-dot-container" id="nav-custos">
         <div class="nav-bar"></div>
         <div class="nav-tooltip">Custos & Fornecedores</div>
+      </a>
+      <a onclick="goToSlide('rentabilidade')" class="nav-dot-container" id="nav-rentabilidade">
+        <div class="nav-bar"></div>
+        <div class="nav-tooltip">Rentabilidade & Patrimônio</div>
+      </a>
+      <a onclick="goToSlide('vendas')" class="nav-dot-container" id="nav-vendas">
+        <div class="nav-bar"></div>
+        <div class="nav-tooltip">Análise de Vendas</div>
       </a>
       <a onclick="goToSlide('tributario')" class="nav-dot-container" id="nav-tributario">
         <div class="nav-bar"></div>
@@ -817,25 +878,9 @@
         <div class="nav-bar"></div>
         <div class="nav-tooltip">Distribuição de Lucros</div>
       </a>
-      <a onclick="goToSlide('ativos')" class="nav-dot-container" id="nav-ativos">
-        <div class="nav-bar"></div>
-        <div class="nav-tooltip">Análise de Ativos</div>
-      </a>
-      <a onclick="goToSlide('passivos')" class="nav-dot-container" id="nav-passivos">
-        <div class="nav-bar"></div>
-        <div class="nav-tooltip">Análise de Passivos</div>
-      </a>
-      <a onclick="goToSlide('rentabilidade')" class="nav-dot-container" id="nav-rentabilidade">
-        <div class="nav-bar"></div>
-        <div class="nav-tooltip">Rentabilidade</div>
-      </a>
-      <a onclick="goToSlide('vendas')" class="nav-dot-container" id="nav-vendas">
-        <div class="nav-bar"></div>
-        <div class="nav-tooltip">Vendas</div>
-      </a>
       <a onclick="goToSlide('conclusao')" class="nav-dot-container" id="nav-conclusao">
         <div class="nav-bar"></div>
-        <div class="nav-tooltip">Conclusão</div>
+        <div class="nav-tooltip">Conclusões & Recomendações</div>
       </a>
       <a onclick="goToSlide('agradecimentos')" class="nav-dot-container" id="nav-agradecimentos">
         <div class="nav-bar"></div>
@@ -852,11 +897,11 @@
 
     <!-- Controles de Slide (Setas) -->
     <div class="slide-controls">
-      <button onclick="prevSlide()" class="btn-floating btn-slide-nav" title="Anterior (Seta Cima/Esq)">
-        <i class="fas fa-chevron-up"></i>
+      <button onclick="prevSlide()" class="btn-floating btn-slide-nav" title="Anterior (Seta Esquerda)">
+        <i class="fas fa-chevron-left"></i>
       </button>
-      <button onclick="nextSlide()" class="btn-floating btn-slide-nav" title="Próximo (Seta Baixo/Dir)">
-        <i class="fas fa-chevron-down"></i>
+      <button onclick="nextSlide()" class="btn-floating btn-slide-nav" title="Próximo (Seta Direita)">
+        <i class="fas fa-chevron-right"></i>
       </button>
     </div>
 
@@ -1354,37 +1399,80 @@
             <div class="page-number">Página 7 de 9</div>
           </div>
         </div>
-        <div class="row">
-          <div class="col-half comparison-box">
+        <div class="row" style="flex: 0 0 auto; margin-bottom: 18px;">
+          <div class="col-half comparison-box" style="height: auto;">
             <div class="comparison-label">Custo no Lucro Real</div>
             <div class="comparison-value" style="color: var(--text-secondary);">{{ dados.estudo_tributario.lucro_real_valor }}</div>
             <div style="font-size: 8pt; color: var(--text-secondary);">Baseado na apuração contábil efetiva</div>
           </div>
-          <div class="col-half comparison-box" style="background: #f0f9f4; border-color: var(--success-color);">
+          <div class="col-half comparison-box" style="background: #f0f9f4; border-color: var(--success-color); height: auto;">
             <div class="comparison-label">Custo no Lucro Presumido</div>
             <div class="comparison-value" style="color: var(--success-color);">{{ dados.estudo_tributario.lucro_presumido_valor }}</div>
             <div style="font-size: 8pt; color: var(--text-secondary);">Baseado nas alíquotas de presunção</div>
           </div>
         </div>
-        <div class="row">
-          <div class="col-full card">
-            <div class="card-header">
+        <div class="row" style="flex: 1; margin-bottom: 0;">
+          <div class="col-full card" style="display: flex; flex-direction: column;">
+            <div class="card-header" style="flex: 0 0 auto;">
               <h3><i class="fas fa-calculator icon"></i>Análise de Economia Tributária</h3>
             </div>
-            <div style="display: flex; justify-content: space-around; padding: 20px; text-align: center;">
-              <div>
-                <div style="font-size: 10pt; color: var(--text-secondary);">Economia Mensal Estimada</div>
-                <div style="font-size: 20pt; font-weight: 700; color: var(--rps-primary);">{{ dados.estudo_tributario.economia_mensal }}</div>
+            <div style="flex: 1; display: flex; flex-direction: column; overflow-y: auto;">
+              <div style="flex: 1; display: flex; flex-direction: column; gap: 15px; overflow-y: auto; padding-bottom: 10px;">
+                <div style="display: flex; justify-content: space-around; padding: 20px; text-align: center; background: #f8faf9; border-radius: 8px;">
+                  <div>
+                    <div style="font-size: 10pt; color: var(--text-secondary);">Economia Mensal Estimada</div>
+                    <div style="font-size: 20pt; font-weight: 700; color: var(--rps-primary);">{{ dados.estudo_tributario.economia_mensal }}</div>
+                  </div>
+                  <div style="width: 1px; background: var(--border-color);"></div>
+                  <div>
+                    <div style="font-size: 10pt; color: var(--text-secondary);">Projeção Anual</div>
+                    <div style="font-size: 20pt; font-weight: 700; color: var(--success-color);">{{ dados.estudo_tributario.economia_anual }}</div>
+                  </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                  <div style="padding: 15px; background: #fff5f5; border-radius: 8px; border-left: 4px solid #e63946;">
+                    <h4 style="font-size: 10pt; margin-bottom: 10px; color: var(--text-primary);"><i class="fas fa-chart-line icon"></i>Lucro Real</h4>
+                    <div style="font-size: 9pt; line-height: 1.6;">
+                      <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                        <span style="color: var(--text-secondary);">IRPJ (15% + Adicional):</span>
+                        <strong>{{ dados.estudo_tributario.lucro_real_irpj }}</strong>
+                      </div>
+                      <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                        <span style="color: var(--text-secondary);">CSLL (9%):</span>
+                        <strong>{{ dados.estudo_tributario.lucro_real_csll }}</strong>
+                      </div>
+                      <div style="border-top: 1px solid var(--border-color); margin-top: 8px; padding-top: 8px; display: flex; justify-content: space-between;">
+                        <span style="color: var(--text-secondary);">Total:</span>
+                        <strong style="color: #e63946; font-size: 11pt;">{{ dados.estudo_tributario.lucro_real_valor }}</strong>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style="padding: 15px; background: #f0f9f4; border-radius: 8px; border-left: 4px solid var(--success-color);">
+                    <h4 style="font-size: 10pt; margin-bottom: 10px; color: var(--text-primary);"><i class="fas fa-chart-bar icon"></i>Lucro Presumido</h4>
+                    <div style="font-size: 9pt; line-height: 1.6;">
+                      <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                        <span style="color: var(--text-secondary);">IRPJ (15% sobre presunção):</span>
+                        <strong>{{ dados.estudo_tributario.lucro_presumido_irpj }}</strong>
+                      </div>
+                      <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                        <span style="color: var(--text-secondary);">CSLL (9% sobre presunção):</span>
+                        <strong>{{ dados.estudo_tributario.lucro_presumido_csll }}</strong>
+                      </div>
+                      <div style="border-top: 1px solid var(--border-color); margin-top: 8px; padding-top: 8px; display: flex; justify-content: space-between;">
+                        <span style="color: var(--text-secondary);">Total:</span>
+                        <strong style="color: var(--success-color); font-size: 11pt;">{{ dados.estudo_tributario.lucro_presumido_valor }}</strong>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div style="width: 1px; background: var(--border-color);"></div>
-              <div>
-                <div style="font-size: 10pt; color: var(--text-secondary);">Projeção Anual</div>
-                <div style="font-size: 20pt; font-weight: 700; color: var(--success-color);">{{ dados.estudo_tributario.economia_anual }}</div>
+
+              <div style="flex: 0 0 auto; padding: 15px; background: #e8f4fd; border-radius: 8px; border-left: 4px solid var(--info-color); margin-top: 10px;">
+                <strong><i class="fas fa-lightbulb icon"></i>Recomendação:</strong>
+                Com base nos dados atuais, o regime de <strong>{{ dados.estudo_tributario.recomendacao }}</strong> apresenta a melhor eficiência tributária para a empresa.
               </div>
-            </div>
-            <div style="margin-top: 20px; padding: 15px; background: #e8f4fd; border-radius: 8px; border-left: 4px solid var(--info-color);">
-              <strong><i class="fas fa-lightbulb icon"></i>Recomendação:</strong>
-              Com base nos dados atuais, o regime de <strong>{{ dados.estudo_tributario.recomendacao }}</strong> apresenta a melhor eficiência tributária para a empresa.
             </div>
           </div>
         </div>
@@ -1405,41 +1493,43 @@
             <div class="page-number">Página 8 de 9</div>
           </div>
         </div>
-        <div class="row">
-          <div class="col-full card" style="background: linear-gradient(135deg, var(--rps-primary) 0%, var(--rps-primary-light) 100%); color: white;">
-            <div style="text-align: center; padding: 20px;">
+        <div class="row" style="flex: 0 0 auto; margin-bottom: 18px;">
+          <div class="col-full card" style="background: linear-gradient(135deg, var(--rps-primary) 0%, var(--rps-primary-light) 100%); color: white; height: auto; padding: 20px;">
+            <div style="text-align: center;">
               <h2 style="font-size: 14pt; margin-bottom: 10px; opacity: 0.9;">Total Distribuído no Período</h2>
               <div style="font-size: 36pt; font-weight: 700; font-family: 'Poppins', sans-serif;">{{ dados.distribuicao_lucros.total }}</div>
             </div>
           </div>
         </div>
-        <div class="row">
-          <div class="col-full card">
-            <div class="card-header">
+        <div class="row" style="flex: 1; margin-bottom: 0;">
+          <div class="col-full card" style="display: flex; flex-direction: column;">
+            <div class="card-header" style="flex: 0 0 auto;">
               <h3><i class="fas fa-users icon"></i>Detalhamento por Sócio</h3>
             </div>
-            <table style="font-size: 11pt;">
-              <thead>
-                <tr>
-                  <th style="padding: 16px;">Sócio</th>
-                  <th style="padding: 16px; text-align: center;">Participação</th>
-                  <th style="padding: 16px; text-align: right;">Valor Recebido</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for socio in dados.distribuicao_lucros.socios %}
-                <tr>
-                  <td style="padding: 16px; font-weight: 600;">{{ socio.nome }}</td>
-                  <td style="padding: 16px; text-align: center;">
-                    <span class="badge badge-info">{{ socio.participacao }}</span>
-                  </td>
-                  <td style="padding: 16px; text-align: right; color: var(--rps-primary); font-weight: 700;">
-                    {{ socio.valor }}
-                  </td>
-                </tr>
-                {% endfor %}
-              </tbody>
-            </table>
+            <div style="flex: 1; overflow-y: auto;">
+              <table style="font-size: 11pt; width: 100%;">
+                <thead>
+                  <tr>
+                    <th style="padding: 16px;">Sócio</th>
+                    <th style="padding: 16px; text-align: center;">Participação</th>
+                    <th style="padding: 16px; text-align: right;">Valor Recebido</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for socio in dados.distribuicao_lucros.socios %}
+                  <tr>
+                    <td style="padding: 16px; font-weight: 600;">{{ socio.nome }}</td>
+                    <td style="padding: 16px; text-align: center;">
+                      <span class="badge badge-info">{{ socio.participacao }}</span>
+                    </td>
+                    <td style="padding: 16px; text-align: right; color: var(--rps-primary); font-weight: 700;">
+                      {{ socio.valor }}
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
@@ -1684,7 +1774,7 @@
       }
     });
 
-    const pageIds = ['capa', 'resumo', 'custos', 'tributario', 'distribuicao', 'ativos', 'passivos', 'rentabilidade', 'vendas', 'conclusao', 'agradecimentos'];
+    const pageIds = ['capa', 'resumo', 'ativos', 'passivos', 'custos', 'rentabilidade', 'vendas', 'tributario', 'distribuicao', 'conclusao', 'agradecimentos'];
     let currentIndex = 0;
 
     function goToSlide(id) {
@@ -1722,29 +1812,79 @@
       }
     }
 
-    // Controle por Teclado
+    // Controle por Teclado (não deve mostrar os controles em fullscreen)
     document.addEventListener('keydown', (e) => {
       if (e.key === "ArrowDown" || e.key === "ArrowRight") {
         e.preventDefault();
         nextSlide();
+        // Não resetar o timer ao usar teclado em fullscreen
       } else if (e.key === "ArrowUp" || e.key === "ArrowLeft") {
         e.preventDefault();
         prevSlide();
+        // Não resetar o timer ao usar teclado em fullscreen
       }
     });
 
     // Toggle Fullscreen
+    let hideControlsTimer = null;
+
     function toggleFullScreen() {
       if (!document.fullscreenElement) {
         document.body.classList.add('fullscreen-mode');
         document.documentElement.requestFullscreen().catch(err => console.log(err));
+        startHideControlsTimer();
       } else {
         document.exitFullscreen();
         document.body.classList.remove('fullscreen-mode');
+        clearHideControlsTimer();
       }
     }
+
     document.addEventListener('fullscreenchange', () => {
-      if (!document.fullscreenElement) document.body.classList.remove('fullscreen-mode');
+      if (!document.fullscreenElement) {
+        document.body.classList.remove('fullscreen-mode');
+        clearHideControlsTimer();
+      }
+    });
+
+    // Gerenciar ocultação de controles após inatividade
+    function startHideControlsTimer() {
+      // Mostrar controles imediatamente
+      document.body.classList.remove('hide-controls');
+
+      // Limpar timer anterior se existir
+      if (hideControlsTimer) {
+        clearTimeout(hideControlsTimer);
+      }
+
+      // Iniciar novo timer para ocultar após 200ms
+      hideControlsTimer = setTimeout(() => {
+        if (document.body.classList.contains('fullscreen-mode')) {
+          document.body.classList.add('hide-controls');
+        }
+      }, 200);
+    }
+
+    function clearHideControlsTimer() {
+      if (hideControlsTimer) {
+        clearTimeout(hideControlsTimer);
+        hideControlsTimer = null;
+      }
+      document.body.classList.remove('hide-controls');
+    }
+
+    // Detectar movimento do mouse apenas em fullscreen
+    document.addEventListener('mousemove', (e) => {
+      if (document.body.classList.contains('fullscreen-mode')) {
+        startHideControlsTimer();
+      }
+    });
+
+    // Ao clicar, também resetar o timer
+    document.addEventListener('click', (e) => {
+      if (document.body.classList.contains('fullscreen-mode')) {
+        startHideControlsTimer();
+      }
     });
 
     // === FUNÇÕES PARA FILTROS DE PERÍODO ===
