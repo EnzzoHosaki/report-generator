@@ -306,6 +306,50 @@
       gap: 8px;
     }
 
+    /* Filtros de Ordenação Discretos */
+    .sort-controls {
+      display: flex;
+      gap: 30px;
+      align-items: center;
+      padding-top: 12px;
+      border-top: 1px solid #f0f0f0;
+      font-size: 9pt;
+    }
+
+    .sort-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .sort-group label {
+      font-weight: 600;
+      color: var(--text-secondary);
+      white-space: nowrap;
+      margin: 0;
+    }
+
+    .sort-group select {
+      padding: 8px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      font-size: 9pt;
+      font-family: 'Inter', sans-serif;
+      background-color: white;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .sort-group select:focus {
+      outline: none;
+      border-color: var(--rps-primary);
+      box-shadow: 0 0 0 3px rgba(45, 90, 61, 0.1);
+    }
+
+    .sort-group select:hover {
+      border-color: var(--rps-secondary);
+    }
+
     .btn-primary {
       background: linear-gradient(135deg, var(--rps-primary), var(--rps-primary-light));
       color: white;
@@ -550,6 +594,226 @@
         transform: rotate(360deg);
       }
     }
+
+    /* === RESPONSIVIDADE PARA MOBILE === */
+    @media (max-width: 768px) {
+      .container {
+        padding: 20px 15px;
+      }
+
+      .header {
+        flex-direction: column;
+        text-align: center;
+        padding: 25px 20px;
+        gap: 20px;
+      }
+
+      .header-left h1 {
+        font-size: 28pt;
+      }
+
+      .header-stats {
+        justify-content: center;
+        gap: 15px;
+      }
+
+      .stat-box {
+        padding: 15px 20px;
+      }
+
+      .controls-area {
+        gap: 15px;
+        padding: 15px 20px;
+      }
+
+      .actions-row {
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .btn {
+        width: 100%;
+        justify-content: center;
+        font-size: 10pt;
+        padding: 10px 16px;
+      }
+
+      .sort-controls {
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      .sort-group {
+        width: 100%;
+        justify-content: space-between;
+      }
+
+      .sort-group select {
+        flex: 1;
+        margin-left: 10px;
+      }
+
+      .clients-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+
+      .client-card {
+        padding: 20px;
+      }
+
+      .client-header {
+        flex-direction: column;
+        text-align: center;
+      }
+
+      .client-icon {
+        align-self: center;
+      }
+
+      .client-stats {
+        gap: 10px;
+      }
+
+      .client-actions {
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .client-actions .btn {
+        font-size: 9pt;
+      }
+
+      .pagination {
+        gap: 8px;
+      }
+
+      .pagination-link {
+        width: 36px;
+        height: 36px;
+        font-size: 9pt;
+      }
+
+      .per-page-control {
+        flex-direction: column;
+        gap: 8px;
+        width: 100%;
+      }
+
+      .per-page-control select {
+        width: 100%;
+      }
+
+      .modal-content {
+        width: 90%;
+        padding: 20px;
+      }
+
+      .modal-header h2 {
+        font-size: 16pt;
+      }
+
+      .footer {
+        font-size: 8pt;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        padding: 15px 10px;
+      }
+
+      .header {
+        padding: 20px 15px;
+      }
+
+      .header-left h1 {
+        font-size: 22pt;
+        margin-bottom: 10px;
+      }
+
+      .header-left p {
+        font-size: 11pt;
+      }
+
+      .header-stats {
+        gap: 10px;
+      }
+
+      .stat-box {
+        padding: 12px 15px;
+      }
+
+      .stat-number {
+        font-size: 24pt;
+      }
+
+      .stat-label {
+        font-size: 8pt;
+      }
+
+      .controls-area {
+        padding: 12px 15px;
+        gap: 12px;
+      }
+
+      .search-input-wrapper input {
+        font-size: 11pt;
+        padding: 12px 16px;
+        padding-left: 40px;
+      }
+
+      .actions-row {
+        gap: 8px;
+      }
+
+      .btn {
+        font-size: 9pt;
+        padding: 8px 12px;
+        flex: 1;
+      }
+
+      .btn i {
+        display: none;
+      }
+
+      .sort-controls {
+        padding-top: 10px;
+      }
+
+      .sort-group {
+        gap: 5px;
+      }
+
+      .sort-group label {
+        font-size: 8pt;
+      }
+
+      .sort-group select {
+        font-size: 8pt;
+        padding: 6px 8px;
+      }
+
+      .client-card {
+        padding: 16px;
+      }
+
+      .client-info h3 {
+        font-size: 14pt;
+      }
+
+      .client-info p {
+        font-size: 8pt;
+      }
+
+      .mini-stat-value {
+        font-size: 12pt;
+      }
+
+      .pagination-info {
+        font-size: 10pt;
+      }
+    }
   </style>
 </head>
 
@@ -570,10 +834,6 @@
           <div class="stat-number">{{ total_empresas }}</div>
           <div class="stat-label">Clientes</div>
         </div>
-        <div class="stat-box">
-          <div class="stat-number">{{ periodos|length }}</div>
-          <div class="stat-label">Períodos</div>
-        </div>
       </div>
     </div>
 
@@ -584,7 +844,6 @@
       <!-- Campos ocultos que serão preenchidos pelo Modal -->
       <input type="hidden" name="sort" id="hiddenSort" value="{{ sort }}">
       <input type="hidden" name="dir" id="hiddenDir" value="{{ direction }}">
-      <input type="hidden" name="periodo" id="hiddenPeriodo" value="{{ periodos[0] }}">
 
       <div class="controls-area">
         <!-- Linha 1: Barra de Pesquisa (Full Width) -->
@@ -608,6 +867,24 @@
             <i class="fas fa-redo icon"></i>Limpar
           </button>
         </div>
+
+        <!-- Linha 3: Filtros de Ordenação (Discretos) -->
+        <div class="sort-controls">
+          <div class="sort-group">
+            <label for="quickSortSelect"><i class="fas fa-sort icon"></i>Ordenar por:</label>
+            <select id="quickSortSelect" name="sort" onchange="document.getElementById('hiddenSort').value = this.value">
+              <option value="codigo" {% if sort=='codigo' %}selected{% endif %}>Código</option>
+              <option value="nome" {% if sort=='nome' %}selected{% endif %}>Nome</option>
+            </select>
+          </div>
+          <div class="sort-group">
+            <label for="quickDirSelect"><i class="fas fa-arrow-up icon"></i>Direção:</label>
+            <select id="quickDirSelect" name="dir" onchange="document.getElementById('hiddenDir').value = this.value">
+              <option value="asc" {% if direction=='asc' %}selected{% endif %}>Crescente</option>
+              <option value="desc" {% if direction=='desc' %}selected{% endif %}>Decrescente</option>
+            </select>
+          </div>
+        </div>
       </div>
 
       <!-- Modal de Filtros -->
@@ -619,16 +896,6 @@
           </div>
 
           <div class="filter-grid">
-            <div class="filter-group">
-              <label><i class="fas fa-calendar icon"></i>Período</label>
-              <!-- Este select atualiza o hidden input ao fechar/aplicar -->
-              <select id="modalPeriodoSelect" onchange="document.getElementById('hiddenPeriodo').value = this.value">
-                {% for p in periodos %}
-                <option value="{{ p }}" {% if request.args.get('periodo')==p or (not request.args.get('periodo') and loop.first) %}selected{% endif %}>{{ p }}</option>
-                {% endfor %}
-              </select>
-            </div>
-
             <div class="filter-group">
               <label><i class="fas fa-sort icon"></i>Ordenar por</label>
               <select id="modalSortSelect" onchange="document.getElementById('hiddenSort').value = this.value">
@@ -764,26 +1031,16 @@
 
     function resetFilters() {
       searchInput.value = '';
-      document.getElementById('hiddenSort').value = 'nome';
+      document.getElementById('hiddenSort').value = 'codigo';
       document.getElementById('hiddenDir').value = 'asc';
-      document.getElementById('modalSortSelect').value = 'nome';
-      document.getElementById('modalDirSelect').value = 'asc';
+      document.getElementById('quickSortSelect').value = 'codigo';
+      document.getElementById('quickDirSelect').value = 'asc';
       pageInput.value = 1;
       mainForm.submit();
     }
 
     function goToReport(baseUrl) {
-      const periodo = document.getElementById('hiddenPeriodo').value;
-      window.location.href = `${baseUrl}?periodo=${encodeURIComponent(periodo)}`;
-    }
-
-    function downloadBatch() {
-      const periodo = document.getElementById('hiddenPeriodo').value;
-      const ids = "{{ ids_pagina }}";
-      if (ids) {
-        showLoading();
-        window.location.href = `/report/pdf-batch?ids=${ids}&periodo=${encodeURIComponent(periodo)}`;
-      }
+      window.location.href = baseUrl;
     }
 
     function showLoading() {
