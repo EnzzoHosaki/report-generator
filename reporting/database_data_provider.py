@@ -62,6 +62,34 @@ class DatabaseDataProvider(DataProvider):
             print(f"Erro ao listar clientes: {e}")
             return []
 
+    def listar_filiais(self, codigo_empresa: int) -> List[Dict[str, Any]]:
+        """
+        Lista as filiais de uma empresa específica.
+        
+        Args:
+            codigo_empresa: Código da empresa (codigoempresa na tabfilial)
+            
+        Returns:
+            Lista de dicionários com informações das filiais
+        """
+        try:
+            conn = self._get_connection()
+            with conn.cursor(cursor_factory=RealDictCursor) as cursor:
+                cursor.execute(
+                    """
+                    SELECT codigo, nome, fantasia 
+                    FROM tabfilial 
+                    WHERE codigoempresa = %s 
+                    ORDER BY codigo
+                    """,
+                    (codigo_empresa,)
+                )
+                filiais = cursor.fetchall()
+                return filiais
+        except Exception as e:
+            print(f"Erro ao listar filiais: {e}")
+            return []
+
     def obter_contexto_dados(self, cliente_id: int, periodo: str) -> Dict[str, Any]:
         """
         Gera/retorna o contexto de DADOS do relatório.

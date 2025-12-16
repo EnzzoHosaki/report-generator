@@ -41,6 +41,9 @@ report_service = ReportService(data_provider, chart_service)
 def home():
     """Dashboard moderno com cards de clientes e estatísticas"""
     empresas = data_provider.listar_clientes()
+    
+    # Filtrar empresas com codigo válido (não None, não vazio)
+    empresas = [e for e in empresas if e.get('codigo') is not None and e.get('codigo') != '']
 
     query = (request.args.get('q') or '').strip()
     sort = request.args.get('sort', 'nome')
@@ -119,7 +122,26 @@ def home():
 @app.route('/report/view/<int:cliente_id>')
 def report_view(cliente_id: int):
     """Visualização web do relatório com navegação entre páginas - Modo WEB"""
-    periodo = request.args.get('periodo') or datetime.now().strftime('%B/%Y')
+    # Suporte aos novos parâmetros (multi-mês e multi-filial)
+    year = request.args.get('year')
+    months = request.args.get('months')  # Ex: "1,2,3"
+    branches = request.args.get('branches')  # Ex: "1,2,3"
+    
+    # Fallback para formato antigo (periodo)
+    if not year and not months:
+        periodo = request.args.get('periodo') or datetime.now().strftime('%B/%Y')
+    else:
+        # Construir período a partir dos novos parâmetros
+        year = year or datetime.now().strftime('%Y')
+        months_list = months.split(',') if months else [str(datetime.now().month)]
+        # Para exibição, usar primeiro mês ou indicar múltiplos meses
+        if len(months_list) == 1:
+            month_names = ['January', 'February', 'March', 'April', 'May', 'June',
+                          'July', 'August', 'September', 'October', 'November', 'December']
+            periodo = f"{month_names[int(months_list[0])-1]}/{year}"
+        else:
+            periodo = f"Múltiplos meses/{year}"
+    
     contexto = report_service.montar_contexto(cliente_id, periodo)
     # Adicionamos mode='web' para ativar gráficos interativos e menu
     return render_template('relatorio_full.html', **contexto, mode='web')
@@ -128,7 +150,26 @@ def report_view(cliente_id: int):
 @app.route('/report/pdf/<int:cliente_id>')
 def report_pdf(cliente_id: int):
     """Geração de PDF com WeasyPrint - Modo PDF"""
-    periodo = request.args.get('periodo') or datetime.now().strftime('%B/%Y')
+    # Suporte aos novos parâmetros (multi-mês e multi-filial)
+    year = request.args.get('year')
+    months = request.args.get('months')  # Ex: "1,2,3"
+    branches = request.args.get('branches')  # Ex: "1,2,3"
+    
+    # Fallback para formato antigo (periodo)
+    if not year and not months:
+        periodo = request.args.get('periodo') or datetime.now().strftime('%B/%Y')
+    else:
+        # Construir período a partir dos novos parâmetros
+        year = year or datetime.now().strftime('%Y')
+        months_list = months.split(',') if months else [str(datetime.now().month)]
+        # Para exibição, usar primeiro mês ou indicar múltiplos meses
+        if len(months_list) == 1:
+            month_names = ['January', 'February', 'March', 'April', 'May', 'June',
+                          'July', 'August', 'September', 'October', 'November', 'December']
+            periodo = f"{month_names[int(months_list[0])-1]}/{year}"
+        else:
+            periodo = f"Múltiplos meses/{year}"
+    
     contexto = report_service.montar_contexto(cliente_id, periodo)
     # Adicionamos mode='pdf' para usar imagens estáticas e esconder menu
     html_string = render_template('relatorio_full.html', **contexto, mode='pdf')
@@ -195,10 +236,40 @@ def api_clientes():
     })
 
 
+@app.route('/api/branches/<int:cliente_id>')
+def api_branches(cliente_id: int):
+    """API REST para listar filiais de um cliente"""
+    filiais = data_provider.listar_filiais(cliente_id)
+    return jsonify([
+        {
+            "codigo": filial['codigo'],
+            "nome": filial.get('nome', ''),
+            "fantasia": filial.get('fantasia', '')
+        }
+        for filial in filiais
+    ])
+
+
 @app.route('/api/preview/<int:cliente_id>')
 def api_preview(cliente_id: int):
     """API para prévia rápida dos KPIs de um cliente"""
-    periodo = request.args.get('periodo') or datetime.now().strftime('%B/%Y')
+    # Suporte aos novos parâmetros (multi-mês e multi-filial)
+    year = request.args.get('year')
+    months = request.args.get('months')
+    
+    # Fallback para formato antigo
+    if not year and not months:
+        periodo = request.args.get('periodo') or datetime.now().strftime('%B/%Y')
+    else:
+        year = year or datetime.now().strftime('%Y')
+        months_list = months.split(',') if months else [str(datetime.now().month)]
+        if len(months_list) == 1:
+            month_names = ['January', 'February', 'March', 'April', 'May', 'June',
+                          'July', 'August', 'September', 'October', 'November', 'December']
+            periodo = f"{month_names[int(months_list[0])-1]}/{year}"
+        else:
+            periodo = f"Múltiplos meses/{year}"
+    
     contexto = report_service.montar_contexto(cliente_id, periodo)
     
     return jsonify({

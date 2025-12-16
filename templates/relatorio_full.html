@@ -72,6 +72,7 @@
     body {
       background-color: #333;
       overflow: hidden;
+      padding: 0;
     }
 
     .snap-container {
@@ -441,6 +442,135 @@
       outline: none;
       border-color: var(--rps-primary);
       box-shadow: 0 0 0 4px rgba(45, 90, 61, 0.1);
+    }
+
+    /* Custom Dropdown com Checkboxes */
+    .custom-dropdown {
+      position: relative;
+      width: 100%;
+    }
+
+    .dropdown-toggle {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid var(--border-color);
+      border-radius: 10px;
+      background: white;
+      cursor: pointer;
+      font-size: 10pt;
+      font-family: 'Inter', sans-serif;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.3s;
+      user-select: none;
+    }
+
+    .dropdown-toggle:hover {
+      border-color: var(--rps-primary);
+    }
+
+    .dropdown-toggle.active {
+      border-color: var(--rps-primary);
+      box-shadow: 0 0 0 4px rgba(45, 90, 61, 0.1);
+    }
+
+    .dropdown-arrow {
+      transition: transform 0.3s;
+      color: var(--text-secondary);
+    }
+
+    .dropdown-toggle.active .dropdown-arrow {
+      transform: rotate(180deg);
+    }
+
+    .dropdown-menu {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      width: 100%;
+      background: white;
+      border: 2px solid var(--rps-primary);
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      max-height: 250px;
+      overflow-y: auto;
+      z-index: 1000;
+      display: none;
+    }
+
+    .dropdown-menu.active {
+      display: block;
+    }
+
+    .dropdown-header {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--bg-light);
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    .dropdown-header-buttons {
+      display: flex;
+      gap: 8px;
+    }
+
+    .dropdown-header button {
+      background: none;
+      border: none;
+      color: var(--rps-primary);
+      cursor: pointer;
+      font-size: 9pt;
+      text-decoration: underline;
+      padding: 2px 6px;
+    }
+
+    .dropdown-header button:hover {
+      color: var(--rps-primary-dark);
+    }
+
+    .dropdown-item {
+      padding: 10px 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: background 0.2s;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .dropdown-item:last-child {
+      border-bottom: none;
+    }
+
+    .dropdown-item:hover {
+      background: rgba(45, 90, 61, 0.05);
+    }
+
+    .dropdown-item input[type="checkbox"] {
+      cursor: pointer;
+      width: 16px;
+      height: 16px;
+      margin: 0;
+    }
+
+    .dropdown-item label {
+      cursor: pointer;
+      font-size: 10pt;
+      margin: 0;
+      flex: 1;
+      color: var(--text-primary);
+    }
+
+    .dropdown-count {
+      font-size: 9pt;
+      color: var(--text-secondary);
+      font-weight: 600;
     }
 
     .period-filter-footer {
@@ -939,21 +1069,91 @@
             </select>
           </div>
           <div class="filter-group">
-            <label for="filterMonth">Mês:</label>
-            <select id="filterMonth">
-              <option value="1">Janeiro</option>
-              <option value="2">Fevereiro</option>
-              <option value="3">Março</option>
-              <option value="4">Abril</option>
-              <option value="5">Maio</option>
-              <option value="6">Junho</option>
-              <option value="7">Julho</option>
-              <option value="8">Agosto</option>
-              <option value="9">Setembro</option>
-              <option value="10">Outubro</option>
-              <option value="11">Novembro</option>
-              <option value="12">Dezembro</option>
-            </select>
+            <label>Meses:</label>
+            <div class="custom-dropdown" id="monthsDropdown">
+              <div class="dropdown-toggle" onclick="toggleMonthsDropdown()">
+                <span class="dropdown-label" id="monthsLabel">Todos os meses (12)</span>
+                <span class="dropdown-arrow">▼</span>
+              </div>
+              <div class="dropdown-menu" id="monthsMenu">
+                <div class="dropdown-header">
+                  <span style="font-size: 9pt; color: var(--text-secondary);">Selecione os meses</span>
+                  <div class="dropdown-header-buttons">
+                    <button type="button" onclick="selectAllMonths()">Todos</button>
+                    <button type="button" onclick="clearAllMonths()">Nenhum</button>
+                  </div>
+                </div>
+                <div class="dropdown-item" onclick="toggleMonthCheckbox(1)">
+                  <input type="checkbox" id="month1" value="1" checked onclick="event.stopPropagation(); updateMonthsLabel();">
+                  <label for="month1" onclick="event.stopPropagation();">Janeiro</label>
+                </div>
+                <div class="dropdown-item" onclick="toggleMonthCheckbox(2)">
+                  <input type="checkbox" id="month2" value="2" checked onclick="event.stopPropagation(); updateMonthsLabel();">
+                  <label for="month2" onclick="event.stopPropagation();">Fevereiro</label>
+                </div>
+                <div class="dropdown-item" onclick="toggleMonthCheckbox(3)">
+                  <input type="checkbox" id="month3" value="3" checked onclick="event.stopPropagation(); updateMonthsLabel();">
+                  <label for="month3" onclick="event.stopPropagation();">Março</label>
+                </div>
+                <div class="dropdown-item" onclick="toggleMonthCheckbox(4)">
+                  <input type="checkbox" id="month4" value="4" checked onclick="event.stopPropagation(); updateMonthsLabel();">
+                  <label for="month4" onclick="event.stopPropagation();">Abril</label>
+                </div>
+                <div class="dropdown-item" onclick="toggleMonthCheckbox(5)">
+                  <input type="checkbox" id="month5" value="5" checked onclick="event.stopPropagation(); updateMonthsLabel();">
+                  <label for="month5" onclick="event.stopPropagation();">Maio</label>
+                </div>
+                <div class="dropdown-item" onclick="toggleMonthCheckbox(6)">
+                  <input type="checkbox" id="month6" value="6" checked onclick="event.stopPropagation(); updateMonthsLabel();">
+                  <label for="month6" onclick="event.stopPropagation();">Junho</label>
+                </div>
+                <div class="dropdown-item" onclick="toggleMonthCheckbox(7)">
+                  <input type="checkbox" id="month7" value="7" checked onclick="event.stopPropagation(); updateMonthsLabel();">
+                  <label for="month7" onclick="event.stopPropagation();">Julho</label>
+                </div>
+                <div class="dropdown-item" onclick="toggleMonthCheckbox(8)">
+                  <input type="checkbox" id="month8" value="8" checked onclick="event.stopPropagation(); updateMonthsLabel();">
+                  <label for="month8" onclick="event.stopPropagation();">Agosto</label>
+                </div>
+                <div class="dropdown-item" onclick="toggleMonthCheckbox(9)">
+                  <input type="checkbox" id="month9" value="9" checked onclick="event.stopPropagation(); updateMonthsLabel();">
+                  <label for="month9" onclick="event.stopPropagation();">Setembro</label>
+                </div>
+                <div class="dropdown-item" onclick="toggleMonthCheckbox(10)">
+                  <input type="checkbox" id="month10" value="10" checked onclick="event.stopPropagation(); updateMonthsLabel();">
+                  <label for="month10" onclick="event.stopPropagation();">Outubro</label>
+                </div>
+                <div class="dropdown-item" onclick="toggleMonthCheckbox(11)">
+                  <input type="checkbox" id="month11" value="11" checked onclick="event.stopPropagation(); updateMonthsLabel();">
+                  <label for="month11" onclick="event.stopPropagation();">Novembro</label>
+                </div>
+                <div class="dropdown-item" onclick="toggleMonthCheckbox(12)">
+                  <input type="checkbox" id="month12" value="12" checked onclick="event.stopPropagation(); updateMonthsLabel();">
+                  <label for="month12" onclick="event.stopPropagation();">Dezembro</label>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="filter-group">
+            <label>Filiais:</label>
+            <div class="custom-dropdown" id="branchesDropdown">
+              <div class="dropdown-toggle" onclick="toggleBranchesDropdown()">
+                <span class="dropdown-label" id="branchesLabel">Carregando...</span>
+                <span class="dropdown-arrow">▼</span>
+              </div>
+              <div class="dropdown-menu" id="branchesMenu">
+                <div class="dropdown-header">
+                  <span style="font-size: 9pt; color: var(--text-secondary);">Selecione as filiais</span>
+                  <div class="dropdown-header-buttons">
+                    <button type="button" onclick="selectAllBranches()">Todas</button>
+                    <button type="button" onclick="clearAllBranches()">Nenhuma</button>
+                  </div>
+                </div>
+                <div id="branchesMenuItems">
+                  <!-- Será preenchido dinamicamente via JavaScript -->
+                </div>
+              </div>
+            </div>
           </div>
         </div>
         <div class="period-filter-footer">
@@ -1180,7 +1380,7 @@
               <h3>Evolução Circulante vs Não-Circulante</h3>
               <span class="badge badge-warning">Monitorar</span>
             </div>
-            <div class="chart-container" style="max-height: 250px; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+            <div class="chart-container" style="max-height: 450px; overflow: hidden; display: flex; align-items: center; justify-content: center;">
               {% if mode == 'web' %}
               <div id="chart-passivos" class="apex-chart-container"></div>
               {% else %}
@@ -1889,32 +2089,220 @@
 
     // === FUNÇÕES PARA FILTROS DE PERÍODO ===
     function openPeriodFilters() {
+      loadBranches();
       document.getElementById('periodFilterModal').classList.add('active');
     }
 
     function closePeriodFilters() {
       document.getElementById('periodFilterModal').classList.remove('active');
+      // Fechar dropdowns ao fechar modal
+      document.getElementById('monthsMenu').classList.remove('active');
+      document.getElementById('branchesMenu').classList.remove('active');
+      document.querySelector('#monthsDropdown .dropdown-toggle').classList.remove('active');
+      document.querySelector('#branchesDropdown .dropdown-toggle').classList.remove('active');
+    }
+
+    // === DROPDOWN DE MESES ===
+    function toggleMonthsDropdown() {
+      const menu = document.getElementById('monthsMenu');
+      const toggle = document.querySelector('#monthsDropdown .dropdown-toggle');
+      const branchesMenu = document.getElementById('branchesMenu');
+      const branchesToggle = document.querySelector('#branchesDropdown .dropdown-toggle');
+
+      // Fechar dropdown de filiais se estiver aberto
+      branchesMenu.classList.remove('active');
+      branchesToggle.classList.remove('active');
+
+      menu.classList.toggle('active');
+      toggle.classList.toggle('active');
+    }
+
+    function toggleMonthCheckbox(monthNum) {
+      const checkbox = document.getElementById('month' + monthNum);
+      checkbox.checked = !checkbox.checked;
+      updateMonthsLabel();
+    }
+
+    function updateMonthsLabel() {
+      const checkboxes = document.querySelectorAll('[id^="month"]:checked');
+      const count = checkboxes.length;
+      const label = document.getElementById('monthsLabel');
+
+      if (count === 0) {
+        label.textContent = 'Nenhum mês selecionado';
+      } else if (count === 12) {
+        label.textContent = 'Todos os meses (12)';
+      } else {
+        label.textContent = `${count} ${count === 1 ? 'mês selecionado' : 'meses selecionados'}`;
+      }
+    }
+
+    function selectAllMonths() {
+      for (let i = 1; i <= 12; i++) {
+        document.getElementById('month' + i).checked = true;
+      }
+      updateMonthsLabel();
+    }
+
+    function clearAllMonths() {
+      for (let i = 1; i <= 12; i++) {
+        document.getElementById('month' + i).checked = false;
+      }
+      updateMonthsLabel();
+    }
+
+    // === DROPDOWN DE FILIAIS ===
+    function toggleBranchesDropdown() {
+      const menu = document.getElementById('branchesMenu');
+      const toggle = document.querySelector('#branchesDropdown .dropdown-toggle');
+      const monthsMenu = document.getElementById('monthsMenu');
+      const monthsToggle = document.querySelector('#monthsDropdown .dropdown-toggle');
+
+      // Fechar dropdown de meses se estiver aberto
+      monthsMenu.classList.remove('active');
+      monthsToggle.classList.remove('active');
+
+      menu.classList.toggle('active');
+      toggle.classList.toggle('active');
+    }
+
+    function toggleBranchCheckbox(branchId) {
+      const checkbox = document.getElementById('branch' + branchId);
+      checkbox.checked = !checkbox.checked;
+      updateBranchesLabel();
+    }
+
+    function updateBranchesLabel() {
+      const checkboxes = document.querySelectorAll('[id^="branch"]:checked');
+      const count = checkboxes.length;
+      const label = document.getElementById('branchesLabel');
+      const total = document.querySelectorAll('[id^="branch"]').length;
+
+      if (count === 0) {
+        label.textContent = 'Nenhuma filial selecionada';
+      } else if (count === total) {
+        label.textContent = `Todas as filiais (${total})`;
+      } else {
+        label.textContent = `${count} ${count === 1 ? 'filial selecionada' : 'filiais selecionadas'}`;
+      }
+    }
+
+    function selectAllBranches() {
+      document.querySelectorAll('[id^="branch"]').forEach(cb => cb.checked = true);
+      updateBranchesLabel();
+    }
+
+    function clearAllBranches() {
+      document.querySelectorAll('[id^="branch"]').forEach(cb => cb.checked = false);
+      updateBranchesLabel();
+    }
+
+    function loadBranches() {
+      const clientId = window.location.pathname.split('/').pop();
+      fetch(`/api/branches/${clientId}`)
+        .then(response => response.json())
+        .then(branches => {
+          const container = document.getElementById('branchesMenuItems');
+          container.innerHTML = '';
+
+          if (branches.length === 0) {
+            container.innerHTML = '<div style="padding: 12px; text-align: center; color: var(--text-secondary); font-size: 10pt;">Nenhuma filial encontrada</div>';
+            document.getElementById('branchesLabel').textContent = 'Nenhuma filial disponível';
+            return;
+          }
+
+          branches.forEach(branch => {
+            const div = document.createElement('div');
+            div.className = 'dropdown-item';
+            div.onclick = () => toggleBranchCheckbox(branch.codigo);
+
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.id = `branch${branch.codigo}`;
+            checkbox.value = branch.codigo;
+            checkbox.checked = true;
+            checkbox.onclick = (e) => {
+              e.stopPropagation();
+              updateBranchesLabel();
+            };
+
+            const label = document.createElement('label');
+            label.htmlFor = `branch${branch.codigo}`;
+            label.textContent = `${branch.codigo} - ${branch.fantasia}`;
+            label.onclick = (e) => e.stopPropagation();
+
+            div.appendChild(checkbox);
+            div.appendChild(label);
+            container.appendChild(div);
+          });
+
+          updateBranchesLabel();
+        })
+        .catch(error => {
+          console.error('Erro ao carregar filiais:', error);
+          const container = document.getElementById('branchesMenuItems');
+          container.innerHTML = '<div style="padding: 12px; text-align: center; color: var(--danger-color); font-size: 10pt;">Erro ao carregar filiais</div>';
+          document.getElementById('branchesLabel').textContent = 'Erro ao carregar';
+        });
     }
 
     function applyPeriodFilter() {
       const year = document.getElementById('filterYear').value;
-      const month = document.getElementById('filterMonth').value;
-      const monthName = new Map([
-        [1, 'January'], [2, 'February'], [3, 'March'], [4, 'April'],
-        [5, 'May'], [6, 'June'], [7, 'July'], [8, 'August'],
-        [9, 'September'], [10, 'October'], [11, 'November'], [12, 'December']
-      ]).get(parseInt(month));
 
-      const periodo = monthName + '/' + year;
+      // Coletar meses selecionados
+      const selectedMonths = [];
+      for (let i = 1; i <= 12; i++) {
+        const checkbox = document.getElementById('month' + i);
+        if (checkbox.checked) {
+          selectedMonths.push(checkbox.value);
+        }
+      }
+
+      if (selectedMonths.length === 0) {
+        alert('Selecione pelo menos um mês!');
+        return;
+      }
+
+      // Coletar filiais selecionadas
+      const selectedBranches = [];
+      document.querySelectorAll('[id^="branch"]:checked').forEach(cb => {
+        selectedBranches.push(cb.value);
+      });
+
+      if (selectedBranches.length === 0) {
+        alert('Selecione pelo menos uma filial!');
+        return;
+      }
+
       closePeriodFilters();
 
-      // Atualizar link do PDF com novo período
+      // Construir parâmetros da URL
       const clientId = window.location.pathname.split('/').pop();
-      document.getElementById('fabDownload').href = `/report/pdf/${clientId}?periodo=${encodeURIComponent(periodo)}`;
+      const params = new URLSearchParams();
+      params.set('year', year);
+      params.set('months', selectedMonths.join(','));
+      params.set('branches', selectedBranches.join(','));
 
-      // Redirecionar com o novo período
-      window.location.href = `/report/view/${clientId}?periodo=${encodeURIComponent(periodo)}`;
+      const queryString = params.toString();
+
+      // Atualizar link do PDF com novos parâmetros
+      document.getElementById('fabDownload').href = `/report/pdf/${clientId}?${queryString}`;
+
+      // Redirecionar com os novos parâmetros
+      window.location.href = `/report/view/${clientId}?${queryString}`;
     }
+
+    // Fechar dropdowns ao clicar fora
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('#monthsDropdown')) {
+        document.getElementById('monthsMenu').classList.remove('active');
+        document.querySelector('#monthsDropdown .dropdown-toggle')?.classList.remove('active');
+      }
+      if (!e.target.closest('#branchesDropdown')) {
+        document.getElementById('branchesMenu').classList.remove('active');
+        document.querySelector('#branchesDropdown .dropdown-toggle')?.classList.remove('active');
+      }
+    });
 
     // Fechar modal ao clicar fora
     document.getElementById('periodFilterModal')?.addEventListener('click', (e) => {
