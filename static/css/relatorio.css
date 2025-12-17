@@ -1,0 +1,936 @@
+/* --- Estilos Gerais --- */
+.icon {
+  margin-right: 4px;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+.snap-container {
+  height: 100vh;
+  width: 100%;
+  overflow-y: scroll;
+  scroll-snap-type: y mandatory;
+}
+
+.page-container {
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+  /* Necessário para posicionamento relativo */
+}
+
+.comparison-box {
+  background: #f8faf9;
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  border: 1px solid var(--border-color);
+}
+
+.comparison-value {
+  font-size: 16pt;
+  font-weight: 700;
+  color: var(--rps-primary);
+  margin: 10px 0;
+}
+
+.comparison-label {
+  font-size: 9pt;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+}
+
+/* --- ESTILOS ESPECÍFICOS PARA MODO WEB (Interativo) --- */
+body {
+  background-color: #333;
+  overflow: hidden;
+  padding: 0;
+}
+
+.snap-container {
+  background-color: #e8ece9;
+  padding-left: 0;
+}
+
+.page-container {
+  margin: 20px auto 40px auto;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+/* MENU LATERAL MINIMALISTA */
+.sidenav-minimal {
+  position: fixed;
+  left: 30px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  z-index: 1000;
+}
+
+.nav-dot-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 20px;
+  cursor: pointer;
+}
+
+.nav-bar {
+  width: 25px;
+  height: 4px;
+  background-color: #cbd5e1;
+  border-radius: 4px;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.nav-dot-container:hover .nav-bar {
+  width: 40px;
+  background-color: var(--rps-primary);
+}
+
+.nav-dot-container.active .nav-bar {
+  width: 45px;
+  background-color: var(--rps-accent);
+  box-shadow: 0 0 10px rgba(212, 175, 55, 0.4);
+}
+
+.nav-tooltip {
+  position: absolute;
+  left: 55px;
+  background-color: var(--text-primary);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(-10px);
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.nav-tooltip::before {
+  content: '';
+  position: absolute;
+  left: -4px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-width: 4px 4px 4px 0;
+  border-style: solid;
+  border-color: transparent var(--text-primary) transparent transparent;
+}
+
+.nav-dot-container:hover .nav-tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(0);
+}
+
+/* BOTÕES FLUTUANTES */
+.btn-floating {
+  position: fixed;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1001;
+  transition: all 0.3s;
+  border: none;
+  background-color: white;
+  color: var(--rps-primary);
+}
+
+.btn-floating:hover {
+  transform: scale(1.1);
+  background-color: var(--rps-primary);
+  color: white;
+}
+
+/* Botão Apresentação (Canto Inferior Direito) */
+.btn-presentation {
+  bottom: 30px;
+  right: 30px;
+}
+
+/* Botão PDF (Canto Inferior ESQUERDO) - Sobrescreve estilo do style.css se necessário */
+.fab-download {
+  position: fixed;
+  bottom: 30px;
+  left: 30px;
+  right: auto;
+  /* Remove alinhamento à direita */
+  z-index: 1001;
+}
+
+/* Controles de Slide (Setas) - Discretos e Centralizados */
+.slide-controls {
+  position: fixed;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 24px;
+  z-index: 1001;
+  align-items: center;
+}
+
+.btn-slide-nav {
+  width: 40px;
+  height: 40px;
+  font-size: 14px;
+  background-color: rgba(255, 255, 255, 0.15) !important;
+  color: rgba(45, 90, 61, 0.3) !important;
+  border: none;
+  box-shadow: none !important;
+  transition: all 0.3s ease;
+  position: relative !important;
+}
+
+.btn-slide-nav:hover {
+  background-color: rgba(45, 90, 61, 0.2) !important;
+  color: var(--rps-primary) !important;
+  box-shadow: 0 4px 12px rgba(45, 90, 61, 0.2) !important;
+  transform: scale(1.1);
+}
+
+.apex-chart-container {
+  width: 100%;
+  min-height: 250px;
+}
+
+/* --- MODO TELA CHEIA (APRESENTAÇÃO) --- */
+body.fullscreen-mode .btn-presentation {
+  /* Opcional: mudar ícone ou estilo quando ativo */
+  background-color: var(--rps-accent);
+  color: white;
+}
+
+/* Esconde botão PDF em tela cheia se desejar, ou mantenha visível */
+body.fullscreen-mode .fab-download {
+  display: none;
+  /* Geralmente não se baixa PDF durante apresentação */
+}
+
+body.fullscreen-mode .snap-container {
+  background-color: #1a1a1a;
+  /* Ocultar Scrollbars */
+  scrollbar-width: none;
+  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE 10+ */
+}
+
+body.fullscreen-mode .snap-container::-webkit-scrollbar {
+  display: none;
+  /* Chrome/Safari */
+}
+
+body.fullscreen-mode .page-container {
+  margin: 0;
+  max-width: 100%;
+  width: 100%;
+  height: 100vh;
+  border-radius: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 40px 10%;
+}
+
+body.fullscreen-mode .content-wrapper {
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* Menu lateral no fullscreen: ajusta cor para ficar visível no fundo escuro se necessário */
+body.fullscreen-mode .nav-bar {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+body.fullscreen-mode .nav-dot-container:hover .nav-bar {
+  background-color: white;
+}
+
+body.fullscreen-mode .nav-dot-container.active .nav-bar {
+  background-color: var(--rps-accent);
+}
+
+/* Ocultar controles quando inativo em fullscreen */
+body.fullscreen-mode.hide-controls .sidenav-minimal,
+body.fullscreen-mode.hide-controls .slide-controls,
+body.fullscreen-mode.hide-controls .btn-presentation,
+body.fullscreen-mode.hide-controls .btn-period-settings {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+}
+
+body.fullscreen-mode .sidenav-minimal,
+body.fullscreen-mode .slide-controls,
+body.fullscreen-mode .btn-presentation,
+body.fullscreen-mode .btn-period-settings {
+  transition: opacity 0.5s ease;
+}
+
+/* Ocultar cursor do mouse em fullscreen quando inativo */
+body.fullscreen-mode.hide-controls {
+  cursor: none;
+}
+
+body.fullscreen-mode {
+  cursor: auto;
+}
+
+/* === ÍCONE DE ENGRENAGEM PARA FILTROS DE PERÍODO === */
+.btn-period-settings {
+  position: fixed;
+  top: 30px;
+  left: 30px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.9);
+  color: var(--rps-primary);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s;
+  z-index: 1002;
+}
+
+.btn-period-settings:hover {
+  background-color: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: scale(1.05);
+}
+
+/* === MODAL DE FILTROS DE PERÍODO === */
+.period-filter-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 2000;
+  align-items: center;
+  justify-content: center;
+}
+
+.period-filter-modal.active {
+  display: flex;
+}
+
+.period-filter-content {
+  background: white;
+  padding: 30px;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  animation: slideUp 0.3s ease;
+}
+
+.period-filter-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  border-bottom: 2px solid var(--border-color);
+  padding-bottom: 16px;
+}
+
+.period-filter-header h3 {
+  font-size: 16pt;
+  color: var(--rps-primary);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.close-period-modal {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: all 0.3s;
+}
+
+.close-period-modal:hover {
+  color: var(--rps-primary);
+  transform: rotate(90deg);
+}
+
+.period-filter-body {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.period-filter-body .filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.period-filter-body .filter-group label {
+  font-weight: 600;
+  color: var(--text-secondary);
+  font-size: 11pt;
+  text-transform: uppercase;
+}
+
+.period-filter-body .filter-group select {
+  padding: 12px 16px;
+  border: 2px solid var(--border-color);
+  border-radius: 10px;
+  font-size: 11pt;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.period-filter-body .filter-group select:focus {
+  outline: none;
+  border-color: var(--rps-primary);
+  box-shadow: 0 0 0 4px rgba(45, 90, 61, 0.1);
+}
+
+/* Custom Dropdown com Checkboxes */
+.custom-dropdown {
+  position: relative;
+  width: 100%;
+}
+
+.dropdown-toggle {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid var(--border-color);
+  border-radius: 10px;
+  background: white;
+  cursor: pointer;
+  font-size: 10pt;
+  font-family: 'Inter', sans-serif;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.3s;
+  user-select: none;
+}
+
+.dropdown-toggle:hover {
+  border-color: var(--rps-primary);
+}
+
+.dropdown-toggle.active {
+  border-color: var(--rps-primary);
+  box-shadow: 0 0 0 4px rgba(45, 90, 61, 0.1);
+}
+
+.dropdown-arrow {
+  transition: transform 0.3s;
+  color: var(--text-secondary);
+}
+
+.dropdown-toggle.active .dropdown-arrow {
+  transform: rotate(180deg);
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  width: 100%;
+  background: white;
+  border: 2px solid var(--rps-primary);
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  max-height: 250px;
+  overflow-y: auto;
+  z-index: 1000;
+  display: none;
+}
+
+.dropdown-menu.active {
+  display: block;
+}
+
+.dropdown-header {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--bg-light);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.dropdown-header-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.dropdown-header button {
+  background: none;
+  border: none;
+  color: var(--rps-primary);
+  cursor: pointer;
+  font-size: 9pt;
+  text-decoration: underline;
+  padding: 2px 6px;
+}
+
+.dropdown-header button:hover {
+  color: var(--rps-primary-dark);
+}
+
+.dropdown-item {
+  padding: 10px 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background 0.2s;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.dropdown-item:last-child {
+  border-bottom: none;
+}
+
+.dropdown-item:hover {
+  background: rgba(45, 90, 61, 0.05);
+}
+
+.dropdown-item input[type="checkbox"] {
+  cursor: pointer;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+}
+
+.dropdown-item label {
+  cursor: pointer;
+  font-size: 10pt;
+  margin: 0;
+  flex: 1;
+  color: var(--text-primary);
+}
+
+.dropdown-count {
+  font-size: 9pt;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.period-filter-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.btn-period {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 11pt;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn-period.btn-primary {
+  background: linear-gradient(135deg, var(--rps-primary), var(--rps-primary-light));
+  color: white;
+}
+
+.btn-period.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(45, 90, 61, 0.3);
+}
+
+.btn-period.btn-secondary {
+  background: white;
+  color: var(--rps-primary);
+  border: 2px solid var(--rps-primary);
+}
+
+.btn-period.btn-secondary:hover {
+  background: var(--rps-primary);
+  color: white;
+}
+
+@media print {
+  .sidenav-minimal,
+  .btn-floating,
+  .fab-download,
+  .slide-controls,
+  .btn-period-settings {
+    display: none !important;
+  }
+
+  .snap-container {
+    height: auto;
+    overflow: visible;
+  }
+
+  .page-container {
+    margin: 0;
+    box-shadow: none;
+    min-height: auto;
+    page-break-after: always;
+  }
+}
+
+/* === RESPONSIVIDADE PARA MOBILE === */
+@media (max-width: 768px) {
+  .page-container {
+    margin: 10px auto 20px auto !important;
+    padding: 20px 15px !important;
+  }
+
+  .content-wrapper {
+    padding: 15px !important;
+  }
+
+  .header {
+    flex-direction: column;
+    text-align: center;
+    padding: 20px !important;
+    gap: 15px;
+  }
+
+  .header-left h1 {
+    font-size: 22pt;
+    margin-bottom: 8px;
+  }
+
+  .header-left .subtitle {
+    font-size: 10pt;
+  }
+
+  .header-right {
+    text-align: center;
+    gap: 4px;
+  }
+
+  .client-name,
+  .period,
+  .page-number {
+    font-size: 9pt;
+  }
+
+  .row {
+    flex-direction: column;
+    gap: 16px !important;
+  }
+
+  .col-half {
+    flex: 1 1 100% !important;
+    width: 100% !important;
+  }
+
+  .col-full {
+    width: 100% !important;
+  }
+
+  .card {
+    padding: 16px !important;
+  }
+
+  .card-header {
+    margin-bottom: 16px;
+  }
+
+  .card-header h3 {
+    font-size: 14pt;
+  }
+
+  .kpi-container {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px;
+  }
+
+  .kpi-box {
+    padding: 12px !important;
+  }
+
+  .kpi-label {
+    font-size: 8pt;
+  }
+
+  .kpi-value {
+    font-size: 14pt;
+  }
+
+  .comparison-box {
+    padding: 16px !important;
+  }
+
+  table {
+    font-size: 9pt !important;
+  }
+
+  table th,
+  table td {
+    padding: 8px !important;
+  }
+
+  .apex-chart-container {
+    min-height: 200px !important;
+  }
+
+  .sidenav-minimal {
+    left: 15px;
+    gap: 10px;
+  }
+
+  .nav-bar {
+    width: 20px;
+    height: 3px;
+  }
+
+  .nav-dot-container:hover .nav-bar {
+    width: 30px;
+  }
+
+  .nav-tooltip {
+    left: 40px;
+    font-size: 11px;
+  }
+
+  .slide-controls {
+    bottom: 30px;
+    right: auto;
+    left: 50%;
+    transform: translateX(-50%);
+    gap: 12px;
+  }
+
+  .btn-slide-nav {
+    width: 36px;
+    height: 36px;
+    font-size: 12px;
+  }
+
+  .btn-presentation {
+    bottom: 20px;
+    right: 20px;
+    width: 45px;
+    height: 45px;
+  }
+
+  .fab-download {
+    bottom: 20px;
+    left: 20px;
+    padding: 10px 14px;
+    font-size: 10pt;
+    width: auto;
+    height: auto;
+  }
+
+  .btn-period-settings {
+    top: 20px;
+    left: 20px;
+    width: 36px;
+    height: 36px;
+    font-size: 14px;
+  }
+
+  .period-filter-content {
+    width: 95%;
+    padding: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-container {
+    padding: 15px 10px !important;
+  }
+
+  .header {
+    padding: 15px 10px !important;
+  }
+
+  .header-left h1 {
+    font-size: 18pt;
+  }
+
+  .header-left .subtitle {
+    font-size: 9pt;
+  }
+
+  .content-wrapper {
+    padding: 10px !important;
+  }
+
+  .card {
+    padding: 12px !important;
+  }
+
+  .card-header h3 {
+    font-size: 12pt;
+  }
+
+  .kpi-container {
+    grid-template-columns: 1fr !important;
+  }
+
+  .kpi-box {
+    padding: 10px !important;
+  }
+
+  .kpi-label {
+    font-size: 7pt;
+  }
+
+  .kpi-value {
+    font-size: 12pt;
+  }
+
+  .kpi-trend {
+    font-size: 7pt;
+  }
+
+  table {
+    font-size: 8pt !important;
+  }
+
+  table th,
+  table td {
+    padding: 6px !important;
+  }
+
+  .sidenav-minimal {
+    left: 10px;
+  }
+
+  .nav-tooltip {
+    font-size: 10px;
+  }
+
+  .slide-controls {
+    bottom: 20px;
+    right: auto;
+    left: 50%;
+    transform: translateX(-50%);
+    gap: 10px;
+  }
+
+  .btn-floating {
+    width: 40px;
+    height: 40px;
+    font-size: 14px;
+  }
+
+  .btn-presentation {
+    bottom: 15px;
+    right: 15px;
+    width: 40px;
+    height: 40px;
+  }
+
+  .fab-download {
+    bottom: 15px;
+    left: 15px;
+    padding: 8px 10px;
+    font-size: 8pt;
+  }
+
+  .btn-period-settings {
+    top: 15px;
+    left: 15px;
+    width: 32px;
+    height: 32px;
+    font-size: 12px;
+  }
+
+  .btn-slide-nav {
+    width: 32px;
+    height: 32px;
+    font-size: 10px;
+  }
+
+  .cover-title {
+    font-size: 28pt !important;
+  }
+
+  .cover-subtitle {
+    font-size: 11pt !important;
+  }
+
+  .cover-client-box {
+    padding: 20px !important;
+  }
+
+  .cover-client-name {
+    font-size: 16pt !important;
+  }
+
+  .cover-date {
+    font-size: 11pt !important;
+  }
+
+  .comparison-box {
+    padding: 12px !important;
+  }
+
+  .comparison-label {
+    font-size: 8pt;
+  }
+
+  .comparison-value {
+    font-size: 14pt;
+  }
+
+  .badge {
+    font-size: 7pt;
+    padding: 4px 8px;
+  }
+
+  .period-filter-content {
+    width: 98%;
+    padding: 16px;
+  }
+
+  .period-filter-header h3 {
+    font-size: 14pt;
+  }
+
+  .period-filter-body .filter-group select {
+    font-size: 10pt;
+  }
+
+  .btn-period {
+    padding: 8px 16px;
+    font-size: 10pt;
+  }
+}
