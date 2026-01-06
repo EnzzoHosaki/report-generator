@@ -42,8 +42,12 @@ def home():
     """Dashboard moderno com cards de clientes e estatísticas"""
     empresas = data_provider.listar_clientes()
     
-    # Filtrar empresas com codigo válido (não None, não vazio)
-    empresas = [e for e in empresas if e.get('codigo') is not None and e.get('codigo') != '']
+    # Filtrar empresas com codigo e nome válidos (não None, não vazio)
+    empresas = [e for e in empresas 
+                if e.get('codigo') is not None 
+                and e.get('codigo') != '' 
+                and e.get('nome') is not None 
+                and e.get('nome') != '']
 
     query = (request.args.get('q') or '').strip()
     sort = request.args.get('sort', 'nome')

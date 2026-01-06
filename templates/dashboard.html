@@ -102,10 +102,9 @@
       background: white;
       padding: 20px 30px;
       border-radius: 16px;
-      margin-bottom: 30px;
       box-shadow: var(--shadow);
       display: flex;
-      flex-direction: column;
+      flex-direction: row;
       gap: 20px;
     }
 
@@ -308,10 +307,13 @@
 
     /* Filtros de Ordenação Discretos */
     .sort-controls {
+      padding: 30px 0 30px 0;
+
       display: flex;
       gap: 30px;
       align-items: center;
-      padding-top: 12px;
+      flex-direction: row-reverse;
+
       border-top: 1px solid #f0f0f0;
       font-size: 9pt;
     }
@@ -364,7 +366,7 @@
     .btn-secondary {
       background: white;
       color: var(--rps-primary);
-      border: 2px solid var(--rps-primary);
+      border: 1px solid var(--rps-primary);
     }
 
     .btn-secondary:hover {
@@ -391,7 +393,6 @@
       padding: 28px;
       box-shadow: var(--shadow);
       transition: all 0.3s;
-      border: 2px solid transparent;
       position: relative;
       overflow: hidden;
     }
@@ -858,32 +859,33 @@
         <!-- Linha 2: Botões de Ação -->
         <div class="actions-row">
           <button type="button" class="btn btn-secondary" onclick="openFilters()">
-            <i class="fas fa-filter icon"></i>Filtros Avançados
-          </button>
-          <button type="submit" class="btn btn-primary">
-            <i class="fas fa-check icon"></i>Aplicar
+            <i class="fas fa-filter icon"></i>
           </button>
           <button type="button" class="btn btn-secondary" onclick="resetFilters()">
             <i class="fas fa-redo icon"></i>Limpar
           </button>
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-check icon"></i>Aplicar
+          </button>
         </div>
 
-        <!-- Linha 3: Filtros de Ordenação (Discretos) -->
-        <div class="sort-controls">
-          <div class="sort-group">
-            <label for="quickSortSelect"><i class="fas fa-sort icon"></i>Ordenar por:</label>
-            <select id="quickSortSelect" name="sort" onchange="document.getElementById('hiddenSort').value = this.value">
-              <option value="codigo" {% if sort=='codigo' %}selected{% endif %}>Código</option>
-              <option value="nome" {% if sort=='nome' %}selected{% endif %}>Nome</option>
-            </select>
-          </div>
-          <div class="sort-group">
-            <label for="quickDirSelect"><i class="fas fa-arrow-up icon"></i>Direção:</label>
-            <select id="quickDirSelect" name="dir" onchange="document.getElementById('hiddenDir').value = this.value">
-              <option value="asc" {% if direction=='asc' %}selected{% endif %}>Crescente</option>
-              <option value="desc" {% if direction=='desc' %}selected{% endif %}>Decrescente</option>
-            </select>
-          </div>
+      </div>
+
+      <!-- Linha 3: Filtros de Ordenação (Discretos) -->
+      <div class="sort-controls">
+        <div class="sort-group">
+          <label for="quickSortSelect"><i class="fas fa-sort icon"></i>Ordenar por:</label>
+          <select id="quickSortSelect" name="sort" onchange="document.getElementById('hiddenSort').value = this.value">
+            <option value="codigo" {% if sort=='codigo' %}selected{% endif %}>Código</option>
+            <option value="nome" {% if sort=='nome' %}selected{% endif %}>Nome</option>
+          </select>
+        </div>
+        <div class="sort-group">
+          <label for="quickDirSelect"><i class="fas fa-arrow-up icon"></i>Direção:</label>
+          <select id="quickDirSelect" name="dir" onchange="document.getElementById('hiddenDir').value = this.value">
+            <option value="asc" {% if direction=='asc' %}selected{% endif %}>Crescente</option>
+            <option value="desc" {% if direction=='desc' %}selected{% endif %}>Decrescente</option>
+          </select>
         </div>
       </div>
 
@@ -926,12 +928,11 @@
         {% for empresa in empresas %}
         <div class="client-card">
           <div class="client-header">
-            <div class="client-icon"><i class="fas fa-building"></i></div>
             <div class="client-info">
               <!-- Alteração solicitada: Nome (Razão Social) como título, Fantasia abaixo -->
               <h3 title="{{ empresa.nome }}">{{ empresa.nome }}</h3>
-              <p>{{ empresa.fantaisa or '' }}</p>
-              <p>ID: {{ empresa.codigo }} • Status: Ativo ✓</p>
+              <p>Fantasia: {{ empresa.fantaisa or '' }}</p>
+              <p>Cód. Empresa: {{ empresa.codigo }}</p>
             </div>
           </div>
 

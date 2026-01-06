@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Relatório RPS - {{ dados.cliente_nome }}</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/relatorio-inline-styles.css') }}">
+  {% if mode == 'web' %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/relatorio.css') }}">
+  {% endif %}
+
+  {% if mode == 'web' %}
+  <!-- Biblioteca de Gráficos Interativos (Apenas WEB) -->
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+  <!-- Biblioteca de QR Code -->
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+  {% endif %}
+</head>
+
+<body>
+  {% if mode == 'web' %}
+  <!-- WRAPPER DE SCROLL SNAP -->
+  <div class="snap-container" id="mainScroll">
+
+    <!-- MENU LATERAL MINIMALISTA -->
+    <div class="sidenav-minimal">
+      <a onclick="goToSlide('capa')" class="nav-dot-container" id="nav-capa">
+        <div class="nav-bar"></div>
+        <div class="nav-tooltip">Capa</div>
+      </a>
+      <a onclick="goToSlide('resumo')" class="nav-dot-container" id="nav-resumo">
+        <div class="nav-bar"></div>
+        <div class="nav-tooltip">Resumo Executivo</div>
+      </a>
+      <a onclick="goToSlide('ativos')" class="nav-dot-container" id="nav-ativos">
+        <div class="nav-bar"></div>
+        <div class="nav-tooltip">Análise de Ativos</div>
+      </a>
+      <a onclick="goToSlide('passivos')" class="nav-dot-container" id="nav-passivos">
+        <div class="nav-bar"></div>
+        <div class="nav-tooltip">Análise de Passivos</div>
+      </a>
+      <a onclick="goToSlide('custos')" class="nav-dot-container" id="nav-custos">
+        <div class="nav-bar"></div>
+        <div class="nav-tooltip">Custos & Fornecedores</div>
+      </a>
+      <a onclick="goToSlide('rentabilidade')" class="nav-dot-container" id="nav-rentabilidade">
+        <div class="nav-bar"></div>
+        <div class="nav-tooltip">Rentabilidade & Patrimônio</div>
+      </a>
+      <a onclick="goToSlide('vendas')" class="nav-dot-container" id="nav-vendas">
+        <div class="nav-bar"></div>
+        <div class="nav-tooltip">Análise de Vendas</div>
+      </a>
+      <a onclick="goToSlide('tributario')" class="nav-dot-container" id="nav-tributario">
+        <div class="nav-bar"></div>
+        <div class="nav-tooltip">Estudo Tributário</div>
+      </a>
+      <a onclick="goToSlide('distribuicao')" class="nav-dot-container" id="nav-distribuicao">
+        <div class="nav-bar"></div>
+        <div class="nav-tooltip">Distribuição de Lucros</div>
+      </a>
+      <a onclick="goToSlide('conclusao')" class="nav-dot-container" id="nav-conclusao">
+        <div class="nav-bar"></div>
+        <div class="nav-tooltip">Conclusões & Recomendações</div>
+      </a>
+      <a onclick="goToSlide('agradecimentos')" class="nav-dot-container" id="nav-agradecimentos">
+        <div class="nav-bar"></div>
+        <div class="nav-tooltip">Agradecimentos</div>
+      </a>
+
+      <div class="spacer-20"></div>
+
+      <a href="/" class="nav-dot-container" title="Sair do Relatório">
+        <div class="nav-bar nav-bar-exit"></div>
+        <div class="nav-tooltip">Sair / Voltar</div>
+      </a>
+    </div>
+
+    <!-- Controles de Slide (Setas) -->
+    <div class="slide-controls">
+      <button onclick="prevSlide()" class="btn-floating btn-slide-nav" title="Anterior">
+        <i class="fas fa-chevron-left"></i>
+      </button>
+      <button onclick="nextSlide()" class="btn-floating btn-slide-nav" title="Próximo">
+        <i class="fas fa-chevron-right"></i>
+      </button>
+    </div>
+
+    <!-- Botão Apresentação -->
+    <button onclick="toggleFullScreen()" class="btn-floating btn-presentation" title="Alternar Tela Cheia">
+      <i class="fas fa-expand-arrows-alt fa-lg"></i>
+    </button>
+    {% endif %}
+
+    <!-- Botão FAB (WEB) - Agora na Esquerda -->
+    <a id="fabDownload" href="/report/pdf/{{ dados.cliente_id }}?periodo={{ dados.periodo | urlencode }}" class="fab-download" target="_blank" title="Baixar PDF">
+      BAIXAR PDF
+    </a>
+
+    <!-- ÍCONE DE ENGRENAGEM PARA FILTROS DE PERÍODO (Web Only) -->
+    {% if mode == 'web' %}
+    <button onclick="openPeriodFilters()" class="btn-period-settings" title="Configurar período">
+      <i class="fas fa-cog"></i>
+    </button>
+
+    <!-- MODAL DE FILTROS DE PERÍODO -->
+    <div class="period-filter-modal" id="periodFilterModal">
+      <div class="period-filter-content">
+        <div class="period-filter-header">
+          <h3><i class="fas fa-calendar icon"></i>Selecionar Período</h3>
+          <button type="button" class="close-period-modal" onclick="closePeriodFilters()">&times;</button>
+        </div>
+        <div class="period-filter-body">
+          <div class="filter-group">
+            <label for="filterYear">Ano:</label>
+            <select id="filterYear">
+              <option value="2024" selected>2024</option>
+              <option value="2023">2023</option>
+              <option value="2022">2022</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>Meses:</label>
+            <div class="custom-dropdown" id="monthsDropdown">
+              <div class="dropdown-toggle" onclick="toggleMonthsDropdown()">
+                <span class="dropdown-label" id="monthsLabel">Todos os meses (12)</span>
+                <span class="dropdown-arrow">▼</span>
+              </div>
+              <div class="dropdown-menu" id="monthsMenu">
+                <div class="dropdown-header">
+                  <span class="dropdown-label">Selecione os meses</span>
+                  <div class="dropdown-header-buttons">
+                    <button type="button" onclick="selectAllMonths()">Todos</button>
+                    <button type="button" onclick="clearAllMonths()">Nenhum</button>
+                  </div>
+                </div>
+                <div class="dropdown-item" onclick="toggleMonthCheckbox(1)">
+                  <input type="checkbox" id="month1" value="1" checked onclick="event.stopPropagation(); updateMonthsLabel();">
+                  <label for="month1" onclick="event.stopPropagation();">Janeiro</label>
+                </div>
+                <div class="dropdown-item" onclick="toggleMonthCheckbox(2)">
+                  <input type="checkbox" id="month2" value="2" checked onclick="event.stopPropagation(); updateMonthsLabel();">
+                  <label for="month2" onclick="event.stopPropagation();">Fevereiro</label>
+                </div>
+                <div class="dropdown-item" onclick="toggleMonthCheckbox(3)">
+                  <input type="checkbox" id="month3" value="3" checked onclick="event.stopPropagation(); updateMonthsLabel();">
+                  <label for="month3" onclick="event.stopPropagation();">Março</label>
+                </div>
+                <div class="dropdown-item" onclick="toggleMonthCheckbox(4)">
+                  <input type="checkbox" id="month4" value="4" checked onclick="event.stopPropagation(); updateMonthsLabel();">
+                  <label for="month4" onclick="event.stopPropagation();">Abril</label>
+                </div>
+                <div class="dropdown-item" onclick="toggleMonthCheckbox(5)">
+                  <input type="checkbox" id="month5" value="5" checked onclick="event.stopPropagation(); updateMonthsLabel();">
+                  <label for="month5" onclick="event.stopPropagation();">Maio</label>
+                </div>
+                <div class="dropdown-item" onclick="toggleMonthCheckbox(6)">
+                  <input type="checkbox" id="month6" value="6" checked onclick="event.stopPropagation(); updateMonthsLabel();">
+                  <label for="month6" onclick="event.stopPropagation();">Junho</label>
+                </div>
+                <div class="dropdown-item" onclick="toggleMonthCheckbox(7)">
+                  <input type="checkbox" id="month7" value="7" checked onclick="event.stopPropagation(); updateMonthsLabel();">
+                  <label for="month7" onclick="event.stopPropagation();">Julho</label>
+                </div>
+                <div class="dropdown-item" onclick="toggleMonthCheckbox(8)">
+                  <input type="checkbox" id="month8" value="8" checked onclick="event.stopPropagation(); updateMonthsLabel();">
+                  <label for="month8" onclick="event.stopPropagation();">Agosto</label>
+                </div>
+                <div class="dropdown-item" onclick="toggleMonthCheckbox(9)">
+                  <input type="checkbox" id="month9" value="9" checked onclick="event.stopPropagation(); updateMonthsLabel();">
+                  <label for="month9" onclick="event.stopPropagation();">Setembro</label>
+                </div>
+                <div class="dropdown-item" onclick="toggleMonthCheckbox(10)">
+                  <input type="checkbox" id="month10" value="10" checked onclick="event.stopPropagation(); updateMonthsLabel();">
+                  <label for="month10" onclick="event.stopPropagation();">Outubro</label>
+                </div>
+                <div class="dropdown-item" onclick="toggleMonthCheckbox(11)">
+                  <input type="checkbox" id="month11" value="11" checked onclick="event.stopPropagation(); updateMonthsLabel();">
+                  <label for="month11" onclick="event.stopPropagation();">Novembro</label>
+                </div>
+                <div class="dropdown-item" onclick="toggleMonthCheckbox(12)">
+                  <input type="checkbox" id="month12" value="12" checked onclick="event.stopPropagation(); updateMonthsLabel();">
+                  <label for="month12" onclick="event.stopPropagation();">Dezembro</label>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="filter-group">
+            <label>Filiais:</label>
+            <div class="custom-dropdown" id="branchesDropdown">
+              <div class="dropdown-toggle" onclick="toggleBranchesDropdown()">
+                <span class="dropdown-label" id="branchesLabel">Carregando...</span>
+                <span class="dropdown-arrow">▼</span>
+              </div>
+              <div class="dropdown-menu" id="branchesMenu">
+                <div class="dropdown-header">
+                  <span class="dropdown-label">Selecione as filiais</span>
+                  <div class="dropdown-header-buttons">
+                    <button type="button" onclick="selectAllBranches()">Todas</button>
+                    <button type="button" onclick="clearAllBranches()">Nenhuma</button>
+                  </div>
+                </div>
+                <div id="branchesMenuItems">
+                  <!-- Será preenchido dinamicamente via JavaScript -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="period-filter-footer">
+          <button type="button" onclick="closePeriodFilters()" class="btn-period btn-secondary">Cancelar</button>
+          <button type="button" onclick="applyPeriodFilter()" class="btn-period btn-primary">Aplicar</button>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- ========================================
+       CONTEÚDO DAS PÁGINAS
+       ======================================== -->
+
+    <!-- CAPA -->
+    <div id="capa" class="page-container cover-page">
+      <div class="logo-container">
+        <img src="{{ url_for('serve_img', filename='logo.png') }}" alt="RPS Logo" class="logo-img">
+      </div>
+      <h1 class="cover-title">Relatório Financeiro</h1>
+      <div class="cover-subtitle">Performance Financeira · Controladoria Estratégica</div>
+      <div class="cover-client-box">
+        <div class="cover-client-name">{{ dados.cliente_nome }}</div>
+        <div class="cover-date">{{ dados.periodo }}</div>
+      </div>
+      <div class="cover-footer">RPS Assessoria Contábil Administrativa</div>
+    </div>
+
+    <!-- RESUMO -->
+    <div id="resumo" class="page-container">
+      <div class="content-wrapper">
+        <div class="header">
+          <div class="header-left">
+            <h1>Resumo Executivo</h1>
+            <div class="subtitle">Visão Consolidada dos Principais Indicadores</div>
+          </div>
+          <div class="header-right">
+            <div class="client-name">{{ dados.cliente_nome }}</div>
+            <div class="period">{{ dados.periodo }}</div>
+            <div class="page-number">Página 1 de 9</div>
+          </div>
+        </div>
+        <!-- Conteúdo KPI... -->
+        <div class="kpi-container">
+          <div class="kpi-box">
+            <div class="kpi-label"><i class="fas fa-money-bill-wave icon"></i>Vendas Líquidas</div>
+            <div class="kpi-value positive">{{ dados.kpis.vendas_liquidas }}</div>
+            <div class="kpi-trend positive">▲ 12.5% vs mês anterior</div>
+          </div>
+          <div class="kpi-box">
+            <div class="kpi-label"><i class="fas fa-chart-pie icon"></i>Carga Tributária</div>
+            <div class="kpi-value negative">{{ dados.kpis.carga_tributaria }}</div>
+            <div class="kpi-trend neutral">18% sobre vendas</div>
+          </div>
+          <div class="kpi-box">
+            <div class="kpi-label"><i class="fas fa-shopping-cart icon"></i>Compras</div>
+            <div class="kpi-value">{{ dados.kpis.compras }}</div>
+            <div class="kpi-trend positive">▼ 3.2% economia</div>
+          </div>
+          <div class="kpi-box">
+            <div class="kpi-label"><i class="fas fa-hard-hat icon"></i>CAPEX</div>
+            <div class="kpi-value">{{ dados.kpis.capex }}</div>
+            <div class="kpi-trend neutral">5% das vendas</div>
+          </div>
+          <div class="kpi-box">
+            <div class="kpi-label"><i class="fas fa-cogs icon"></i>Despesas Operacionais</div>
+            <div class="kpi-value">{{ dados.kpis.opex }}</div>
+            <div class="kpi-trend positive">Dentro do orçado</div>
+          </div>
+          <div class="kpi-box">
+            <div class="kpi-label"><i class="fas fa-credit-card icon"></i>Despesas Financeiras</div>
+            <div class="kpi-value">{{ dados.kpis.finex }}</div>
+            <div class="kpi-trend positive">▼ 1.5% redução</div>
+          </div>
+          <div class="kpi-box">
+            <div class="kpi-label"><i class="fas fa-file-invoice icon"></i>Outras Despesas</div>
+            <div class="kpi-value">{{ dados.kpis.outros }}</div>
+            <div class="kpi-trend neutral">Dentro da meta</div>
+          </div>
+          <div class="kpi-box kpi-box-success">
+            <div class="kpi-label"><i class="fas fa-star icon"></i>Resultado Líquido</div>
+            <div class="kpi-value {{ 'positive' if dados.kpis.lucro_liquido_raw > 0 else 'negative' }}">
+              {{ dados.kpis.lucro_liquido }}
+            </div>
+            <div class="kpi-trend {{ 'positive' if dados.kpis.lucro_liquido_raw > 0 else 'negative' }}">
+              {% if dados.kpis.lucro_liquido_raw > 0 %}▲ Performance positiva{% else %}▼ Atenção necessária{% endif %}
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-half card">
+            <div class="card-header">
+              <h3><i class="fas fa-chart-line icon"></i>Análise de Tendência</h3>
+              <span class="badge badge-success">+12.5%</span>
+            </div>
+            <p class="text-muted text-muted-small">
+              Crescimento consistente nas vendas líquidas com controle efetivo de despesas operacionais.
+              Margem líquida mantida acima da meta de 10%.
+            </p>
+            <table>
+              <thead>
+                <tr>
+                  <th>Indicador</th>
+                  <th>Valor</th>
+                  <th>Meta</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Margem Bruta</td>
+                  <td class="table-highlight">42%</td>
+                  <td>40%</td>
+                  <td><span class="badge badge-success">OK</span></td>
+                </tr>
+                <tr>
+                  <td>Margem EBITDA</td>
+                  <td class="table-highlight">15%</td>
+                  <td>12%</td>
+                  <td><span class="badge badge-success">OK</span></td>
+                </tr>
+                <tr>
+                  <td>Margem Líquida</td>
+                  <td class="table-highlight">12%</td>
+                  <td>10%</td>
+                  <td><span class="badge badge-success">OK</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="col-half card">
+            <div class="card-header">
+              <h3><i class="fas fa-bullseye icon"></i>Destaques do Período</h3>
+            </div>
+            <div class="insights-container">
+              <div class="alert-success">
+                <div class="alert-success-title"><i class="fas fa-check icon"></i>Vendas Acima da Meta</div>
+                <div class="text-extra-small">
+                  Faturamento superou projeção em 12.5%, impulsionado pelo segmento de produtos premium.
+                </div>
+              </div>
+              <div class="alert-warning">
+                <div class="alert-warning-title"><i class="fas fa-exclamation-circle icon"></i>Atenção aos Custos</div>
+                <div class="text-extra-small">
+                  Despesas financeiras representam 3% do faturamento. Oportunidade de renegociação.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ATIVOS -->
+    <div id="ativos" class="page-container">
+      <div class="content-wrapper">
+        <div class="header">
+          <div class="header-left">
+            <h1>Análise de Ativos</h1>
+            <div class="subtitle">Evolução Monetária e Composição Percentual</div>
+          </div>
+          <div class="header-right">
+            <div class="client-name">{{ dados.cliente_nome }}</div>
+            <div class="period">{{ dados.periodo }}</div>
+            <div class="page-number">Página 2 de 9</div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-full card">
+            <div class="card-header">
+              <h3><i class="fas fa-chart-line icon"></i>Evolução dos Ativos (R$)</h3>
+              <span class="badge badge-success">Crescimento Constante</span>
+            </div>
+            <div class="chart-container chart-container-250">
+              {% if mode == 'web' %}
+              <div id="chart-ativos-evolucao" class="apex-chart-container"></div>
+              {% else %}
+              <img class="chart-img" src="data:image/png;base64,{{ graficos.ativos_evolucao_valor }}" alt="Evolução Ativos R$">
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-full card">
+            <div class="card-header">
+              <h3><i class="fas fa-chart-bar icon"></i>Composição do Ativo (%)</h3>
+              <span class="badge badge-info">Estrutura Estável</span>
+            </div>
+            <div class="chart-container chart-container-250">
+              {% if mode == 'web' %}
+              <div id="chart-ativos-composicao" class="apex-chart-container"></div>
+              {% else %}
+              <img class="chart-img" src="data:image/png;base64,{{ graficos.ativos_composicao_perc }}" alt="Composição Ativos %">
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PASSIVOS -->
+    <div id="passivos" class="page-container">
+      <div class="content-wrapper">
+        <div class="header">
+          <div class="header-left">
+            <h1>Análise de Passivos</h1>
+            <div class="subtitle">Estrutura de Capital e Endividamento</div>
+          </div>
+          <div class="header-right">
+            <div class="client-name">{{ dados.cliente_nome }}</div>
+            <div class="period">{{ dados.periodo }}</div>
+            <div class="page-number">Página 3 de 9</div>
+          </div>
+        </div>
+        <div class="row row-flex-auto">
+          <div class="col-full">
+            <span class="section-badge"><i class="fas fa-briefcase icon"></i>Estrutura de Capital</span>
+          </div>
+        </div>
+        <div class="row">
+          <div class="card card-full-width">
+            <div class="card-header">
+              <h3>Evolução Circulante vs Não-Circulante</h3>
+              <span class="badge badge-warning">Monitorar</span>
+            </div>
+            <div class="chart-container chart-container-450">
+              {% if mode == 'web' %}
+              <div id="chart-passivos" class="apex-chart-container"></div>
+              {% else %}
+              <img class="chart-img chart-img-85" src="data:image/png;base64,{{ graficos.passivos_stack }}" alt="Gráfico de Passivos">
+              {% endif %}
+            </div>
+            <div class="alert-warning-inline">
+              <div class="text-extra-small">
+                <strong><i class="fas fa-lightbulb icon"></i>Insight:</strong> Passivo circulante cresceu 6% enquanto não-circulante reduziu 8%.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CUSTOS -->
+    <div id="custos" class="page-container">
+      <div class="content-wrapper">
+        <div class="header">
+          <div class="header-left">
+            <h1>Custos & Fornecedores</h1>
+            <div class="subtitle">Análise de Despesas e Concentração</div>
+          </div>
+          <div class="header-right">
+            <div class="client-name">{{ dados.cliente_nome }}</div>
+            <div class="period">{{ dados.periodo }}</div>
+            <div class="page-number">Página 4 de 9</div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-half card">
+            <div class="card-header">
+              <h3><i class="fas fa-wallet icon"></i>Composição de Despesas</h3>
+              <span class="badge badge-warning">Atenção Pessoal</span>
+            </div>
+            <div class="chart-container">
+              {% if mode == 'web' %}
+              <div id="chart-custos" class="apex-chart-container"></div>
+              {% else %}
+              <img class="chart-img chart-img-75" src="data:image/png;base64,{{ graficos.custos_pie }}" alt="Custos">
+              {% endif %}
+            </div>
+            <div class="alert-warning-compact">
+              <strong><i class="fas fa-exclamation-triangle icon"></i>Alerta:</strong> Pessoal representa 50% dos custos. Avaliar produtividade e automação.
+            </div>
+          </div>
+          <div class="col-half card">
+            <div class="card-header">
+              <h3><i class="fas fa-handshake icon"></i>Concentração de Fornecedores</h3>
+              <span class="badge badge-warning">Alta Concentração</span>
+            </div>
+            <div class="chart-container">
+              {% if mode == 'web' %}
+              <div id="chart-fornecedores" class="apex-chart-container"></div>
+              {% else %}
+              <img class="chart-img chart-img-75" src="data:image/png;base64,{{ graficos.fornecedores_pie }}" alt="Fornecedores">
+              {% endif %}
+            </div>
+            <div class="alert-warning-bottom">
+              <strong><i class="fas fa-lightbulb icon"></i>Recomendação:</strong> Fornecedor A representa 60%. Considerar diversificação para reduzir risco.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RENTABILIDADE -->
+    <div id="rentabilidade" class="page-container">
+      <div class="content-wrapper">
+        <div class="header">
+          <div class="header-left">
+            <h1>Rentabilidade & Patrimônio</h1>
+            <div class="subtitle">Análise de Retorno vs Referencial</div>
+          </div>
+          <div class="header-right">
+            <div class="client-name">{{ dados.cliente_nome }}</div>
+            <div class="period">{{ dados.periodo }}</div>
+            <div class="page-number">Página 5 de 9</div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-half card">
+            <div class="card-header">
+              <h3><i class="fas fa-chart-area icon"></i>Rentabilidade vs CDI</h3>
+              <span class="badge badge-success">Superando</span>
+            </div>
+            <div class="chart-container">
+              {% if mode == 'web' %}
+              <div id="chart-rentabilidade" class="apex-chart-container"></div>
+              {% else %}
+              <img class="chart-img" src="data:image/png;base64,{{ graficos.rentabilidade_line }}" alt="Rentabilidade">
+              {% endif %}
+            </div>
+          </div>
+          <div class="col-half card">
+            <div class="card-header">
+              <h3><i class="fas fa-gem icon"></i>Patrimônio vs Ativos</h3>
+              <span class="badge badge-info">Crescimento</span>
+            </div>
+            <div class="chart-container">
+              {% if mode == 'web' %}
+              <div id="chart-equity" class="apex-chart-container"></div>
+              {% else %}
+              <img class="chart-img" src="data:image/png;base64,{{ graficos.equity_vs_ativos }}" alt="Patrimônio">
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-full card">
+            <div class="card-header">
+              <h3><i class="fas fa-target icon"></i>ROE vs CDI - Análise Comparativa</h3>
+            </div>
+            <table>
+              <thead>
+                <tr>
+                  <th>Período</th>
+                  <th class="th-center">ROE (%)</th>
+                  <th class="th-center">CDI (%)</th>
+                  <th class="th-center">Spread</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for row in dados.tabela_roe %}
+                <tr>
+                  <td class="td-bold">{{ row.periodo }}</td>
+                  <td class="td-center-primary">{{ row.roe }}%</td>
+                  <td class="td-center-secondary">{{ row.cdi }}%</td>
+                  <td class="td-spread {% if row.delta > 0 %}td-color-positive{% else %}td-color-negative{% endif %}">
+                    {{ '+' if row.delta > 0 else '' }}{{ row.delta }}%
+                  </td>
+                  <td>
+                    <span class="badge {% if row.delta > 0 %}badge-success{% else %}badge-danger{% endif %}">
+                      {{ 'Acima' if row.delta > 0 else 'Abaixo' }}
+                    </span>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VENDAS -->
+    <div id="vendas" class="page-container">
+      <div class="content-wrapper">
+        <div class="header">
+          <div class="header-left">
+            <h1>Análise de Vendas</h1>
+            <div class="subtitle">Top Produtos e Comparativos</div>
+          </div>
+          <div class="header-right">
+            <div class="client-name">{{ dados.cliente_nome }}</div>
+            <div class="period">{{ dados.periodo }}</div>
+            <div class="page-number">Página 6 de 9</div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-half card">
+            <div class="card-header">
+              <h3><i class="fas fa-trophy icon"></i>Top 5 - Faturamento</h3>
+            </div>
+            <div class="chart-container">
+              {% if mode == 'web' %}
+              <div id="chart-top-fat" class="apex-chart-container"></div>
+              {% else %}
+              <img class="chart-img" src="data:image/png;base64,{{ graficos.top_produtos_faturamento }}" alt="Top Faturamento">
+              {% endif %}
+            </div>
+          </div>
+          <div class="col-half card">
+            <div class="card-header">
+              <h3><i class="fas fa-boxes icon"></i>Top 5 - Quantidade</h3>
+            </div>
+            <div class="chart-container">
+              {% if mode == 'web' %}
+              <div id="chart-top-qtd" class="apex-chart-container"></div>
+              {% else %}
+              <img class="chart-img" src="data:image/png;base64,{{ graficos.top_produtos_quantidade }}" alt="Top Quantidade">
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-full card">
+            <div class="card-header">
+              <h3><i class="fas fa-calendar-alt icon"></i>Comparativo Anual (YoY)</h3>
+            </div>
+            <div class="chart-container chart-container-200">
+              {% if mode == 'web' %}
+              <div id="chart-vendas-yoy" class="apex-chart-container"></div>
+              {% else %}
+              <img class="chart-img" src="data:image/png;base64,{{ graficos.vendas_line }}" alt="YoY">
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TRIBUTÁRIO -->
+    <div id="tributario" class="page-container">
+      <div class="content-wrapper">
+        <div class="header">
+          <div class="header-left">
+            <h1>Estudo Tributário</h1>
+            <div class="subtitle">Comparativo IRPJ e CSLL: Lucro Real vs Presumido</div>
+          </div>
+          <div class="header-right">
+            <div class="client-name">{{ dados.cliente_nome }}</div>
+            <div class="period">{{ dados.periodo }}</div>
+            <div class="page-number">Página 7 de 9</div>
+          </div>
+        </div>
+        <div class="row row-flex-auto">
+          <div class="col-half comparison-box">
+            <div class="comparison-label">Custo no Lucro Real</div>
+            <div class="comparison-value text-secondary">{{ dados.estudo_tributario.lucro_real_valor }}</div>
+            <div class="text-8pt-secondary">Baseado na apuração contábil efetiva</div>
+          </div>
+          <div class="col-half comparison-box comparison-box-success">
+            <div class="comparison-label">Custo no Lucro Presumido</div>
+            <div class="comparison-value text-success">{{ dados.estudo_tributario.lucro_presumido_valor }}</div>
+            <div class="text-8pt-secondary">Baseado nas alíquotas de presunção</div>
+          </div>
+        </div>
+        <div class="row row-flex-1">
+          <div class="col-full card card-flex-column">
+            <div class="card-header flex-auto">
+              <h3><i class="fas fa-calculator icon"></i>Análise de Economia Tributária</h3>
+            </div>
+            <div class="flex-1-column-scroll">
+              <div class="flex-1-column-gap">
+                <div class="tax-comparison-header">
+                  <div>
+                    <div class="text-10pt-secondary">Economia Mensal Estimada</div>
+                    <div class="text-20pt-bold-primary">{{ dados.estudo_tributario.economia_mensal }}</div>
+                  </div>
+                  <div class="vertical-divider"></div>
+                  <div>
+                    <div class="text-10pt-secondary">Projeção Anual</div>
+                    <div class="text-20pt-bold-success">{{ dados.estudo_tributario.economia_anual }}</div>
+                  </div>
+                </div>
+
+                <div class="grid-2col-gap-15">
+                  <div class="tax-box-real">
+                    <h4 class="text-10pt-primary-mb"><i class="fas fa-chart-line icon"></i>Lucro Real</h4>
+                    <div class="tax-box-content">
+                      <div class="tax-row">
+                        <span class="text-secondary">IRPJ (15% + Adicional):</span>
+                        <strong>{{ dados.estudo_tributario.lucro_real_irpj }}</strong>
+                      </div>
+                      <div class="tax-row">
+                        <span class="text-secondary">CSLL (9%):</span>
+                        <strong>{{ dados.estudo_tributario.lucro_real_csll }}</strong>
+                      </div>
+                      <div class="horizontal-divider tax-row">
+                        <span class="text-secondary">Total:</span>
+                        <strong class="text-11pt-danger">{{ dados.estudo_tributario.lucro_real_valor }}</strong>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="tax-box-presumido">
+                    <h4 class="text-10pt-primary-mb"><i class="fas fa-chart-bar icon"></i>Lucro Presumido</h4>
+                    <div class="tax-box-content">
+                      <div class="tax-row">
+                        <span class="text-secondary">IRPJ (15% sobre presunção):</span>
+                        <strong>{{ dados.estudo_tributario.lucro_presumido_irpj }}</strong>
+                      </div>
+                      <div class="tax-row">
+                        <span class="text-secondary">CSLL (9% sobre presunção):</span>
+                        <strong>{{ dados.estudo_tributario.lucro_presumido_csll }}</strong>
+                      </div>
+                      <div class="horizontal-divider tax-row">
+                        <span class="text-secondary">Total:</span>
+                        <strong class="text-11pt-success">{{ dados.estudo_tributario.lucro_presumido_valor }}</strong>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="alert-info-compact">
+                <strong><i class="fas fa-lightbulb icon"></i>Recomendação:</strong>
+                Com base nos dados atuais, o regime de <strong>{{ dados.estudo_tributario.recomendacao }}</strong> apresenta a melhor eficiência tributária para a empresa.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DISTRIBUIÇÃO -->
+    <div id="distribuicao" class="page-container">
+      <div class="content-wrapper">
+        <div class="header">
+          <div class="header-left">
+            <h1>Distribuição de Lucros</h1>
+            <div class="subtitle">Detalhamento dos Dividendos aos Sócios</div>
+          </div>
+          <div class="header-right">
+            <div class="client-name">{{ dados.cliente_nome }}</div>
+            <div class="period">{{ dados.periodo }}</div>
+            <div class="page-number">Página 8 de 9</div>
+          </div>
+        </div>
+        <div class="row" style="flex: 0 0 auto; margin-bottom: 18px;">
+          <div class="col-full card" style="background: linear-gradient(135deg, var(--rps-primary) 0%, var(--rps-primary-light) 100%); color: white; height: auto; padding: 20px;">
+            <div style="text-align: center;">
+              <h2 style="font-size: 14pt; margin-bottom: 10px; opacity: 0.9;">Total Distribuído no Período</h2>
+              <div style="font-size: 36pt; font-weight: 700; font-family: 'Poppins', sans-serif;">{{ dados.distribuicao_lucros.total }}</div>
+            </div>
+          </div>
+        </div>
+        <div class="row" style="flex: 1; margin-bottom: 0;">
+          <div class="col-full card" style="display: flex; flex-direction: column;">
+            <div class="card-header" style="flex: 0 0 auto;">
+              <h3><i class="fas fa-users icon"></i>Detalhamento por Sócio</h3>
+            </div>
+            <div style="flex: 1; overflow-y: auto;">
+              <table style="font-size: 11pt; width: 100%;">
+                <thead>
+                  <tr>
+                    <th style="padding: 16px;">Sócio</th>
+                    <th style="padding: 16px; text-align: center;">Participação</th>
+                    <th style="padding: 16px; text-align: right;">Valor Recebido</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for socio in dados.distribuicao_lucros.socios %}
+                  <tr>
+                    <td style="padding: 16px; font-weight: 600;">{{ socio.nome }}</td>
+                    <td style="padding: 16px; text-align: center;">
+                      <span class="badge badge-info">{{ socio.participacao }}</span>
+                    </td>
+                    <td style="padding: 16px; text-align: right; color: var(--rps-primary); font-weight: 700;">
+                      {{ socio.valor }}
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONCLUSÃO -->
+    <div id="conclusao" class="page-container">
+      <div class="content-wrapper">
+        <div class="header">
+          <div class="header-left">
+            <h1>Conclusões & Recomendações</h1>
+            <div class="subtitle">Síntese Estratégica e Próximos Passos</div>
+          </div>
+          <div class="header-right">
+            <div class="client-name">{{ dados.cliente_nome }}</div>
+            <div class="period">{{ dados.periodo }}</div>
+            <div class="page-number">Página 9 de 9</div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-half card" style="background: linear-gradient(135deg, #f0f9f4 0%, #e8f5ec 100%);">
+            <div class="card-header">
+              <h3><i class="fas fa-check-circle icon"></i>Pontos Fortes</h3>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 12px; font-size: 9pt;">
+              <div style="display: flex; gap: 10px;">
+                <span style="color: var(--success-color); font-size: 14pt;">●</span>
+                <div>
+                  <strong>Crescimento Sustentável:</strong> Vendas 12.5% acima do período anterior com margem líquida de 12%.
+                </div>
+              </div>
+              <div style="display: flex; gap: 10px;">
+                <span style="color: var(--success-color); font-size: 14pt;">●</span>
+                <div>
+                  <strong>Liquidez Saudável:</strong> Índice de 1.45 garante capacidade de honrar obrigações de curto prazo.
+                </div>
+              </div>
+              <div style="display: flex; gap: 10px;">
+                <span style="color: var(--success-color); font-size: 14pt;">●</span>
+                <div>
+                  <strong>ROE Acima do CDI:</strong> Rentabilidade superior ao benchmark em todos os períodos analisados.
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-half card" style="background: linear-gradient(135deg, #fff9e6 0%, #fff4d9 100%);">
+            <div class="card-header">
+              <h3><i class="fas fa-exclamation-triangle icon"></i>Pontos de Atenção</h3>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 12px; font-size: 9pt;">
+              <div style="display: flex; gap: 10px;">
+                <span style="color: var(--warning-color); font-size: 14pt;">●</span>
+                <div>
+                  <strong>Concentração de Fornecedores:</strong> 60% das compras com um único fornecedor aumenta risco operacional.
+                </div>
+              </div>
+              <div style="display: flex; gap: 10px;">
+                <span style="color: var(--warning-color); font-size: 14pt;">●</span>
+                <div>
+                  <strong>Custos com Pessoal:</strong> 50% das despesas operacionais. Avaliar produtividade e automação.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-full card">
+            <div class="card-header">
+              <h3><i class="fas fa-lightbulb icon"></i>Recomendações Estratégicas</h3>
+            </div>
+            <table>
+              <thead>
+                <tr>
+                  <th style="width: 20%;">Área</th>
+                  <th style="width: 50%;">Recomendação</th>
+                  <th style="width: 15%;">Prioridade</th>
+                  <th style="width: 15%;">Prazo</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Fornecedores</strong></td>
+                  <td>Diversificar base de fornecedores para reduzir risco de concentração</td>
+                  <td><span class="badge badge-danger">Alta</span></td>
+                  <td>30 dias</td>
+                </tr>
+                <tr>
+                  <td><strong>Financeiro</strong></td>
+                  <td>Renegociar taxas de empréstimos e linhas de crédito com bancos</td>
+                  <td><span class="badge badge-warning">Média</span></td>
+                  <td>60 dias</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AGRADECIMENTOS -->
+    <div id="agradecimentos" class="page-container">
+      <div class="content-wrapper">
+        <div class="header">
+          <div class="header-left">
+            <h1>Agradecimentos</h1>
+            <div class="subtitle">Contato e Acesso ao Relatório Digital</div>
+          </div>
+          <div class="header-right">
+            <div class="client-name">{{ dados.cliente_nome }}</div>
+            <div class="period">{{ dados.periodo }}</div>
+            <div class="page-number">Página 10 de 10</div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-full card" style="text-align: center; padding: 40px;">
+            <h2 style="color: var(--rps-primary); margin-bottom: 30px; font-size: 24pt;">
+              Obrigado pela Confiança
+            </h2>
+            <p style="font-size: 12pt; color: var(--text-secondary); margin-bottom: 20px;">
+              Agradecemos a oportunidade de contribuir para o sucesso financeiro de sua empresa. Este relatório foi desenvolvido com atenção aos detalhes e ao seu contexto específico.
+            </p>
+          </div>
+        </div>
+
+        <div class="row" style="margin-top: 30px;">
+          <div class="col-half card">
+            <div class="card-header">
+              <h3><i class="fas fa-phone icon"></i>Entre em Contato</h3>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 16px; font-size: 10pt;">
+              <div>
+                <div style="font-weight: 600; color: var(--rps-primary); margin-bottom: 4px;">RPS Assessoria Contábil Administrativa</div>
+              </div>
+              <div>
+                <div style="font-weight: 600; color: var(--text-secondary); margin-bottom: 4px;">
+                  <i class="fas fa-phone icon"></i>Telefone
+                </div>
+                <div style="color: var(--text-primary);">
+                  +55 (73) 3166-5700
+                </div>
+              </div>
+              <div>
+                <div style="font-weight: 600; color: var(--text-secondary); margin-bottom: 4px;">
+                  <i class="fas fa-envelope icon"></i>Email
+                </div>
+                <div style="color: var(--text-primary);">
+                  atendimento@rpscontabil.com.br
+                </div>
+              </div>
+              <div>
+                <div style="font-weight: 600; color: var(--text-secondary); margin-bottom: 4px;">
+                  <i class="fas fa-map-marker-alt icon"></i>Endereço
+                </div>
+                <div style="color: var(--text-primary); font-size: 9pt;">
+                  Eunápolis - BA
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-half card">
+            <div class="card-header">
+              <h3><i class="fas fa-qrcode icon"></i>Acesse o Relatório no Celular</h3>
+            </div>
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 16px; padding: 10px;">
+              <p style="font-size: 9pt; color: var(--text-secondary);">
+                Escaneie o código QR abaixo para acessar este relatório no seu dispositivo móvel:
+              </p>
+              <div id="qrCodeContainer" style="
+                background: white;
+                padding: 10px;
+                border-radius: 8px;
+                border: 2px solid var(--border-color);
+              "></div>
+              <p style="font-size: 8pt; color: var(--text-secondary); font-style: italic;">
+                Válido por 30 dias
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {% if mode == 'web' %}
+  </div> <!-- Fecha snap-container -->
+  {% endif %}
+
+  <!-- Scripts externos -->
+  {% if mode == 'web' %}
+  <script>
+    // Passar dados dos gráficos para o script externo
+    window.reportData = {{ raw_data | tojson }};
+  </script>
+  <script src="{{ url_for('static', filename='js/relatorio.js') }}"></script>
+  {% endif %}
+
+</body>
+
+</html>
