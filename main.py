@@ -26,16 +26,38 @@ COLOR_SECONDARY = '#7fa88f'
 COLOR_TERTIARY = '#1a1a1a'
 COLOR_BG = '#fafbfa'
 
+# --- CONFIGURAÇÃO FIREBIRD ---
+# Atualizado para conectar no banco Athenas (Firebird)
 data_provider = DatabaseDataProvider(
-    host=os.getenv('DB_HOST', '192.168.10.46'),
-    port=int(os.getenv('DB_PORT', '5433')),
-    database=os.getenv('DB_NAME', 'dw_athenas'),
-    user=os.getenv('DB_USER', 'postgres'),
-    password=os.getenv('DB_PASSWORD', 'admin'),
+    host='192.168.10.160',
+    port=3050,
+    database=r'e:\Athenas\rps.fdb',
+    user='SYSDBA',
+    password='masterkey',
 )
 chart_service = ChartService(primary=COLOR_PRIMARY, secondary=COLOR_SECONDARY, tertiary=COLOR_TERTIARY, bg=COLOR_BG)
 report_service = ReportService(data_provider, chart_service)
 
+def parse_request_params():
+    """Helper para extrair filtros de ano, meses e filiais da requisição"""
+    # Ano
+    year = request.args.get('year', type=int) or datetime.now().year
+    
+    # Meses (ex: "1,2,3" -> [1, 2, 3])
+    months_str = request.args.get('months')
+    if months_str:
+        months = [int(m) for m in months_str.split(',') if m.strip().isdigit()]
+    else:
+        # Default: mês atual
+        months = [datetime.now().month]
+        
+    # Filiais (ex: "1,2" -> [1, 2])
+    branches_str = request.args.get('branches')
+    branches = None
+    if branches_str:
+        branches = [int(b) for b in branches_str.split(',') if b.strip().isdigit()]
+        
+    return year, months, branches
 
 @app.route('/')
 def home():
@@ -126,56 +148,31 @@ def home():
 @app.route('/report/view/<int:cliente_id>')
 def report_view(cliente_id: int):
     """Visualização web do relatório com navegação entre páginas - Modo WEB"""
-    # Suporte aos novos parâmetros (multi-mês e multi-filial)
-    year = request.args.get('year')
-    months = request.args.get('months')  # Ex: "1,2,3"
-    branches = request.args.get('branches')  # Ex: "1,2,3"
+    year, months, branches = parse_request_params()
     
-    # Fallback para formato antigo (periodo)
-    if not year and not months:
-        periodo = request.args.get('periodo') or datetime.now().strftime('%B/%Y')
-    else:
-        # Construir período a partir dos novos parâmetros
-        year = year or datetime.now().strftime('%Y')
-        months_list = months.split(',') if months else [str(datetime.now().month)]
-        # Para exibição, usar primeiro mês ou indicar múltiplos meses
-        if len(months_list) == 1:
-            month_names = ['January', 'February', 'March', 'April', 'May', 'June',
-                          'July', 'August', 'September', 'October', 'November', 'December']
-            periodo = f"{month_names[int(months_list[0])-1]}/{year}"
-        else:
-            periodo = f"Múltiplos meses/{year}"
+    # Passando os parâmetros novos corretamente
+    contexto = report_service.montar_contexto(
+        cliente_id=cliente_id, 
+        year=year, 
+        months=months, 
+        branches=branches
+    )
     
-    contexto = report_service.montar_contexto(cliente_id, periodo)
-    # Adicionamos mode='web' para ativar gráficos interativos e menu
     return render_template('relatorio_full.html', **contexto, mode='web')
 
 
 @app.route('/report/pdf/<int:cliente_id>')
 def report_pdf(cliente_id: int):
     """Geração de PDF com WeasyPrint - Modo PDF"""
-    # Suporte aos novos parâmetros (multi-mês e multi-filial)
-    year = request.args.get('year')
-    months = request.args.get('months')  # Ex: "1,2,3"
-    branches = request.args.get('branches')  # Ex: "1,2,3"
+    year, months, branches = parse_request_params()
     
-    # Fallback para formato antigo (periodo)
-    if not year and not months:
-        periodo = request.args.get('periodo') or datetime.now().strftime('%B/%Y')
-    else:
-        # Construir período a partir dos novos parâmetros
-        year = year or datetime.now().strftime('%Y')
-        months_list = months.split(',') if months else [str(datetime.now().month)]
-        # Para exibição, usar primeiro mês ou indicar múltiplos meses
-        if len(months_list) == 1:
-            month_names = ['January', 'February', 'March', 'April', 'May', 'June',
-                          'July', 'August', 'September', 'October', 'November', 'December']
-            periodo = f"{month_names[int(months_list[0])-1]}/{year}"
-        else:
-            periodo = f"Múltiplos meses/{year}"
+    contexto = report_service.montar_contexto(
+        cliente_id=cliente_id, 
+        year=year, 
+        months=months, 
+        branches=branches
+    )
     
-    contexto = report_service.montar_contexto(cliente_id, periodo)
-    # Adicionamos mode='pdf' para usar imagens estáticas e esconder menu
     html_string = render_template('relatorio_full.html', **contexto, mode='pdf')
 
     css_file = os.path.join(app.static_folder, 'style.css')
@@ -185,7 +182,7 @@ def report_pdf(cliente_id: int):
 
     response = make_response(pdf_bytes)
     response.headers['Content-Type'] = 'application/pdf'
-    filename = f"RPS_Relatorio_{cliente_id}_{periodo.replace('/', '_')}.pdf"
+    filename = f"Relatorio_{cliente_id}_{year}.pdf"
     response.headers['Content-Disposition'] = f"attachment; filename={filename}"
     return response
 
@@ -194,7 +191,7 @@ def report_pdf(cliente_id: int):
 def report_pdf_batch():
     """Geração em lote de PDFs (ZIP)"""
     ids_str = request.args.get('ids', '')
-    periodo = request.args.get('periodo') or datetime.now().strftime('%B/%Y')
+    year, months, branches = parse_request_params()
     
     if not ids_str:
         return jsonify({"error": "Parâmetro 'ids' é obrigatório"}), 400
@@ -208,18 +205,22 @@ def report_pdf_batch():
     buf = io.BytesIO()
     with zipfile.ZipFile(buf, 'w', compression=zipfile.ZIP_DEFLATED) as zf:
         for cid in ids:
-            contexto = report_service.montar_contexto(cid, periodo)
-            # PDF em lote também usa mode='pdf'
+            contexto = report_service.montar_contexto(
+                cliente_id=cid, 
+                year=year, 
+                months=months, 
+                branches=branches
+            )
             html_string = render_template('relatorio_full.html', **contexto, mode='pdf')
             css_file = os.path.join(app.static_folder, 'style.css')
             pdf_bytes = HTML(string=html_string, base_url=app.root_path).write_pdf(
                 stylesheets=[CSS(filename=css_file)]
             )
-            filename = f"RPS_Relatorio_{cid}_{periodo.replace('/', '_')}.pdf"
+            filename = f"RPS_Relatorio_{cid}_{year}.pdf"
             zf.writestr(filename, pdf_bytes)
 
     buf.seek(0)
-    zip_name = f"RPS_Relatorios_{periodo.replace('/', '_')}.zip"
+    zip_name = f"RPS_Relatorios_{year}.zip"
     return send_file(buf, as_attachment=True, download_name=zip_name, mimetype='application/zip')
 
 
@@ -257,28 +258,18 @@ def api_branches(cliente_id: int):
 @app.route('/api/preview/<int:cliente_id>')
 def api_preview(cliente_id: int):
     """API para prévia rápida dos KPIs de um cliente"""
-    # Suporte aos novos parâmetros (multi-mês e multi-filial)
-    year = request.args.get('year')
-    months = request.args.get('months')
+    year, months, branches = parse_request_params()
     
-    # Fallback para formato antigo
-    if not year and not months:
-        periodo = request.args.get('periodo') or datetime.now().strftime('%B/%Y')
-    else:
-        year = year or datetime.now().strftime('%Y')
-        months_list = months.split(',') if months else [str(datetime.now().month)]
-        if len(months_list) == 1:
-            month_names = ['January', 'February', 'March', 'April', 'May', 'June',
-                          'July', 'August', 'September', 'October', 'November', 'December']
-            periodo = f"{month_names[int(months_list[0])-1]}/{year}"
-        else:
-            periodo = f"Múltiplos meses/{year}"
-    
-    contexto = report_service.montar_contexto(cliente_id, periodo)
+    contexto = report_service.montar_contexto(
+        cliente_id=cliente_id, 
+        year=year, 
+        months=months, 
+        branches=branches
+    )
     
     return jsonify({
         "cliente_id": cliente_id,
-        "periodo": periodo,
+        "periodo": contexto['dados']['periodo'],
         "kpis": contexto['dados']['kpis'],
         "indicadores": contexto['dados']['indicadores']
     })

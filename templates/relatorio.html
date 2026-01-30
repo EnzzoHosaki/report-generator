@@ -13,19 +13,16 @@
   {% endif %}
 
   {% if mode == 'web' %}
-  <!-- Biblioteca de Gráficos Interativos (Apenas WEB) -->
   <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-  <!-- Biblioteca de QR Code -->
   <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
   {% endif %}
 </head>
 
 <body>
   {% if mode == 'web' %}
-  <!-- WRAPPER DE SCROLL SNAP -->
   <div class="snap-container" id="mainScroll">
 
-    <!-- MENU LATERAL MINIMALISTA -->
+    <!-- MENU LATERAL -->
     <div class="sidenav-minimal">
       <a onclick="goToSlide('capa')" class="nav-dot-container" id="nav-capa">
         <div class="nav-bar"></div>
@@ -80,7 +77,7 @@
       </a>
     </div>
 
-    <!-- Controles de Slide (Setas) -->
+    <!-- Controles de Slide -->
     <div class="slide-controls">
       <button onclick="prevSlide()" class="btn-floating btn-slide-nav" title="Anterior">
         <i class="fas fa-chevron-left"></i>
@@ -96,12 +93,12 @@
     </button>
     {% endif %}
 
-    <!-- Botão FAB (WEB) - Agora na Esquerda -->
+    <!-- Botão FAB (WEB) -->
     <a id="fabDownload" href="/report/pdf/{{ dados.cliente_id }}?periodo={{ dados.periodo | urlencode }}" class="fab-download" target="_blank" title="Baixar PDF">
       BAIXAR PDF
     </a>
 
-    <!-- ÍCONE DE ENGRENAGEM PARA FILTROS DE PERÍODO (Web Only) -->
+    <!-- ÍCONE DE ENGRENAGEM PARA FILTROS DE PERÍODO -->
     {% if mode == 'web' %}
     <button onclick="openPeriodFilters()" class="btn-period-settings" title="Configurar período">
       <i class="fas fa-cog"></i>
@@ -205,7 +202,6 @@
                   </div>
                 </div>
                 <div id="branchesMenuItems">
-                  <!-- Será preenchido dinamicamente via JavaScript -->
                 </div>
               </div>
             </div>
@@ -970,13 +966,11 @@
     </div>
 
     {% if mode == 'web' %}
-  </div> <!-- Fecha snap-container -->
+  </div>
   {% endif %}
 
-  <!-- Scripts externos -->
   {% if mode == 'web' %}
   <script>
-    // Passar dados dos gráficos para o script externo
     window.reportData = {{ raw_data | tojson }};
   </script>
   <script src="{{ url_for('static', filename='js/relatorio.js') }}"></script>

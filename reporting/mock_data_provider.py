@@ -1,7 +1,7 @@
 from __future__ import annotations
 import random
 from datetime import datetime
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 
 from faker import Faker
 
@@ -10,8 +10,7 @@ from .data_provider import DataProvider
 
 class MockDataProvider(DataProvider):
     """
-    Implementação mock do DataProvider usando Faker e random para gerar dados
-    sintéticos e reproduzíveis (opcionalmente via seed).
+    Implementação mock do DataProvider.
     """
 
     def __init__(self, locale: str = "pt_BR", seed: int | None = None) -> None:
@@ -20,21 +19,35 @@ class MockDataProvider(DataProvider):
             random.seed(seed)
             Faker.seed(seed)
         # Clientes de exemplo
-        self._clientes: List[int] = [1001, 1002, 1003]
+        self._clientes = [
+            {"codigo": 1001, "nome": "Empresa Mock A", "fantasia": "Mock A"},
+            {"codigo": 1002, "nome": "Empresa Mock B", "fantasia": "Mock B"},
+        ]
 
-    def listar_clientes(self) -> List[int]:
-        return list(self._clientes)
+    def listar_clientes(self) -> List[Dict[str, Any]]:
+        return self._clientes
+
+    def listar_filiais(self, cliente_id: int) -> List[Dict[str, Any]]:
+        return [{"codigo": 1, "nome": "Matriz", "fantasia": "Matriz"}]
 
     def _fmt_brl(self, val: float) -> str:
         return f"R$ {val:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
 
-    def obter_contexto_dados(self, cliente_id: int, periodo: str) -> Dict[str, Any]:
+    def obter_contexto_dados(
+        self, 
+        cliente_id: int, 
+        anos: List[int], 
+        meses: List[int], 
+        filiais: Optional[List[int]] = None
+    ) -> Dict[str, Any]:
+        
         # Dados básicos
-        cliente_info = {
-            "cliente_id": cliente_id,
-            "cliente_nome": self.fake.company(),
-            "periodo": periodo or datetime.now().strftime("%B/%Y"),
-        }
+        cliente_nome = next((c["nome"] for c in self._clientes if c["codigo"] == cliente_id), "Cliente Mock")
+        
+        # Formatação do período
+        str_meses = "/".join(map(str, meses))
+        str_anos = "/".join(map(str, set(anos)))
+        periodo_display = f"Meses: {str_meses} | Ano: {str_anos}"
 
         # KPIs (exemplo simples)
         vendas = random.uniform(500000, 1000000)
@@ -72,14 +85,41 @@ class MockDataProvider(DataProvider):
             {"periodo": "6 M", "roe": 8.2, "cdi": 5.5, "delta": 2.7},
             {"periodo": "12 M", "roe": 15.1, "cdi": 11.2, "delta": 3.9},
         ]
+        
+        estudo_tributario = {
+            "lucro_real_valor": self._fmt_brl(lucro * 0.34),
+            "lucro_presumido_valor": self._fmt_brl(vendas * 0.05),
+            "recomendacao": "Lucro Presumido",
+            "economia_anual": "R$ 50.000,00",
+            "economia_mensal": "R$ 4.166,00"
+        }
+        
+        distribuicao = {
+            "total": self._fmt_brl(lucro),
+            "socios": [{"nome": "Sócio 1", "participacao": "100%", "valor": self._fmt_brl(lucro)}]
+        }
+
+        # Mock de dados gráficos
+        graficos_data = {
+            "vendas_evo": [vendas] * 12,
+            "custos_evo": [compras] * 12,
+            "ativos_evo": [vendas * 2] * 12,
+            "pl_evo": [vendas * 1.5] * 12,
+            "composicao_ativo": [vendas, vendas],
+            "composicao_passivo": [vendas * 0.5, vendas * 0.5],
+            "custos_detalhe": [opex, finex, impostos]
+        }
 
         return {
             "dados": {
                 "cliente_id": cliente_id,
-                "cliente_nome": cliente_info["cliente_nome"],
-                "periodo": cliente_info["periodo"],
+                "cliente_nome": cliente_nome,
+                "periodo": periodo_display,
                 "kpis": kpis,
                 "indicadores": indicadores,
                 "tabela_roe": tabela_roe,
-            }
+                "estudo_tributario": estudo_tributario,
+                "distribuicao_lucros": distribuicao
+            },
+            "graficos_data": graficos_data
         }

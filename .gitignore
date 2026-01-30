@@ -25,3 +25,4 @@ nohup.out
 # Sistemas
 .DS_Store
 Thumbs.db
+*:Zone.Identifier

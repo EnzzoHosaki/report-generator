@@ -1,293 +1,294 @@
 from __future__ import annotations
-import psycopg2
-from psycopg2.extras import RealDictCursor
+import firebirdsql
+import time
 from typing import Dict, Any, List, Optional
 from datetime import datetime
-import random
-import re
 
 from .data_provider import DataProvider
 
-
 class DatabaseDataProvider(DataProvider):
     """
-    Implementação do DataProvider usando PostgreSQL.
-    Conecta ao banco dw_athenas e busca dados reais das empresas.
+    Provider definitivo e OTIMIZADO para Firebird/Athenas.
+    - Conexão robusta (Firebird Pure Python).
+    - Cache em memória: Faz 1 consulta pesada em vez de 20.
+    - FALLBACK AUTOMÁTICO: Se não achar dados na data escolhida, busca o último mês com movimento.
     """
 
     def __init__(
         self,
-        host: str = "192.168.10.46",
-        port: int = 5433,
-        database: str = "dw_athenas",
-        user: str = "postgres",
-        password: str = "admin",
+        host: str = "192.168.10.160",
+        port: int = 3050,
+        database: str = r"e:\Athenas\rps.fdb",
+        user: str = "SYSDBA",
+        password: str = "masterkey",
     ) -> None:
         self.host = host
         self.port = port
         self.database = database
         self.user = user
         self.password = password
-        self._connection = None
-        self._empresas_cache = None
-        
-        self.meses_map = {
-            'janeiro': 1, 'fevereiro': 2, 'março': 3, 'marco': 3,
-            'abril': 4, 'maio': 5, 'junho': 6,
-            'julho': 7, 'agosto': 8, 'setembro': 9,
-            'outubro': 10, 'novembro': 11, 'dezembro': 12,
-            'january': 1, 'february': 2, 'march': 3,
-            'april': 4, 'may': 5, 'june': 6,
-            'july': 7, 'august': 8, 'september': 9,
-            'october': 10, 'november': 11, 'december': 12
-        }
 
     def _get_connection(self):
-        """Obtém ou cria uma conexão com o banco de dados."""
-        if self._connection is None or self._connection.closed:
-            self._connection = psycopg2.connect(
-                host=self.host,
-                port=self.port,
-                database=self.database,
-                user=self.user,
-                password=self.password,
-            )
-        return self._connection
+        return firebirdsql.connect(
+            host=self.host,
+            port=self.port,
+            database=self.database,
+            user=self.user,
+            password=self.password,
+            charset='WIN1252'
+        )
 
     def _fmt_brl(self, val: float) -> str:
-        """Formata valor como BRL."""
-        if val is None:
-            val = 0.0
+        if val is None: val = 0.0
         return f"R$ {val:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
 
-    def _parse_periodo(self, periodo: str) -> tuple[Optional[int], int]:
-        """
-        Converte string 'Janeiro/2024', 'January/2024' ou '01/2024' para (mes, ano).
-        Retorna (mes_atual, ano_atual) se falhar.
-        Se detectar 'Múltiplos meses/YYYY', retorna (None, YYYY).
-        """
-        if not periodo:
-            now = datetime.now()
-            return now.month, now.year
-            
-        try:
-            if '/' in periodo:
-                parts = periodo.split('/')
-                
-                if "Múltiplos meses" in parts[0]:
-                    if len(parts) >= 2 and parts[1].strip().isdigit():
-                         return None, int(parts[1])
-                
-                if parts[0].isdigit():
-                    return int(parts[0]), int(parts[1])
-            
-            parts = periodo.split('/')
-            if len(parts) == 2:
-                mes_nome = parts[0].lower().strip()
-                ano = int(parts[1])
-                mes = self.meses_map.get(mes_nome)
-                if mes:
-                    return mes, ano
-        except Exception as e:
-            print(f"Erro ao fazer parse do período '{periodo}': {e}")
-        
-        print(f"Não foi possível interpretar o período '{periodo}'. Usando data atual.")
-        now = datetime.now()
-        return now.month, now.year
+    def _row_to_dict(self, cursor, row) -> Dict[str, Any]:
+        col_names = [col[0].lower() for col in cursor.description]
+        return dict(zip(col_names, row))
 
     def listar_clientes(self) -> List[Dict[str, Any]]:
-        if self._empresas_cache is not None:
-            return self._empresas_cache
-
+        conn = None
         try:
             conn = self._get_connection()
-            with conn.cursor(cursor_factory=RealDictCursor) as cursor:
-                cursor.execute(
-                    "SELECT codigo, nome, fantaisa FROM tabempresas ORDER BY nome"
-                )
-                self._empresas_cache = cursor.fetchall()
-                return self._empresas_cache
+            cursor = conn.cursor()
+            try:
+                cursor.execute("SELECT codigo, nome, fantaisa FROM tabempresas ORDER BY nome")
+            except Exception:
+                if conn: conn.rollback()
+                cursor = conn.cursor()
+                cursor.execute("SELECT codigo, nome, fantasia FROM tabempresas ORDER BY nome")
+            
+            rows = cursor.fetchall()
+            clientes = [self._row_to_dict(cursor, row) for row in rows]
+            for c in clientes:
+                val = c.get('fantasia') or c.get('fantaisa') or ''
+                c['fantasia'] = val
+                c['fantaisa'] = val
+            return clientes
         except Exception as e:
-            print(f"Erro ao listar clientes: {e}")
+            print(f"❌ Erro listar clientes: {e}")
             return []
+        finally:
+            if conn: conn.close()
 
     def listar_filiais(self, codigo_empresa: int) -> List[Dict[str, Any]]:
-        """
-        Lista as filiais de uma empresa específica.
-        """
-        try:
-            conn = self._get_connection()
-            with conn.cursor(cursor_factory=RealDictCursor) as cursor:
-                cursor.execute(
-                    """
-                    SELECT codigo, nome, fantasia 
-                    FROM tabfilial 
-                    WHERE codigoempresa = %s 
-                    ORDER BY codigo
-                    """,
-                    (codigo_empresa,)
-                )
-                filiais = cursor.fetchall()
-                return filiais
-        except Exception as e:
-            print(f"Erro ao listar filiais: {e}")
-            return []
+        return [] 
 
-    def _calcular_vendas_liquidas(self, empresa_id: int, mes: Optional[int], ano: int) -> float:
+    def _encontrar_ultimo_periodo_valido(self, conn, cliente_id):
         """
-        Calcula as Vendas Líquidas consultando o banco de dados.
-        Vendas Líquidas = Receita Bruta (31...) - Deduções (3150...)
-        Se mes for None, calcula para todo o ano.
+        Busca o último ano/mês que teve movimento de vendas (Grupo 3) para evitar relatórios zerados.
         """
-        base_query = """
-        SELECT sum(s.saldo_movimento_liquido) as total
-        FROM bi.f_balancete_mensal s
-        WHERE s.id_empresa = %s
-          AND s.ano = %s
+        cursor = conn.cursor()
+        # Busca o último ano/mês com saldo no grupo 3 (Resultado)
+        sql = """
+            SELECT FIRST 1 ANO, MES 
+            FROM FAT_HIERARQUIA_SALDOS 
+            WHERE COD_EMPRESA = ? 
+            AND CAST(COD_CONTA_HIERARQUIA AS VARCHAR(50)) LIKE '3%'
+            AND SALDO_MOVIMENTO <> 0
+            ORDER BY ANO DESC, MES DESC
         """
+        cursor.execute(sql, (cliente_id,))
+        row = cursor.fetchone()
+        if row:
+            print(f"🔄 FALLBACK: Dados encontrados em {row[1]}/{row[0]}")
+            return [row[0]], [row[1]] # Retorna ([ano], [mes])
+        return None, None
+
+    def _carregar_cache_analitico(self, conn, cliente_id, anos, meses, filiais=None):
+        start = time.time()
+        cursor = conn.cursor()
         
-        params = [empresa_id, ano]
+        anos_str = ",".join(map(str, anos))
+        meses_str = ",".join(map(str, meses))
         
-        if mes is not None:
-            base_query += " AND s.mes = %s"
-            params.append(mes)
+        # 1. Tenta carregar dados do período solicitado
+        sql = f"""
+            SELECT 
+                CAST(COD_CONTA_HIERARQUIA AS VARCHAR(50)) as CONTA,
+                MES,
+                SUM(SALDO_MOVIMENTO) as VALOR
+            FROM FAT_HIERARQUIA_SALDOS
+            WHERE COD_EMPRESA = ?
+              AND ANO IN ({anos_str})
+              AND MES IN ({meses_str})
+              AND TIPO_CONTA = 'Analitica'
+        """
+        params = [cliente_id]
+        if filiais:
+            filiais_str = ",".join(map(str, filiais))
+            sql += f" AND COD_FILIAL IN ({filiais_str})"
+        sql += " GROUP BY 1, 2"
+        
+        cursor.execute(sql, tuple(params))
+        rows = cursor.fetchall()
+        
+        # 2. SE NÃO VEIO NADA, TENTA BUSCAR DADOS ANTERIORES (FALLBACK)
+        if not rows:
+            print(f"⚠️ Nenhum dado em {meses}/{anos}. Tentando buscar histórico...")
+            novos_anos, novos_meses = self._encontrar_ultimo_periodo_valido(conn, cliente_id)
             
-        base_query += """
-          AND s.id_conta LIKE '31%%'
-          AND s.id_conta NOT LIKE '3180%%'
-          AND s.id_conta NOT LIKE '3185%%'
-          AND s.id_conta NOT LIKE '3190%%'
-        """
+            if novos_anos and novos_meses:
+                # Recarrega com a nova data
+                return self._carregar_cache_analitico(conn, cliente_id, novos_anos, novos_meses, filiais), f"{novos_meses[0]}/{novos_anos[0]}"
+            
+        cache = []
+        for r in rows:
+            cache.append({
+                'conta': str(r[0]),
+                'mes': int(r[1]),
+                'valor': float(r[2]) if r[2] else 0.0
+            })
+            
+        return cache, None # None indica que usamos a data original
+
+    def obter_contexto_dados(
+        self, 
+        cliente_id: int, 
+        anos: List[int], 
+        meses: List[int], 
+        filiais: Optional[List[int]] = None
+    ) -> Dict[str, Any]:
         
+        conn = None
         try:
             conn = self._get_connection()
-            with conn.cursor() as cursor:
-                cursor.execute(base_query, tuple(params))
-                row = cursor.fetchone()
-                if row and len(row) > 0 and row[0] is not None:
-                    return float(row[0]) * -1
-                return 0.0
-        except Exception as e:
-            print(f"Erro ao calcular vendas líquidas para empresa {empresa_id} em {mes}/{ano}: {e}")
-            return 0.0
+            
+            # 1. Nome da Empresa
+            nome_cliente = f"Empresa {cliente_id}"
+            try:
+                cur = conn.cursor()
+                cur.execute("SELECT NOME, FANTAISA FROM TABEMPRESAS WHERE CODIGO = ?", (cliente_id,))
+                row = cur.fetchone()
+                if row: nome_cliente = row[1] if row[1] and row[1].strip() else row[0]
+            except: pass
 
-    def obter_contexto_dados(self, cliente_id: int, periodo: str) -> Dict[str, Any]:
-        """
-        Gera/retorna o contexto de DADOS do relatório.
-        """
-        empresas = self.listar_clientes()
-        empresa = next((e for e in empresas if e["codigo"] == cliente_id), None)
+            # 2. Carregar Cache (Com Fallback Automático)
+            cache_dados, periodo_real = self._carregar_cache_analitico(conn, cliente_id, anos, meses, filiais)
+            
+            # Se houve fallback, avisar na interface trocando o período exibido
+            periodo_display = periodo_real if periodo_real else f"{','.join(map(str, meses))}/{','.join(map(str, anos))}"
 
-        if empresa is None:
-            cliente_nome = f"Empresa {cliente_id}"
-        else:
-            cliente_nome = empresa.get("fantaisa") or empresa.get("nome")
+            # --- Helpers em Memória ---
+            def somar(prefixo: str) -> float:
+                return sum(d['valor'] for d in cache_dados if d['conta'].startswith(prefixo))
 
-        cliente_info = {
-            "cliente_id": cliente_id,
-            "cliente_nome": cliente_nome,
-            "periodo": periodo or datetime.now().strftime("%B/%Y"),
-        }
-        
-        mes, ano = self._parse_periodo(cliente_info["periodo"])
-        print(f"Debug: Consultando DB para Cliente {cliente_id}, Mês {mes}, Ano {ano}")
+            def evolucao(prefixo: str) -> List[float]:
+                meses_val = {m: 0.0 for m in range(1, 13)}
+                for d in cache_dados:
+                    if d['conta'].startswith(prefixo):
+                        meses_val[d['mes']] += d['valor']
+                return list(meses_val.values())
 
-        vendas = self._calcular_vendas_liquidas(cliente_id, mes, ano)
-        
-        impostos = vendas * 0.18
-        compras = vendas * 0.40
-        capex = vendas * 0.05
-        opex = vendas * 0.15
-        finex = vendas * 0.03
-        outros = vendas * 0.02
-        lucro = vendas - (impostos + compras + capex + opex + finex + outros)
+            # --- 3. Cálculo de KPIs ---
+            
+            # Receita Bruta (311)
+            receita_bruta = somar("311")
+            
+            # Se 311 vier zerado, tenta 3.01 (Outro padrão comum)
+            if receita_bruta == 0:
+                # print("⚠️ Receita 311 zerada. Tentando prefixo 301...")
+                receita_bruta = somar("301")
 
-        kpis = {
-            "vendas_liquidas": self._fmt_brl(vendas),
-            "carga_tributaria": self._fmt_brl(impostos),
-            "compras": self._fmt_brl(compras),
-            "capex": self._fmt_brl(capex),
-            "opex": self._fmt_brl(opex),
-            "finex": self._fmt_brl(finex),
-            "outros": self._fmt_brl(outros),
-            "lucro_liquido": self._fmt_brl(lucro),
-            "lucro_liquido_raw": lucro,
-        }
+            deducoes = somar("315")
+            vendas_liquidas = abs(receita_bruta) - abs(deducoes)
 
-        indicadores = {
-            "ebitda": self._fmt_brl(vendas * 0.15),
-            "liquidez_corrente": "1.45" if vendas > 0 else "0.00",
-            "margem_liquida": f"{(lucro/vendas*100):.1f}%" if vendas > 0 else "0.0%",
-            "endividamento": "45%" if vendas > 0 else "0%",
-            "roa": "8%" if vendas > 0 else "0%",
-            "ncg": self._fmt_brl(vendas * 0.1),
-        }
+            # print(f"💰 RESULTADO FINAL: Bruta={receita_bruta}, Liq={vendas_liquidas}")
 
-        tabela_roe = [
-            {"periodo": "3 M", "roe": 4.5 if vendas > 0 else 0, "cdi": 2.8, "delta": 1.7 if vendas > 0 else -2.8},
-            {"periodo": "6 M", "roe": 8.2 if vendas > 0 else 0, "cdi": 5.5, "delta": 2.7 if vendas > 0 else -5.5},
-            {"periodo": "12 M", "roe": 15.1 if vendas > 0 else 0, "cdi": 11.2, "delta": 3.9 if vendas > 0 else -11.2},
-        ]
-        
-        total_distribuido = lucro * 0.6 
-        socios = [
-            {"nome": "Sócio Fundador A", "perc": 50, "valor": total_distribuido * 0.50},
-            {"nome": "Sócio Diretor B", "perc": 30, "valor": total_distribuido * 0.30},
-            {"nome": "Sócio Investidor C", "perc": 20, "valor": total_distribuido * 0.20},
-        ]
-        distribuicao_lucros = {
-            "total": self._fmt_brl(total_distribuido),
-            "socios": [
-                {
-                    "nome": s["nome"],
-                    "participacao": f"{s['perc']}%",
-                    "valor": self._fmt_brl(s["valor"])
-                } for s in socios
-            ]
-        }
+            custos = abs(somar("32"))
+            desp_op = abs(somar("33")) + abs(somar("34"))
+            fin_val = somar("35")
+            desp_fin = abs(fin_val) if fin_val < 0 else 0
+            outros = abs(somar("36"))
+            impostos = abs(somar("39"))
+            lucro = vendas_liquidas - custos - desp_op + fin_val # Soma algébrica pois fin pode ser receita
 
-        base_lucro_real = lucro
-        irpj_real = base_lucro_real * 0.15
-        if base_lucro_real > 60000:
-            irpj_real += (base_lucro_real - 60000) * 0.10
-        csll_real = base_lucro_real * 0.09
-        imposto_real = irpj_real + csll_real
-        
-        base_presumida = vendas * 0.08
-        irpj_presumido = base_presumida * 0.15
-        csll_presumido = base_presumida * 0.09
-        imposto_presumido = irpj_presumido + csll_presumido
-        
-        economia = imposto_real - imposto_presumido
-        
-        estudo_tributario = {
-            "lucro_real_valor": self._fmt_brl(imposto_real),
-            "lucro_real_irpj": self._fmt_brl(irpj_real),
-            "lucro_real_csll": self._fmt_brl(csll_real),
-            "lucro_presumido_valor": self._fmt_brl(imposto_presumido),
-            "lucro_presumido_irpj": self._fmt_brl(irpj_presumido),
-            "lucro_presumido_csll": self._fmt_brl(csll_presumido),
-            "economia_anual": self._fmt_brl(economia * 12),
-            "economia_mensal": self._fmt_brl(economia),
-            "recomendacao": "Lucro Presumido" if imposto_presumido < imposto_real else "Lucro Real"
-        }
+            # Balanço
+            ativo_circ = abs(somar("11"))
+            ativo_n_circ = abs(somar("12"))
+            passivo_circ = abs(somar("21"))
+            passivo_n_circ = abs(somar("22"))
 
-        return {
-            "dados": {
-                "cliente_id": cliente_id,
-                "cliente_nome": cliente_info["cliente_nome"],
-                "periodo": cliente_info["periodo"],
-                "kpis": kpis,
-                "indicadores": indicadores,
-                "tabela_roe": tabela_roe,
-                "distribuicao_lucros": distribuicao_lucros,
-                "estudo_tributario": estudo_tributario
+            return {
+                "dados": {
+                    "cliente_id": cliente_id,
+                    "cliente_nome": nome_cliente,
+                    "periodo": periodo_display, # Mostra a data REAL dos dados
+                    "kpis": {
+                        "vendas_liquidas": self._fmt_brl(vendas_liquidas),
+                        "carga_tributaria": self._fmt_brl(impostos),
+                        "compras": self._fmt_brl(custos),
+                        "capex": self._fmt_brl(0),
+                        "opex": self._fmt_brl(desp_op),
+                        "finex": self._fmt_brl(desp_fin),
+                        "outros": self._fmt_brl(outros),
+                        "lucro_liquido": self._fmt_brl(lucro),
+                        "lucro_liquido_raw": lucro,  # Necessário para lógica do template
+                    },
+                    "indicadores": {
+                        "ebitda": self._fmt_brl(lucro + desp_fin + impostos),
+                        "liquidez_corrente": f"{(ativo_circ / passivo_circ):.2f}" if passivo_circ > 0 else "N/A",
+                        "margem_liquida": f"{(lucro/vendas_liquidas*100):.1f}%" if vendas_liquidas > 0 else "0%",
+                        "endividamento": f"{((passivo_circ+passivo_n_circ)/(ativo_circ+ativo_n_circ)*100):.1f}%" if (ativo_circ+ativo_n_circ) > 0 else "0%",
+                    },
+                    "estudo_tributario": {
+                        "lucro_real_valor": self._fmt_brl(lucro * 0.34),
+                        "lucro_presumido_valor": self._fmt_brl(vendas_liquidas * 0.06),
+                        "recomendacao": "Análise"
+                    },
+                    "distribuicao_lucros": {
+                        "total": self._fmt_brl(lucro if lucro > 0 else 0),
+                        "socios": []
+                    },
+                    "tabela_roe": []
+                },
+                "graficos_data": {
+                    "vendas_evo": evolucao("311") if receita_bruta != 0 else evolucao("301"),
+                    "custos_evo": evolucao("32"),
+                    "ativos_evo": evolucao("1"),
+                    "pl_evo": evolucao("23"),
+                    "composicao_ativo": [ativo_circ, ativo_n_circ],
+                    "composicao_passivo": [passivo_circ, passivo_n_circ],
+                    "custos_detalhe": [abs(somar("331")), abs(somar("332")), abs(somar("333"))]
+                }
             }
-        }
 
-    def close(self):
-        if self._connection and not self._connection.closed:
-            self._connection.close()
-
-    def __del__(self):
-        self.close()
+        except Exception as e:
+            print(f"❌ Erro crítico no provider: {e}")
+            # Retorno de emergência COMPLETO para não quebrar a página
+            return {
+                "dados": {
+                    "cliente_nome": "Erro Carregamento", 
+                    "periodo": "N/A",
+                    "kpis": {
+                        "vendas_liquidas": "R$ 0,00",
+                        "carga_tributaria": "R$ 0,00",
+                        "compras": "R$ 0,00",
+                        "capex": "R$ 0,00",
+                        "opex": "R$ 0,00",
+                        "finex": "R$ 0,00",
+                        "outros": "R$ 0,00",
+                        "lucro_liquido": "R$ 0,00",
+                        "lucro_liquido_raw": 0
+                    }, 
+                    "indicadores": {
+                        "ebitda": "R$ 0,00",
+                        "liquidez_corrente": "0",
+                        "margem_liquida": "0%",
+                        "endividamento": "0%"
+                    },
+                    "estudo_tributario": {
+                        "lucro_real_valor": "R$ 0,00", 
+                        "lucro_presumido_valor": "R$ 0,00", 
+                        "recomendacao": "-"
+                    },
+                    "distribuicao_lucros": {
+                        "total": "R$ 0,00", 
+                        "socios": []
+                    },
+                    "tabela_roe": []
+                },
+                "graficos_data": {} # O ReportService sabe lidar com isso vazio
+            }
+        finally:
+            if conn: conn.close()
