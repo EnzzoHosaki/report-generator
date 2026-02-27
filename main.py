@@ -255,6 +255,24 @@ def api_branches(cliente_id: int):
     ])
 
 
+@app.route('/api/balancete/<int:cliente_id>')
+def api_balancete(cliente_id: int):
+    """API REST para retornar dados do balancete contábil"""
+    year, months, branches = parse_request_params()
+    
+    balancete = data_provider.obter_balancete(
+        cliente_id=cliente_id,
+        anos=[year],
+        meses=months,
+        filiais=branches
+    )
+    
+    return jsonify({
+        "total": len(balancete),
+        "dados": balancete
+    })
+
+
 @app.route('/api/preview/<int:cliente_id>')
 def api_preview(cliente_id: int):
     """API para prévia rápida dos KPIs de um cliente"""

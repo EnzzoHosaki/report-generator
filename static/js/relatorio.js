@@ -623,3 +623,220 @@ document.addEventListener('click', (e) => {
 document.getElementById('periodFilterModal')?.addEventListener('click', (e) => {
   if (e.target.id === 'periodFilterModal') closePeriodFilters();
 });
+
+/* === FUNÇÕES DO BALANCETE === */
+
+let balanceteData = [];
+let balanceteMode = 'empresa'; // 'empresa' (consolidado) ou 'filial'
+
+function openBalancete() {
+  const modal = document.getElementById('balanceteModal');
+  if (!modal) return;
+  modal.classList.add('active');
+  
+  document.getElementById('balanceteLoading').style.display = 'flex';
+  document.getElementById('balanceteError').style.display = 'none';
+  document.getElementById('balanceteTableWrapper').style.display = 'none';
+  
+  loadBalancete();
+}
+
+function closeBalancete() {
+  const modal = document.getElementById('balanceteModal');
+  if (modal) modal.classList.remove('active');
+}
+
+function loadBalancete() {
+  const clientId = getClientId();
+  const params = new URLSearchParams(window.location.search);
+  
+  // Usar os mesmos filtros já aplicados na URL
+  const queryString = params.toString();
+  const url = `/api/balancete/${clientId}${queryString ? '?' + queryString : ''}`;
+  
+  fetch(url)
+    .then(response => {
+      if (!response.ok) throw new Error('Erro na resposta');
+      return response.json();
+    })
+    .then(data => {
+      balanceteData = data.dados || [];
+      // Reset toggle para modo empresa
+      balanceteMode = 'empresa';
+      document.getElementById('balanceteToggle').checked = false;
+      updateToggleLabels();
+      applyBalanceteView();
+      
+      document.getElementById('balanceteLoading').style.display = 'none';
+      document.getElementById('balanceteTableWrapper').style.display = 'flex';
+    })
+    .catch(error => {
+      console.error('Erro ao carregar balancete:', error);
+      document.getElementById('balanceteLoading').style.display = 'none';
+      document.getElementById('balanceteError').style.display = 'flex';
+    });
+}
+
+function formatBRL(val) {
+  if (val === null || val === undefined) val = 0;
+  return val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
+const MESES_NOMES_BALANCETE = {
+  1: 'Jan', 2: 'Fev', 3: 'Mar', 4: 'Abr',
+  5: 'Mai', 6: 'Jun', 7: 'Jul', 8: 'Ago',
+  9: 'Set', 10: 'Out', 11: 'Nov', 12: 'Dez'
+};
+
+function consolidarPorEmpresa(dados) {
+  const mapa = {};
+  dados.forEach(row => {
+    const chave = row.cod_conta_contabil;
+    if (!mapa[chave]) {
+      mapa[chave] = {
+        cod_conta_contabil: row.cod_conta_contabil,
+        nome_conta: row.nome_conta,
+        tipo_conta: row.tipo_conta,
+        natureza: row.natureza,
+        cod_grupo: row.cod_grupo,
+        saldo_inicial: 0,
+        debito: 0,
+        credito: 0,
+        saldo: 0,
+      };
+    }
+    mapa[chave].saldo_inicial += row.saldo_inicial || 0;
+    mapa[chave].debito += row.debito || 0;
+    mapa[chave].credito += row.credito || 0;
+    mapa[chave].saldo += row.saldo || 0;
+  });
+  return Object.values(mapa).sort((a, b) => a.cod_conta_contabil.localeCompare(b.cod_conta_contabil));
+}
+
+function onBalanceteToggle() {
+  const checked = document.getElementById('balanceteToggle').checked;
+  balanceteMode = checked ? 'filial' : 'empresa';
+  updateToggleLabels();
+  applyBalanceteView();
+}
+
+function setBalanceteMode(mode) {
+  balanceteMode = mode;
+  document.getElementById('balanceteToggle').checked = (mode === 'filial');
+  updateToggleLabels();
+  applyBalanceteView();
+}
+
+function updateToggleLabels() {
+  const lblEmpresa = document.getElementById('lblEmpresa');
+  const lblFilial = document.getElementById('lblFilial');
+  if (balanceteMode === 'empresa') {
+    lblEmpresa.className = 'toggle-label-active';
+    lblFilial.className = 'toggle-label-inactive';
+  } else {
+    lblEmpresa.className = 'toggle-label-inactive';
+    lblFilial.className = 'toggle-label-active';
+  }
+}
+
+function applyBalanceteView() {
+  const dados = balanceteMode === 'empresa' ? consolidarPorEmpresa(balanceteData) : balanceteData;
+  renderBalanceteTable(dados, balanceteMode);
+  document.getElementById('balanceteCount').textContent = `${dados.length} registros encontrados`;
+}
+
+function renderBalanceteTable(dados, mode) {
+  const thead = document.querySelector('#balanceteTable thead tr');
+  const tbody = document.getElementById('balanceteBody');
+  tbody.innerHTML = '';
+
+  const isFilial = mode === 'filial';
+  const colCount = isFilial ? 10 : 9;
+
+  // Atualizar cabeçalho dinamicamente
+  thead.innerHTML = `
+    <th>Conta</th>
+    <th>Nome da Conta</th>
+    <th>Tipo</th>
+    <th>Natureza</th>
+    <th>Grupo</th>
+    ${isFilial ? '<th>Filial</th>' : ''}
+    <th class="text-right">Saldo Inicial</th>
+    <th class="text-right">Débito</th>
+    <th class="text-right">Crédito</th>
+    <th class="text-right">Saldo</th>
+  `;
+
+  if (!dados || dados.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="${colCount}" style="text-align:center; padding:30px; color:var(--text-secondary);">Nenhum dado encontrado para o período selecionado.</td></tr>`;
+    return;
+  }
+  
+  dados.forEach(row => {
+    const tr = document.createElement('tr');
+    if (row.tipo_conta === 'Sintetica') tr.classList.add('sintetica');
+    
+    const saldoClass = row.saldo >= 0 ? 'saldo-positivo' : 'saldo-negativo';
+    
+    tr.innerHTML = `
+      <td>${row.cod_conta_contabil}</td>
+      <td>${row.nome_conta}</td>
+      <td>${row.tipo_conta}</td>
+      <td>${row.natureza}</td>
+      <td>${row.cod_grupo}</td>
+      ${isFilial ? `<td>${row.nome_fantasia_filial || row.nome_filial || '-'}</td>` : ''}
+      <td class="text-right">${formatBRL(row.saldo_inicial)}</td>
+      <td class="text-right">${formatBRL(row.debito)}</td>
+      <td class="text-right">${formatBRL(row.credito)}</td>
+      <td class="text-right ${saldoClass}">${formatBRL(row.saldo)}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function exportBalanceteCSV() {
+  if (!balanceteData || balanceteData.length === 0) {
+    alert('Nenhum dado para exportar.');
+    return;
+  }
+  
+  const exportData = balanceteMode === 'empresa' ? consolidarPorEmpresa(balanceteData) : balanceteData;
+  const isFilial = balanceteMode === 'filial';
+  
+  const headers = isFilial
+    ? ['Conta', 'Nome da Conta', 'Tipo', 'Natureza', 'Grupo', 'Filial', 'Saldo Inicial', 'Débito', 'Crédito', 'Saldo']
+    : ['Conta', 'Nome da Conta', 'Tipo', 'Natureza', 'Grupo', 'Saldo Inicial', 'Débito', 'Crédito', 'Saldo'];
+  const rows = exportData.map(r => {
+    const base = [
+      r.cod_conta_contabil,
+      `"${(r.nome_conta || '').replace(/"/g, '""')}"`,
+      r.tipo_conta,
+      r.natureza,
+      r.cod_grupo,
+    ];
+    if (isFilial) {
+      base.push(`"${(r.nome_fantasia_filial || r.nome_filial || '').replace(/"/g, '""')}"`);
+    }
+    base.push(
+      (r.saldo_inicial || 0).toFixed(2).replace('.', ','),
+      (r.debito || 0).toFixed(2).replace('.', ','),
+      (r.credito || 0).toFixed(2).replace('.', ','),
+      (r.saldo || 0).toFixed(2).replace('.', ',')
+    );
+    return base;
+  });
+  
+  const csvContent = '\uFEFF' + headers.join(';') + '\n' + rows.map(r => r.join(';')).join('\n');
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `balancete_${getClientId()}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// Fechar modal do balancete ao clicar fora
+document.getElementById('balanceteModal')?.addEventListener('click', (e) => {
+  if (e.target.id === 'balanceteModal') closeBalancete();
+});

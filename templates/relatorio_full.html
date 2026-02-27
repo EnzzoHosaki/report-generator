@@ -100,6 +100,13 @@
       BAIXAR PDF
     </a>
 
+    <!-- BOTÃO BALANCETE (Web Only) -->
+    {% if mode == 'web' %}
+    <button onclick="openBalancete()" class="btn-balancete" title="Ver Balancete">
+      <i class="fas fa-table"></i>
+    </button>
+    {% endif %}
+
     <!-- ÍCONE DE ENGRENAGEM PARA FILTROS DE PERÍODO (Web Only) -->
     {% if mode == 'web' %}
     <button onclick="openPeriodFilters()" class="btn-period-settings" title="Configurar período">
@@ -920,6 +927,64 @@
         </div>
       </div>
     </div>
+
+    <!-- MODAL DO BALANCETE -->
+    {% if mode == 'web' %}
+    <div class="balancete-modal" id="balanceteModal">
+      <div class="balancete-modal-content">
+        <div class="balancete-modal-header">
+          <h3><i class="fas fa-table icon"></i>Balancete Contábil</h3>
+          <div class="balancete-header-actions">
+            <div class="balancete-toggle">
+              <label id="lblEmpresa" class="toggle-label-active" onclick="setBalanceteMode('empresa')">Por Empresa</label>
+              <div class="toggle-switch">
+                <input type="checkbox" id="balanceteToggle" onchange="onBalanceteToggle()">
+                <span class="toggle-slider"></span>
+              </div>
+              <label id="lblFilial" class="toggle-label-inactive" onclick="setBalanceteMode('filial')">Por Filial</label>
+            </div>
+            <button type="button" class="btn-balancete-export" onclick="exportBalanceteCSV()" title="Exportar CSV">
+              <i class="fas fa-file-csv"></i> CSV
+            </button>
+            <button type="button" class="close-balancete-modal" onclick="closeBalancete()">&times;</button>
+          </div>
+        </div>
+        <div class="balancete-modal-body">
+          <div id="balanceteLoading" class="balancete-loading">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>
+            <p>Carregando balancete...</p>
+          </div>
+          <div id="balanceteError" class="balancete-error" style="display:none;">
+            <i class="fas fa-exclamation-triangle fa-2x"></i>
+            <p>Erro ao carregar balancete.</p>
+          </div>
+          <div id="balanceteTableWrapper" class="balancete-table-wrapper" style="display:none;">
+            <div class="balancete-info">
+              <span id="balanceteCount"></span>
+            </div>
+            <table class="balancete-table" id="balanceteTable">
+              <thead>
+                <tr>
+                  <th>Conta</th>
+                  <th>Nome da Conta</th>
+                  <th>Tipo</th>
+                  <th>Natureza</th>
+                  <th>Grupo</th>
+                  <th>Filial</th>
+                  <th class="text-right">Saldo Inicial</th>
+                  <th class="text-right">Débito</th>
+                  <th class="text-right">Crédito</th>
+                  <th class="text-right">Saldo</th>
+                </tr>
+              </thead>
+              <tbody id="balanceteBody">
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
 
     {% if mode == 'web' %}
   </div> <!-- Fecha snap-container -->
