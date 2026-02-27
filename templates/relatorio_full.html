@@ -100,6 +100,101 @@
       BAIXAR PDF
     </a>
 
+    <!-- BOTÃO DE DEBUG - BALANCETE (Web Only) -->
+    {% if mode == 'web' %}
+    <button onclick="openBalancete()" class="btn-debug-balancete" title="Ver Balancete (Debug)">
+      <i class="fas fa-bug"></i>
+      <span>Balancete</span>
+    </button>
+
+    <!-- MODAL DO BALANCETE -->
+    <div class="balancete-modal" id="balanceteModal">
+      <div class="balancete-modal-content">
+        <div class="balancete-modal-header">
+          <h3><i class="fas fa-table icon"></i>Balancete de Verificação (Debug)</h3>
+          <div class="balancete-header-info">
+            <span id="balancetePeriodo">Carregando...</span>
+            <span id="balanceteTotal">0 contas</span>
+          </div>
+          <button type="button" class="close-balancete-modal" onclick="closeBalancete()">&times;</button>
+        </div>
+        <div class="balancete-filters">
+          <div class="filter-nivel">
+            <label>Filtrar por nível:</label>
+            <select id="filterNivel" onchange="filterBalancete()">
+              <option value="">Todos</option>
+              <option value="1">Nível 1</option>
+              <option value="2">Nível 2</option>
+              <option value="3">Nível 3</option>
+              <option value="4">Nível 4</option>
+              <option value="5">Nível 5+</option>
+            </select>
+          </div>
+          <div class="filter-grupo">
+            <label>Grupo:</label>
+            <select id="filterGrupo" onchange="filterBalancete()">
+              <option value="">Todos</option>
+              <option value="1">1 - Ativo</option>
+              <option value="2">2 - Passivo</option>
+              <option value="3">3 - Receitas</option>
+              <option value="4">4 - Custos/Entradas</option>
+              <option value="5">5 - Despesas</option>
+              <option value="6">6 - Resultado</option>
+            </select>
+          </div>
+          <div class="filter-search">
+            <input type="text" id="filterConta" placeholder="Buscar por código ou nome..." oninput="filterBalancete()">
+          </div>
+          <div class="filter-saldo">
+            <label>
+              <input type="checkbox" id="filterComSaldo" onchange="filterBalancete()">
+              Apenas com saldo ≠ 0
+            </label>
+          </div>
+          <button class="btn-export-csv" onclick="exportBalanceteCSV()">
+            <i class="fas fa-download"></i> Exportar CSV
+          </button>
+        </div>
+        <div class="balancete-modal-body">
+          <div class="balancete-loading" id="balanceteLoading">
+            <i class="fas fa-spinner fa-spin"></i>
+            <span>Carregando balancete...</span>
+          </div>
+          <table class="balancete-table" id="balanceteTable" style="display: none;">
+            <thead>
+              <tr>
+                <th class="col-grupo">Grp</th>
+                <th class="col-codigo">Código da Conta</th>
+                <th class="col-nome">Nome da Conta</th>
+                <th class="col-nivel">Nv</th>
+                <th class="col-tipo">Tipo</th>
+                <th class="col-natureza">Nat</th>
+                <th class="col-inicial">Ini</th>
+                <th class="col-debito">Débito</th>
+                <th class="col-credito">Crédito</th>
+                <th class="col-saldo">Saldo</th>
+              </tr>
+            </thead>
+            <tbody id="balanceteBody">
+            </tbody>
+            <tfoot>
+              <tr class="totals-row">
+                <td colspan="7"><strong>TOTAIS</strong></td>
+                <td id="totalDebito" class="col-debito">R$ 0,00</td>
+                <td id="totalCredito" class="col-credito">R$ 0,00</td>
+                <td id="totalSaldo" class="col-saldo">R$ 0,00</td>
+              </tr>
+            </tfoot>
+          </table>
+          <div class="balancete-empty" id="balanceteEmpty" style="display: none;">
+            <i class="fas fa-inbox"></i>
+            <span>Nenhuma conta encontrada para os filtros selecionados.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
     <!-- ÍCONE DE ENGRENAGEM PARA FILTROS DE PERÍODO (Web Only) -->
     {% if mode == 'web' %}
     <button onclick="openPeriodFilters()" class="btn-period-settings" title="Configurar período">
@@ -116,17 +211,15 @@
         <div class="period-filter-body">
           <div class="filter-group">
             <label for="filterYear">Ano:</label>
-            <select id="filterYear">
-              <option value="2024" selected>2024</option>
-              <option value="2023">2023</option>
-              <option value="2022">2022</option>
+            <select id="filterYear" onchange="onYearChange()">
+              <option value="">Carregando...</option>
             </select>
           </div>
           <div class="filter-group">
             <label>Meses:</label>
             <div class="custom-dropdown" id="monthsDropdown">
               <div class="dropdown-toggle" onclick="toggleMonthsDropdown()">
-                <span class="dropdown-label" id="monthsLabel">Todos os meses (12)</span>
+                <span class="dropdown-label" id="monthsLabel">Carregando...</span>
                 <span class="dropdown-arrow">▼</span>
               </div>
               <div class="dropdown-menu" id="monthsMenu">
@@ -137,53 +230,8 @@
                     <button type="button" onclick="clearAllMonths()">Nenhum</button>
                   </div>
                 </div>
-                <div class="dropdown-item" onclick="toggleMonthCheckbox(1)">
-                  <input type="checkbox" id="month1" value="1" checked onclick="event.stopPropagation(); updateMonthsLabel();">
-                  <label for="month1" onclick="event.stopPropagation();">Janeiro</label>
-                </div>
-                <div class="dropdown-item" onclick="toggleMonthCheckbox(2)">
-                  <input type="checkbox" id="month2" value="2" checked onclick="event.stopPropagation(); updateMonthsLabel();">
-                  <label for="month2" onclick="event.stopPropagation();">Fevereiro</label>
-                </div>
-                <div class="dropdown-item" onclick="toggleMonthCheckbox(3)">
-                  <input type="checkbox" id="month3" value="3" checked onclick="event.stopPropagation(); updateMonthsLabel();">
-                  <label for="month3" onclick="event.stopPropagation();">Março</label>
-                </div>
-                <div class="dropdown-item" onclick="toggleMonthCheckbox(4)">
-                  <input type="checkbox" id="month4" value="4" checked onclick="event.stopPropagation(); updateMonthsLabel();">
-                  <label for="month4" onclick="event.stopPropagation();">Abril</label>
-                </div>
-                <div class="dropdown-item" onclick="toggleMonthCheckbox(5)">
-                  <input type="checkbox" id="month5" value="5" checked onclick="event.stopPropagation(); updateMonthsLabel();">
-                  <label for="month5" onclick="event.stopPropagation();">Maio</label>
-                </div>
-                <div class="dropdown-item" onclick="toggleMonthCheckbox(6)">
-                  <input type="checkbox" id="month6" value="6" checked onclick="event.stopPropagation(); updateMonthsLabel();">
-                  <label for="month6" onclick="event.stopPropagation();">Junho</label>
-                </div>
-                <div class="dropdown-item" onclick="toggleMonthCheckbox(7)">
-                  <input type="checkbox" id="month7" value="7" checked onclick="event.stopPropagation(); updateMonthsLabel();">
-                  <label for="month7" onclick="event.stopPropagation();">Julho</label>
-                </div>
-                <div class="dropdown-item" onclick="toggleMonthCheckbox(8)">
-                  <input type="checkbox" id="month8" value="8" checked onclick="event.stopPropagation(); updateMonthsLabel();">
-                  <label for="month8" onclick="event.stopPropagation();">Agosto</label>
-                </div>
-                <div class="dropdown-item" onclick="toggleMonthCheckbox(9)">
-                  <input type="checkbox" id="month9" value="9" checked onclick="event.stopPropagation(); updateMonthsLabel();">
-                  <label for="month9" onclick="event.stopPropagation();">Setembro</label>
-                </div>
-                <div class="dropdown-item" onclick="toggleMonthCheckbox(10)">
-                  <input type="checkbox" id="month10" value="10" checked onclick="event.stopPropagation(); updateMonthsLabel();">
-                  <label for="month10" onclick="event.stopPropagation();">Outubro</label>
-                </div>
-                <div class="dropdown-item" onclick="toggleMonthCheckbox(11)">
-                  <input type="checkbox" id="month11" value="11" checked onclick="event.stopPropagation(); updateMonthsLabel();">
-                  <label for="month11" onclick="event.stopPropagation();">Novembro</label>
-                </div>
-                <div class="dropdown-item" onclick="toggleMonthCheckbox(12)">
-                  <input type="checkbox" id="month12" value="12" checked onclick="event.stopPropagation(); updateMonthsLabel();">
-                  <label for="month12" onclick="event.stopPropagation();">Dezembro</label>
+                <div id="monthsMenuItems">
+                  <!-- Meses serão carregados dinamicamente -->
                 </div>
               </div>
             </div>
@@ -675,12 +723,12 @@
                 <div style="display: flex; justify-content: space-around; padding: 20px; text-align: center; background: #f8faf9; border-radius: 8px;">
                   <div>
                     <div style="font-size: 10pt; color: var(--text-secondary);">Economia Mensal Estimada</div>
-                    <div style="font-size: 20pt; font-weight: 700; color: var(--rps-primary);">{{ dados.estudo_tributario.economia_mensal }}</div>
+                    <div style="font-size: 20pt; font-weight: 700; color: var(--rps-primary);">{{ dados.estudo_tributario.economia_mensal|default('R$ 0,00') }}</div>
                   </div>
                   <div style="width: 1px; background: var(--border-color);"></div>
                   <div>
                     <div style="font-size: 10pt; color: var(--text-secondary);">Projeção Anual</div>
-                    <div style="font-size: 20pt; font-weight: 700; color: var(--success-color);">{{ dados.estudo_tributario.economia_anual }}</div>
+                    <div style="font-size: 20pt; font-weight: 700; color: var(--success-color);">{{ dados.estudo_tributario.economia_anual|default('R$ 0,00') }}</div>
                   </div>
                 </div>
 
@@ -690,11 +738,11 @@
                     <div style="font-size: 9pt; line-height: 1.6;">
                       <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
                         <span style="color: var(--text-secondary);">IRPJ (15% + Adicional):</span>
-                        <strong>{{ dados.estudo_tributario.lucro_real_irpj }}</strong>
+                        <strong>{{ dados.estudo_tributario.lucro_real_irpj|default('R$ 0,00') }}</strong>
                       </div>
                       <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
                         <span style="color: var(--text-secondary);">CSLL (9%):</span>
-                        <strong>{{ dados.estudo_tributario.lucro_real_csll }}</strong>
+                        <strong>{{ dados.estudo_tributario.lucro_real_csll|default('R$ 0,00') }}</strong>
                       </div>
                       <div style="border-top: 1px solid var(--border-color); margin-top: 8px; padding-top: 8px; display: flex; justify-content: space-between;">
                         <span style="color: var(--text-secondary);">Total:</span>
@@ -708,11 +756,11 @@
                     <div style="font-size: 9pt; line-height: 1.6;">
                       <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
                         <span style="color: var(--text-secondary);">IRPJ (15% sobre presunção):</span>
-                        <strong>{{ dados.estudo_tributario.lucro_presumido_irpj }}</strong>
+                        <strong>{{ dados.estudo_tributario.lucro_presumido_irpj|default('R$ 0,00') }}</strong>
                       </div>
                       <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
                         <span style="color: var(--text-secondary);">CSLL (9% sobre presunção):</span>
-                        <strong>{{ dados.estudo_tributario.lucro_presumido_csll }}</strong>
+                        <strong>{{ dados.estudo_tributario.lucro_presumido_csll|default('R$ 0,00') }}</strong>
                       </div>
                       <div style="border-top: 1px solid var(--border-color); margin-top: 8px; padding-top: 8px; display: flex; justify-content: space-between;">
                         <span style="color: var(--text-secondary);">Total:</span>
@@ -942,7 +990,7 @@
                   Eunápolis - BA
                 </div>
               </div>
-            </div>
+            </div>ç
           </div>
 
           <div class="col-half card">
@@ -974,7 +1022,7 @@
 
   <!-- Scripts externos -->
   {% if mode == 'web' %}
-  <script>
+  <script>0
     // Passar dados dos gráficos para o script externo
     window.reportData = {{ raw_data | tojson }};
   </script>

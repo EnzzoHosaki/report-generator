@@ -275,6 +275,59 @@ def api_preview(cliente_id: int):
     })
 
 
+@app.route('/api/balancete/<int:cliente_id>')
+def api_balancete(cliente_id: int):
+    """API para obter o balancete de verificação do cliente (debug)"""
+    try:
+        year, months, branches = parse_request_params()
+        
+        balancete = data_provider.obter_balancete(
+            cliente_id=cliente_id,
+            anos=[year],
+            meses=months,
+            filiais=branches
+        )
+        
+        # Se não encontrou dados, tenta fallback para último período com dados
+        if not balancete:
+            fb_ano, fb_meses = data_provider.encontrar_ultimo_periodo_balancete(cliente_id, branches)
+            if fb_ano and fb_meses:
+                year = fb_ano
+                months = fb_meses
+                balancete = data_provider.obter_balancete(
+                    cliente_id=cliente_id,
+                    anos=[year],
+                    meses=months,
+                    filiais=branches
+                )
+        
+        # Calcular totais
+        total_debito = sum(c['debito'] for c in balancete)
+        total_credito = sum(c['credito'] for c in balancete)
+        total_saldo = sum(c['saldo'] for c in balancete)
+        
+        return jsonify({
+            "cliente_id": cliente_id,
+            "ano": year,
+            "meses": months,
+            "filiais": branches,
+            "total_contas": len(balancete),
+            "totais": {
+                "debito": total_debito,
+                "credito": total_credito,
+                "saldo": total_saldo,
+                "debito_fmt": f"R$ {total_debito:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."),
+                "credito_fmt": f"R$ {total_credito:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."),
+                "saldo_fmt": f"R$ {total_saldo:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+            },
+            "contas": balancete
+        })
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({"erro": str(e), "contas": [], "total_contas": 0, "totais": {"debito": 0, "credito": 0, "saldo": 0}}), 500
+
+
 @app.route('/img/<path:filename>')
 def serve_img(filename):
     """Servir imagens da pasta img"""

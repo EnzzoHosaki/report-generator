@@ -25,42 +25,37 @@ class ReportService:
         months: Optional[List[int]] = None,
         branches: Optional[List[int]] = None
     ) -> Dict[str, Any]:
+        
         """
         Monta o contexto do relatório. Aceita tanto o formato legado (periodo string)
         quanto o novo formato (listas de ints).
         """
         
-        # 1. Normalização de Parâmetros
         anos_query = [datetime.now().year]
         meses_query = [datetime.now().month]
         
-        # Se veio via parâmetros explícitos (Novo Dashboard)
         if year:
             anos_query = [year]
         if months:
             meses_query = months
             
-        # Se veio via string legado (ex: "Janeiro/2024") e não tem parâmetros novos
         if periodo and not year and not months:
             try:
                 parts = periodo.split('/')
                 if len(parts) == 2:
-                    # Tenta converter mês nome para numero se necessário, ou usa int direto
                     mes_str = parts[0].strip()
                     ano_str = parts[1].strip()
                     
                     if mes_str.isdigit():
                         meses_query = [int(mes_str)]
                     else:
-                        # Mapeamento simples reverso se necessário, ou assumir atual
                         pass 
                     
                     if ano_str.isdigit():
                         anos_query = [int(ano_str)]
             except Exception:
-                pass # Mantém defaults (data atual)
+                pass
 
-        # 2. Busca dados reais no banco
         raw_context = self.data_provider.obter_contexto_dados(
             cliente_id=cliente_id,
             anos=anos_query,
@@ -71,10 +66,8 @@ class ReportService:
         dados = raw_context["dados"]
         g_data = raw_context.get("graficos_data", {})
 
-        # --- PREPARAÇÃO PARA GRÁFICOS ---
         meses_labels = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"]
         
-        # Recupera dados brutos do provider ou usa lista vazia/zeros
         def safe_get_list(key, default_len=12):
             val = g_data.get(key)
             if not val:
@@ -86,17 +79,13 @@ class ReportService:
         vendas_atual = safe_get_list('vendas_evo')
         custos_total_evo = safe_get_list('custos_evo')
         
-        # Composições
-        comp_ativo = safe_get_list('composicao_ativo', 2) # [Circ, NaoCirc]
-        comp_passivo = safe_get_list('composicao_passivo', 2) # [Circ, NaoCirc]
-        detalhe_custos = safe_get_list('custos_detalhe', 3) # [Pessoal, Admin, Trib]
+        comp_ativo = safe_get_list('composicao_ativo', 2)
+        comp_passivo = safe_get_list('composicao_passivo', 2)
+        detalhe_custos = safe_get_list('custos_detalhe', 3)
 
-        # Vendas ano anterior (Mock ou buscar no DB se o provider suportar)
-        vendas_anterior = [v * 0.9 for v in vendas_atual] # Simulação YoY
+        vendas_anterior = [v * 0.9 for v in vendas_atual]
 
-        # 6. Custos (Pizza)
         custos_labels = ["Pessoal", "Admin", "Tributário"]
-        # Filtrar zeros para não quebrar gráfico visualmente
         custos_clean = [(l, v) for l, v in zip(custos_labels, detalhe_custos) if v > 0]
         if custos_clean:
             custos_labels_plot, custos_values_plot = zip(*custos_clean)
@@ -104,9 +93,8 @@ class ReportService:
             custos_values_plot = list(custos_values_plot)
         else:
             custos_labels_plot = ["Sem dados"]
-            custos_values_plot = [0] # ChartService lida com 0
+            custos_values_plot = [0]
 
-        # --- PACOTE DE DADOS RAW (Frontend) ---
         raw_data_front = {
             "meses": meses_labels,
             "ativos": {
@@ -145,7 +133,6 @@ class ReportService:
             }
         }
 
-        # --- GERAÇÃO DE IMAGENS ESTÁTICAS (PDF) ---
         graficos = {
             "ativos_evolucao_valor": self.charts.linhas_simples(
                 meses_labels, total_ativos, label="Total Ativos (Movimento)", color=self.charts.primary

@@ -293,9 +293,42 @@ document.addEventListener('click', (e) => {
 });
 
 /* === FUNÇÕES PARA FILTROS DE PERÍODO === */
+
+// Nomes dos meses em português
+const MESES_NOMES = {
+  1: 'Janeiro', 2: 'Fevereiro', 3: 'Março', 4: 'Abril',
+  5: 'Maio', 6: 'Junho', 7: 'Julho', 8: 'Agosto',
+  9: 'Setembro', 10: 'Outubro', 11: 'Novembro', 12: 'Dezembro'
+};
+
+// Anos disponíveis (fixos)
+const ANOS_DISPONIVEIS = [2026, 2025, 2024, 2023];
+
+function getClientId() {
+  return window.location.pathname.split('/').pop();
+}
+
+function getCurrentUrlParams() {
+  const params = new URLSearchParams(window.location.search);
+  return {
+    year: params.get('year') ? parseInt(params.get('year')) : null,
+    months: params.get('months') ? params.get('months').split(',').map(m => parseInt(m)) : null,
+    branches: params.get('branches') ? params.get('branches').split(',').map(b => parseInt(b)) : null
+  };
+}
+
+function getMesAtual() {
+  return new Date().getMonth() + 1; // getMonth() retorna 0-11
+}
+
+function getAnoAtual() {
+  return new Date().getFullYear();
+}
+
 function openPeriodFilters() {
-  loadBranches();
   document.getElementById('periodFilterModal').classList.add('active');
+  loadYearsAndMonths();
+  loadBranches();
 }
 
 function closePeriodFilters() {
@@ -305,6 +338,77 @@ function closePeriodFilters() {
   document.getElementById('branchesMenu').classList.remove('active');
   document.querySelector('#monthsDropdown .dropdown-toggle').classList.remove('active');
   document.querySelector('#branchesDropdown .dropdown-toggle').classList.remove('active');
+}
+
+/* === CARREGAMENTO DE ANOS E MESES (FIXOS) === */
+function loadYearsAndMonths() {
+  const urlParams = getCurrentUrlParams();
+  const yearSelect = document.getElementById('filterYear');
+  yearSelect.innerHTML = '';
+  
+  const anoAtual = getAnoAtual();
+  
+  ANOS_DISPONIVEIS.forEach((ano, index) => {
+    const option = document.createElement('option');
+    option.value = ano;
+    option.textContent = ano;
+    // Selecionar o ano da URL ou o ano atual
+    if (urlParams.year && urlParams.year === ano) {
+      option.selected = true;
+    } else if (!urlParams.year && ano === anoAtual) {
+      option.selected = true;
+    }
+    yearSelect.appendChild(option);
+  });
+  
+  // Carregar meses do ano selecionado
+  const selectedYear = parseInt(yearSelect.value);
+  loadMesesParaAno(selectedYear, urlParams.months);
+}
+
+function onYearChange() {
+  const yearSelect = document.getElementById('filterYear');
+  const selectedYear = parseInt(yearSelect.value);
+  loadMesesParaAno(selectedYear, null); // null = selecionar todos os meses disponíveis
+}
+
+function loadMesesParaAno(ano, mesesPreSelecionados) {
+  const container = document.getElementById('monthsMenuItems');
+  container.innerHTML = '';
+  
+  const anoAtual = getAnoAtual();
+  const mesAtual = getMesAtual();
+  
+  // Se for o ano atual, mostrar apenas até o mês atual
+  const mesMaximo = (ano === anoAtual) ? mesAtual : 12;
+  
+  for (let mes = 1; mes <= mesMaximo; mes++) {
+    const div = document.createElement('div');
+    div.className = 'dropdown-item';
+    div.onclick = () => toggleMonthCheckbox(mes);
+
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.id = `month${mes}`;
+    checkbox.value = mes;
+    // Se há meses pré-selecionados (da URL), usa eles; senão, marca todos
+    checkbox.checked = mesesPreSelecionados ? mesesPreSelecionados.includes(mes) : true;
+    checkbox.onclick = (e) => {
+      e.stopPropagation();
+      updateMonthsLabel();
+    };
+
+    const label = document.createElement('label');
+    label.htmlFor = `month${mes}`;
+    label.textContent = MESES_NOMES[mes];
+    label.onclick = (e) => e.stopPropagation();
+
+    div.appendChild(checkbox);
+    div.appendChild(label);
+    container.appendChild(div);
+  }
+  
+  updateMonthsLabel();
 }
 
 /* === DROPDOWN DE MESES === */
@@ -324,35 +428,34 @@ function toggleMonthsDropdown() {
 
 function toggleMonthCheckbox(monthNum) {
   const checkbox = document.getElementById('month' + monthNum);
-  checkbox.checked = !checkbox.checked;
-  updateMonthsLabel();
+  if (checkbox) {
+    checkbox.checked = !checkbox.checked;
+    updateMonthsLabel();
+  }
 }
 
 function updateMonthsLabel() {
-  const checkboxes = document.querySelectorAll('[id^="month"]:checked');
+  const checkboxes = document.querySelectorAll('#monthsMenuItems input[type="checkbox"]:checked');
+  const total = document.querySelectorAll('#monthsMenuItems input[type="checkbox"]').length;
   const count = checkboxes.length;
   const label = document.getElementById('monthsLabel');
 
   if (count === 0) {
     label.textContent = 'Nenhum mês selecionado';
-  } else if (count === 12) {
-    label.textContent = 'Todos os meses (12)';
+  } else if (count === total && total > 0) {
+    label.textContent = `Todos os meses (${total})`;
   } else {
     label.textContent = `${count} ${count === 1 ? 'mês selecionado' : 'meses selecionados'}`;
   }
 }
 
 function selectAllMonths() {
-  for (let i = 1; i <= 12; i++) {
-    document.getElementById('month' + i).checked = true;
-  }
+  document.querySelectorAll('#monthsMenuItems input[type="checkbox"]').forEach(cb => cb.checked = true);
   updateMonthsLabel();
 }
 
 function clearAllMonths() {
-  for (let i = 1; i <= 12; i++) {
-    document.getElementById('month' + i).checked = false;
-  }
+  document.querySelectorAll('#monthsMenuItems input[type="checkbox"]').forEach(cb => cb.checked = false);
   updateMonthsLabel();
 }
 
@@ -373,8 +476,10 @@ function toggleBranchesDropdown() {
 
 function toggleBranchCheckbox(branchId) {
   const checkbox = document.getElementById('branch' + branchId);
-  checkbox.checked = !checkbox.checked;
-  updateBranchesLabel();
+  if (checkbox) {
+    checkbox.checked = !checkbox.checked;
+    updateBranchesLabel();
+  }
 }
 
 function updateBranchesLabel() {
@@ -403,7 +508,9 @@ function clearAllBranches() {
 }
 
 function loadBranches() {
-  const clientId = window.location.pathname.split('/').pop();
+  const clientId = getClientId();
+  const urlParams = getCurrentUrlParams();
+  
   fetch(`/api/branches/${clientId}`)
     .then(response => response.json())
     .then(branches => {
@@ -425,7 +532,8 @@ function loadBranches() {
         checkbox.type = 'checkbox';
         checkbox.id = `branch${branch.codigo}`;
         checkbox.value = branch.codigo;
-        checkbox.checked = true;
+        // Se há filiais pré-selecionadas na URL, usa elas; senão, marca todas
+        checkbox.checked = urlParams.branches ? urlParams.branches.includes(branch.codigo) : true;
         checkbox.onclick = (e) => {
           e.stopPropagation();
           updateBranchesLabel();
@@ -453,15 +561,17 @@ function loadBranches() {
 
 function applyPeriodFilter() {
   const year = document.getElementById('filterYear').value;
+  
+  if (!year) {
+    alert('Selecione um ano!');
+    return;
+  }
 
   // Coletar meses selecionados
   const selectedMonths = [];
-  for (let i = 1; i <= 12; i++) {
-    const checkbox = document.getElementById('month' + i);
-    if (checkbox.checked) {
-      selectedMonths.push(checkbox.value);
-    }
-  }
+  document.querySelectorAll('#monthsMenuItems input[type="checkbox"]:checked').forEach(cb => {
+    selectedMonths.push(cb.value);
+  });
 
   if (selectedMonths.length === 0) {
     alert('Selecione pelo menos um mês!');
@@ -482,7 +592,7 @@ function applyPeriodFilter() {
   closePeriodFilters();
 
   // Construir parâmetros da URL
-  const clientId = window.location.pathname.split('/').pop();
+  const clientId = getClientId();
   const params = new URLSearchParams();
   params.set('year', year);
   params.set('months', selectedMonths.join(','));
@@ -512,4 +622,285 @@ document.addEventListener('click', (e) => {
 // Fechar modal ao clicar fora
 document.getElementById('periodFilterModal')?.addEventListener('click', (e) => {
   if (e.target.id === 'periodFilterModal') closePeriodFilters();
+});
+/* ============================================
+   BALANCETE DE VERIFICAÇÃO (DEBUG)
+   ============================================ */
+
+let balanceteData = []; // Armazena os dados do balancete carregados
+
+function openBalancete() {
+  const modal = document.getElementById('balanceteModal');
+  modal.classList.add('active');
+  document.body.style.overflow = 'hidden';
+  
+  // Carregar dados do balancete
+  loadBalancete();
+}
+
+function closeBalancete() {
+  const modal = document.getElementById('balanceteModal');
+  modal.classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+function loadBalancete() {
+  const loading = document.getElementById('balanceteLoading');
+  const table = document.getElementById('balanceteTable');
+  const empty = document.getElementById('balanceteEmpty');
+  
+  // Mostrar loading
+  loading.style.display = 'flex';
+  table.style.display = 'none';
+  empty.style.display = 'none';
+  
+  // Obter parâmetros atuais da URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const clientId = getClientId();
+  
+  // Construir URL com os mesmos filtros do relatório
+  let apiUrl = `/api/balancete/${clientId}`;
+  if (urlParams.toString()) {
+    apiUrl += '?' + urlParams.toString();
+  }
+  
+  fetch(apiUrl)
+    .then(response => response.json())
+    .then(data => {
+      balanceteData = data.contas || [];
+      
+      // Atualizar informações do header
+      document.getElementById('balancetePeriodo').textContent = 
+        `Ano: ${data.ano} | Meses: ${data.meses?.join(', ') || 'N/A'}`;
+      document.getElementById('balanceteTotal').textContent = 
+        `${data.total_contas} contas encontradas`;
+      
+      // Renderizar tabela
+      renderBalanceteTable(balanceteData, data.totais);
+      
+      // Esconder loading e mostrar tabela
+      loading.style.display = 'none';
+      
+      if (balanceteData.length > 0) {
+        table.style.display = 'table';
+        empty.style.display = 'none';
+      } else {
+        table.style.display = 'none';
+        empty.style.display = 'flex';
+      }
+    })
+    .catch(error => {
+      console.error('Erro ao carregar balancete:', error);
+      loading.innerHTML = `
+        <i class="fas fa-exclamation-triangle" style="color: #dc2626;"></i>
+        <span>Erro ao carregar balancete: ${error.message}</span>
+      `;
+    });
+}
+
+function renderBalanceteTable(contas, totais) {
+  const tbody = document.getElementById('balanceteBody');
+  tbody.innerHTML = '';
+  
+  contas.forEach(conta => {
+    const tr = document.createElement('tr');
+    tr.setAttribute('data-nivel', conta.nivel);
+    tr.setAttribute('data-codigo', conta.codigo);
+    tr.setAttribute('data-nome', conta.nome.toLowerCase());
+    tr.setAttribute('data-saldo', conta.saldo);
+    tr.setAttribute('data-grupo', conta.grupo || conta.codigo.charAt(0));
+    
+    // Classes para valores
+    const debitoClass = conta.debito > 0 ? 'valor-positivo' : (conta.debito < 0 ? 'valor-negativo' : 'valor-zero');
+    const creditoClass = conta.credito > 0 ? 'valor-positivo' : (conta.credito < 0 ? 'valor-negativo' : 'valor-zero');
+    const saldoClass = conta.saldo > 0 ? 'valor-positivo' : (conta.saldo < 0 ? 'valor-negativo' : 'valor-zero');
+    
+    // Tipo badge
+    const tipoBadge = conta.tipo === 'Sintetica' 
+      ? '<span class="tipo-sintetica">S</span>' 
+      : '<span class="tipo-analitica">A</span>';
+    
+    // Natureza
+    const naturezaSpan = conta.natureza === 'Devedora'
+      ? '<span class="nat-devedora">D</span>'
+      : '<span class="nat-credora">C</span>';
+    
+    // Grupo (primeiro dígito do código)
+    const grupo = conta.grupo || conta.codigo.charAt(0);
+    const grupoNomes = {
+      '1': 'Ativo',
+      '2': 'Passivo', 
+      '3': 'Receitas',
+      '4': 'Custos',
+      '5': 'Despesas',
+      '6': 'Resultado'
+    };
+    const grupoTitle = grupoNomes[grupo] || grupo;
+    
+    // Saldo inicial badge
+    const inicialBadge = conta.saldo_inicial === 1 
+      ? '<span class="badge-inicial" title="Contém saldo inicial">SI</span>' 
+      : '<span class="badge-movimento" title="Apenas movimento">MV</span>';
+    
+    tr.innerHTML = `
+      <td class="col-grupo" title="${grupoTitle}">${grupo}</td>
+      <td class="col-codigo">${conta.codigo}</td>
+      <td class="col-nome" style="padding-left: ${Math.max(0, (conta.nivel - 1) * 10)}px;">${conta.nome}</td>
+      <td class="col-nivel">${conta.nivel}</td>
+      <td class="col-tipo">${tipoBadge}</td>
+      <td class="col-natureza">${naturezaSpan}</td>
+      <td class="col-inicial">${inicialBadge}</td>
+      <td class="col-debito ${debitoClass}">${conta.debito_fmt}</td>
+      <td class="col-credito ${creditoClass}">${conta.credito_fmt}</td>
+      <td class="col-saldo ${saldoClass}">${conta.saldo_fmt}</td>
+    `;
+    
+    tbody.appendChild(tr);
+  });
+  
+  // Atualizar totais
+  if (totais) {
+    document.getElementById('totalDebito').textContent = totais.debito_fmt;
+    document.getElementById('totalCredito').textContent = totais.credito_fmt;
+    document.getElementById('totalSaldo').textContent = totais.saldo_fmt;
+  }
+}
+
+function filterBalancete() {
+  const nivelFilter = document.getElementById('filterNivel').value;
+  const grupoFilter = document.getElementById('filterGrupo')?.value || '';
+  const searchFilter = document.getElementById('filterConta').value.toLowerCase();
+  const comSaldoFilter = document.getElementById('filterComSaldo').checked;
+  
+  const rows = document.querySelectorAll('#balanceteBody tr');
+  let visibleCount = 0;
+  let totalDebito = 0;
+  let totalCredito = 0;
+  let totalSaldo = 0;
+  
+  rows.forEach(row => {
+    const nivel = parseInt(row.getAttribute('data-nivel'));
+    const codigo = row.getAttribute('data-codigo').toLowerCase();
+    const nome = row.getAttribute('data-nome');
+    const saldo = parseFloat(row.getAttribute('data-saldo'));
+    const grupo = row.getAttribute('data-grupo');
+    
+    let visible = true;
+    
+    // Filtro por grupo
+    if (grupoFilter) {
+      visible = grupo === grupoFilter;
+    }
+    
+    // Filtro por nível
+    if (visible && nivelFilter) {
+      if (nivelFilter === '5') {
+        visible = nivel >= 5;
+      } else {
+        visible = nivel === parseInt(nivelFilter);
+      }
+    }
+    
+    // Filtro por busca
+    if (visible && searchFilter) {
+      visible = codigo.includes(searchFilter) || nome.includes(searchFilter);
+    }
+    
+    // Filtro por saldo
+    if (visible && comSaldoFilter) {
+      visible = Math.abs(saldo) > 0.01;
+    }
+    
+    row.style.display = visible ? '' : 'none';
+    
+    if (visible) {
+      visibleCount++;
+      // Acumular totais visíveis (usar os dados originais)
+      const conta = balanceteData.find(c => c.codigo === row.getAttribute('data-codigo'));
+      if (conta) {
+        totalDebito += conta.debito;
+        totalCredito += conta.credito;
+        totalSaldo += conta.saldo;
+      }
+    }
+  });
+  
+  // Atualizar contador
+  document.getElementById('balanceteTotal').textContent = 
+    `${visibleCount} contas exibidas`;
+  
+  // Atualizar totais filtrados
+  document.getElementById('totalDebito').textContent = formatBRL(totalDebito);
+  document.getElementById('totalCredito').textContent = formatBRL(totalCredito);
+  document.getElementById('totalSaldo').textContent = formatBRL(totalSaldo);
+  
+  // Mostrar/esconder mensagem de vazio
+  const table = document.getElementById('balanceteTable');
+  const empty = document.getElementById('balanceteEmpty');
+  
+  if (visibleCount === 0 && balanceteData.length > 0) {
+    empty.style.display = 'flex';
+    empty.querySelector('span').textContent = 'Nenhuma conta corresponde aos filtros aplicados.';
+  } else {
+    empty.style.display = 'none';
+  }
+}
+
+function formatBRL(value) {
+  return `R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
+function exportBalanceteCSV() {
+  if (!balanceteData || balanceteData.length === 0) {
+    alert('Nenhum dado para exportar!');
+    return;
+  }
+  
+  // Obter apenas linhas visíveis
+  const visibleRows = document.querySelectorAll('#balanceteBody tr:not([style*="display: none"])');
+  const visibleCodigos = Array.from(visibleRows).map(row => row.getAttribute('data-codigo'));
+  
+  const dataToExport = balanceteData.filter(c => visibleCodigos.includes(c.codigo));
+  
+  // Cabeçalho CSV
+  const headers = ['Grupo', 'Código', 'Nome', 'Nível', 'Tipo', 'Natureza', 'Saldo_Inicial', 'Débito', 'Crédito', 'Saldo'];
+  
+  // Linhas
+  const rows = dataToExport.map(c => [
+    c.grupo || c.codigo.charAt(0),
+    c.codigo,
+    `"${c.nome.replace(/"/g, '""')}"`,
+    c.nivel,
+    c.tipo,
+    c.natureza,
+    c.saldo_inicial || 0,
+    c.debito.toFixed(2).replace('.', ','),
+    c.credito.toFixed(2).replace('.', ','),
+    c.saldo.toFixed(2).replace('.', ',')
+  ]);
+  
+  // Montar CSV
+  const csv = [headers.join(';'), ...rows.map(r => r.join(';'))].join('\n');
+  
+  // Download
+  const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = `balancete_${getClientId()}_${new Date().toISOString().slice(0,10)}.csv`;
+  link.click();
+}
+
+// Fechar modal do balancete ao clicar fora
+document.getElementById('balanceteModal')?.addEventListener('click', (e) => {
+  if (e.target.id === 'balanceteModal') closeBalancete();
+});
+
+// Fechar modal do balancete com ESC
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    const balanceteModal = document.getElementById('balanceteModal');
+    if (balanceteModal?.classList.contains('active')) {
+      closeBalancete();
+    }
+  }
 });

@@ -30,3 +30,17 @@ class DataProvider(ABC):
         Gera/retorna o contexto de DADOS do relatório.
         """
         raise NotImplementedError
+
+    @abstractmethod
+    def obter_balancete(
+        self,
+        cliente_id: int,
+        anos: List[int],
+        meses: List[int],
+        filiais: Optional[List[int]] = None
+    ) -> List[Dict[str, Any]]:
+        """
+        Retorna o balancete de verificação com débito, crédito e saldo de cada conta.
+        Usado para depuração e conferência dos dados contábeis.
+        """
+        raise NotImplementedError

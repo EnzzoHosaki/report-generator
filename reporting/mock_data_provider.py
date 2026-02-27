@@ -123,3 +123,46 @@ class MockDataProvider(DataProvider):
             },
             "graficos_data": graficos_data
         }
+
+    def obter_balancete(
+        self,
+        cliente_id: int,
+        anos: List[int],
+        meses: List[int],
+        filiais: Optional[List[int]] = None
+    ) -> List[Dict[str, Any]]:
+        """
+        Retorna um balancete mock para testes.
+        """
+        contas_mock = [
+            {"codigo": "10000000000000", "nome": "ATIVO", "nivel": 1, "tipo": "Sintetica", "natureza": "Devedora"},
+            {"codigo": "11000000000000", "nome": "ATIVO CIRCULANTE", "nivel": 2, "tipo": "Sintetica", "natureza": "Devedora"},
+            {"codigo": "12000000000000", "nome": "ATIVO NÃO CIRCULANTE", "nivel": 2, "tipo": "Sintetica", "natureza": "Devedora"},
+            {"codigo": "20000000000000", "nome": "PASSIVO", "nivel": 1, "tipo": "Sintetica", "natureza": "Credora"},
+            {"codigo": "21000000000000", "nome": "PASSIVO CIRCULANTE", "nivel": 2, "tipo": "Sintetica", "natureza": "Credora"},
+            {"codigo": "23000000000000", "nome": "PATRIMÔNIO LÍQUIDO", "nivel": 2, "tipo": "Sintetica", "natureza": "Credora"},
+            {"codigo": "31000000000000", "nome": "RECEITAS", "nivel": 1, "tipo": "Sintetica", "natureza": "Credora"},
+            {"codigo": "50000000000000", "nome": "DESPESAS", "nivel": 1, "tipo": "Sintetica", "natureza": "Devedora"},
+        ]
+        
+        balancete = []
+        for conta in contas_mock:
+            debito = random.uniform(10000, 500000) if conta["natureza"] == "Devedora" else random.uniform(0, 50000)
+            credito = random.uniform(10000, 500000) if conta["natureza"] == "Credora" else random.uniform(0, 50000)
+            saldo = debito - credito if conta["natureza"] == "Devedora" else credito - debito
+            
+            balancete.append({
+                "codigo": conta["codigo"],
+                "nome": conta["nome"],
+                "nivel": conta["nivel"],
+                "tipo": conta["tipo"],
+                "natureza": conta["natureza"],
+                "debito": debito,
+                "credito": credito,
+                "saldo": saldo,
+                "debito_fmt": self._fmt_brl(debito),
+                "credito_fmt": self._fmt_brl(credito),
+                "saldo_fmt": self._fmt_brl(saldo)
+            })
+        
+        return balancete
