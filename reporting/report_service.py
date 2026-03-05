@@ -135,7 +135,11 @@ class ReportService:
 
         graficos = {
             "ativos_evolucao_valor": self.charts.linhas_simples(
-                meses_labels, total_ativos, label="Total Ativos (Movimento)", color=self.charts.primary
+                meses_labels,
+                total_ativos,
+                label="Total Ativos (Movimento)",
+                color=self.charts.primary,
+                compact_y=True,
             ),
             "ativos_composicao_perc": self.charts.pizza(
                 ["Circulante", "Não Circulante"], comp_ativo, donut=False

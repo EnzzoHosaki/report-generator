@@ -212,28 +212,58 @@
         </div>
         <!-- Conteúdo KPI... -->
         <div class="kpi-container">
-          <div class="kpi-box">
+          <div class="kpi-box kpi-box-hover-info">
             <div class="kpi-label"><i class="fas fa-money-bill-wave icon"></i>Vendas Líquidas</div>
             <div class="kpi-value positive">{{ dados.kpis.vendas_liquidas }}</div>
-            <div class="kpi-trend positive">▲ 12.5% vs mês anterior</div>
+            <div class="kpi-trend {{ 'positive' if dados.kpis.vendas_liquidas_variacao_raw > 0 else 'negative' if dados.kpis.vendas_liquidas_variacao_raw < 0 else 'neutral' }}">
+              {% if dados.kpis.vendas_liquidas_variacao_raw > 0 %}▲{% elif dados.kpis.vendas_liquidas_variacao_raw < 0 %}▼{% endif %}
+              {{ dados.kpis.vendas_liquidas_variacao }} vs período anterior
+            </div>
+            {% if mode == 'web' %}
+            <div class="kpi-hover-dialog">
+              <div class="kpi-hover-title">Como calculamos Vendas Líquidas</div>
+              <div class="kpi-hover-text">Receita operacional bruta - cancelamentos - impostos sobre vendas</div>
+              <div class="kpi-hover-formula">{{ dados.kpis.vendas_liquidas_receita_bruta }} - {{ dados.kpis.vendas_liquidas_cancelamentos }} - {{ dados.kpis.vendas_liquidas_impostos_vendas }}</div>
+              <div class="kpi-hover-item">Receita Bruta (3110): <strong>{{ dados.kpis.vendas_liquidas_receita_bruta }}</strong></div>
+              <div class="kpi-hover-item">Cancelamentos (3150): <strong>{{ dados.kpis.vendas_liquidas_cancelamentos }}</strong></div>
+              <div class="kpi-hover-item">Impostos s/ Vendas (3180): <strong>{{ dados.kpis.vendas_liquidas_impostos_vendas }}</strong></div>
+            </div>
+            {% endif %}
           </div>
           <div class="kpi-box">
             <div class="kpi-label"><i class="fas fa-chart-pie icon"></i>Carga Tributária</div>
             <div class="kpi-value negative">{{ dados.kpis.carga_tributaria }}</div>
             <div class="kpi-trend neutral">18% sobre vendas</div>
           </div>
-          <div class="kpi-box">
+          <div class="kpi-box kpi-box-hover-info">
             <div class="kpi-label"><i class="fas fa-shopping-cart icon"></i>Compras</div>
             <div class="kpi-value">{{ dados.kpis.compras }}</div>
             <div class="kpi-trend positive">▼ 3.2% economia</div>
+            {% if mode == 'web' %}
+            <div class="kpi-hover-dialog">
+              <div class="kpi-hover-title">Como calculamos Compras</div>
+              <div class="kpi-hover-text">Compras p/ Comercialização - Devoluções</div>
+              <div class="kpi-hover-formula">{{ dados.kpis.compras_comercializacao }} - {{ dados.kpis.compras_devolucoes }}</div>
+              <div class="kpi-hover-item">Compras p/ Comercialização (4101): <strong>{{ dados.kpis.compras_comercializacao }}</strong></div>
+              <div class="kpi-hover-item">Devoluções (4140): <strong>{{ dados.kpis.compras_devolucoes }}</strong></div>
+            </div>
+            {% endif %}
           </div>
           <div class="kpi-box">
             <div class="kpi-label"><i class="fas fa-hard-hat icon"></i>CAPEX</div>
             <div class="kpi-value">{{ dados.kpis.capex }}</div>
-            <div class="kpi-trend neutral">5% das vendas</div>
+            <div class="kpi-trend {{ 'positive' if dados.kpis.capex_variacao_raw is defined and dados.kpis.capex_variacao_raw <= 0 else 'negative' if dados.kpis.capex_variacao_raw is defined and dados.kpis.capex_variacao_raw > 0 else 'neutral' }}">
+              {% if dados.kpis.capex_variacao is defined %}
+                {% if dados.kpis.capex_variacao_raw > 0 %}▲{% elif dados.kpis.capex_variacao_raw < 0 %}▼{% endif %}
+                {{ dados.kpis.capex_variacao }} vs período anterior
+                <br><small>Anterior: {{ dados.kpis.capex_anterior }}</small>
+              {% else %}
+                Sem comparação disponível
+              {% endif %}
+            </div>
           </div>
           <div class="kpi-box">
-            <div class="kpi-label"><i class="fas fa-cogs icon"></i>Despesas Operacionais</div>
+            <div class="kpi-label"><i class="fas fa-cogs icon"></i>Despesas Administrativas</div>
             <div class="kpi-value">{{ dados.kpis.opex }}</div>
             <div class="kpi-trend positive">Dentro do orçado</div>
           </div>
@@ -265,7 +295,7 @@
               <span class="badge badge-success">+12.5%</span>
             </div>
             <p class="text-muted" style="font-size: 9pt; margin-bottom: 12px;">
-              Crescimento consistente nas vendas líquidas com controle efetivo de despesas operacionais.
+              Crescimento consistente nas vendas líquidas com controle efetivo de despesas administrativas.
               Margem líquida mantida acima da meta de 10%.
             </p>
             <table>
@@ -649,11 +679,43 @@
                     <h4 style="font-size: 10pt; margin-bottom: 10px; color: var(--text-primary);"><i class="fas fa-chart-line icon"></i>Lucro Real</h4>
                     <div style="font-size: 9pt; line-height: 1.6;">
                       <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
-                        <span style="color: var(--text-secondary);">IRPJ (15% + Adicional):</span>
+                        <span style="color: var(--text-secondary);">Resultado Líquido:</span>
+                        <strong>{{ dados.estudo_tributario.lucro_real_detalhado.resultado_liquido|default('R$ 0,00') }}</strong>
+                      </div>
+                      <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                        <span style="color: var(--text-secondary);">Provisões contas:</span>
+                        <strong>{{ dados.estudo_tributario.lucro_real_detalhado.provisoes_59|default('R$ 0,00') }}</strong>
+                      </div>
+                      <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                        <span style="color: var(--text-secondary);">Base IRPJ:</span>
+                        <strong>{{ dados.estudo_tributario.lucro_real_detalhado.base_irpj|default('R$ 0,00') }}</strong>
+                      </div>
+                      <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                        <span style="color: var(--text-secondary);">IRPJ:</span>
+                        <strong>{{ dados.estudo_tributario.lucro_real_detalhado.irpj_15|default('R$ 0,00') }}</strong>
+                      </div>
+                      <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                        <span style="color: var(--text-secondary);">Limite adicional:</span>
+                        <strong>{{ dados.estudo_tributario.lucro_real_detalhado.limite_adicional|default('R$ 0,00') }}</strong>
+                      </div>
+                      <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                        <span style="color: var(--text-secondary);">Base adicional IRPJ:</span>
+                        <strong>{{ dados.estudo_tributario.lucro_real_detalhado.base_adicional_irpj|default('R$ 0,00') }}</strong>
+                      </div>
+                      <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                        <span style="color: var(--text-secondary);">Adicional IRPJ:</span>
+                        <strong>{{ dados.estudo_tributario.lucro_real_detalhado.adicional_irpj_10|default('R$ 0,00') }}</strong>
+                      </div>
+                      <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                        <span style="color: var(--text-secondary);">IRPJ + Adicional:</span>
                         <strong>{{ dados.estudo_tributario.lucro_real_irpj|default('R$ 0,00') }}</strong>
                       </div>
                       <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
-                        <span style="color: var(--text-secondary);">CSLL (9%):</span>
+                        <span style="color: var(--text-secondary);">Base CSLL:</span>
+                        <strong>{{ dados.estudo_tributario.lucro_real_detalhado.base_csll|default('R$ 0,00') }}</strong>
+                      </div>
+                      <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                        <span style="color: var(--text-secondary);">CSLL:</span>
                         <strong>{{ dados.estudo_tributario.lucro_real_csll|default('R$ 0,00') }}</strong>
                       </div>
                       <div style="border-top: 1px solid var(--border-color); margin-top: 8px; padding-top: 8px; display: flex; justify-content: space-between;">
@@ -667,11 +729,47 @@
                     <h4 style="font-size: 10pt; margin-bottom: 10px; color: var(--text-primary);"><i class="fas fa-chart-bar icon"></i>Lucro Presumido</h4>
                     <div style="font-size: 9pt; line-height: 1.6;">
                       <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
-                        <span style="color: var(--text-secondary);">IRPJ (15% sobre presunção):</span>
+                        <span style="color: var(--text-secondary);">Venda Mercadorias/Produtos:</span>
+                        <strong>{{ dados.estudo_tributario.lucro_presumido_detalhado.vendas_mercadorias_produtos|default('R$ 0,00') }}</strong>
+                      </div>
+                      <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                        <span style="color: var(--text-secondary);">Cancelamentos/Devoluções:</span>
+                        <strong>{{ dados.estudo_tributario.lucro_presumido_detalhado.cancelamentos_devolucoes_vendas|default('R$ 0,00') }}</strong>
+                      </div>
+                      <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                        <span style="color: var(--text-secondary);">Receitas Financeiras:</span>
+                        <strong>{{ dados.estudo_tributario.lucro_presumido_detalhado.receitas_financeiras|default('R$ 0,00') }}</strong>
+                      </div>
+                      <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                        <span style="color: var(--text-secondary);">Base IRPJ:</span>
+                        <strong>{{ dados.estudo_tributario.lucro_presumido_detalhado.base_irpj|default('R$ 0,00') }}</strong>
+                      </div>
+                      <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                        <span style="color: var(--text-secondary);">IRPJ:</span>
+                        <strong>{{ dados.estudo_tributario.lucro_presumido_detalhado.irpj_15|default('R$ 0,00') }}</strong>
+                      </div>
+                      <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                        <span style="color: var(--text-secondary);">Limite adicional:</span>
+                        <strong>{{ dados.estudo_tributario.lucro_presumido_detalhado.limite_adicional|default('R$ 0,00') }}</strong>
+                      </div>
+                      <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                        <span style="color: var(--text-secondary);">Base adicional IRPJ:</span>
+                        <strong>{{ dados.estudo_tributario.lucro_presumido_detalhado.base_adicional_irpj|default('R$ 0,00') }}</strong>
+                      </div>
+                      <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                        <span style="color: var(--text-secondary);">Adicional IRPJ:</span>
+                        <strong>{{ dados.estudo_tributario.lucro_presumido_detalhado.adicional_irpj_10|default('R$ 0,00') }}</strong>
+                      </div>
+                      <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                        <span style="color: var(--text-secondary);">IRPJ:</span>
                         <strong>{{ dados.estudo_tributario.lucro_presumido_irpj|default('R$ 0,00') }}</strong>
                       </div>
                       <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
-                        <span style="color: var(--text-secondary);">CSLL (9% sobre presunção):</span>
+                        <span style="color: var(--text-secondary);">Base CSLL:</span>
+                        <strong>{{ dados.estudo_tributario.lucro_presumido_detalhado.base_csll|default('R$ 0,00') }}</strong>
+                      </div>
+                      <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                        <span style="color: var(--text-secondary);">CSLL:</span>
                         <strong>{{ dados.estudo_tributario.lucro_presumido_csll|default('R$ 0,00') }}</strong>
                       </div>
                       <div style="border-top: 1px solid var(--border-color); margin-top: 8px; padding-top: 8px; display: flex; justify-content: space-between;">
@@ -803,7 +901,7 @@
               <div style="display: flex; gap: 10px;">
                 <span style="color: var(--warning-color); font-size: 14pt;">●</span>
                 <div>
-                  <strong>Custos com Pessoal:</strong> 50% das despesas operacionais. Avaliar produtividade e automação.
+                  <strong>Custos com Pessoal:</strong> 50% das despesas administrativas. Avaliar produtividade e automação.
                 </div>
               </div>
             </div>

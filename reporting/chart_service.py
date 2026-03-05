@@ -4,6 +4,7 @@ import base64
 from typing import List, Sequence
 
 import matplotlib.pyplot as plt
+from matplotlib.ticker import FuncFormatter
 import seaborn as sns
 import pandas as pd
 
@@ -13,7 +14,6 @@ class ChartService:
     Serviço de gráficos independente de Flask/Templates.
     Retorna imagens em base64 para incorporação no HTML.
     """
-
     def __init__(self, primary: str, secondary: str, tertiary: str, bg: str = "#fdfdfd") -> None:
         self.primary = primary
         self.secondary = secondary
@@ -40,6 +40,26 @@ class ChartService:
         img = base64.b64encode(buf.read()).decode("utf-8")
         plt.close(fig)
         return img
+
+    @staticmethod
+    def _format_compact_value(val: float, _pos=None) -> str:
+        abs_val = abs(val)
+
+        if abs_val >= 1_000_000_000:
+            num = val / 1_000_000_000
+            suffix = "Bi"
+        elif abs_val >= 1_000_000:
+            num = val / 1_000_000
+            suffix = "Mi"
+        elif abs_val >= 1_000:
+            num = val / 1_000
+            suffix = "M"
+        else:
+            num = val
+            suffix = ""
+
+        txt = f"{num:.2f}".rstrip("0").rstrip(".")
+        return f"{txt}{suffix}"
 
     def barras_empilhadas(self, df: pd.DataFrame, cores: List[str], width: float = 0.6, legend_cols: int = 3) -> str:
         fig, ax = plt.subplots(figsize=(7, 3.5))
@@ -96,13 +116,22 @@ class ChartService:
         sns.despine()
         return self._fig_to_b64(fig)
         
-    def linhas_simples(self, x: Sequence, y: Sequence[float], label: str, color: str = None) -> str:
+    def linhas_simples(
+        self,
+        x: Sequence,
+        y: Sequence[float],
+        label: str,
+        color: str = None,
+        compact_y: bool = False
+    ) -> str:
         """Linha simples para evolução"""
         fig, ax = plt.subplots(figsize=(7, 3.5))
         
-        y = [v if pd.notna(v) else 0.0 for v in y]
+        y = [round((v if pd.notna(v) else 0.0), 2) for v in y]
         
         sns.lineplot(x=x, y=y, marker="o", label=label, ax=ax, color=color or self.primary)
+        if compact_y:
+            ax.yaxis.set_major_formatter(FuncFormatter(self._format_compact_value))
         ax.legend(frameon=False)
         sns.despine()
         return self._fig_to_b64(fig)

@@ -327,13 +327,17 @@ def internal_error(error):
 if __name__ == '__main__':
     debug = os.environ.get('DEBUG', '1') == '1'
     port = int(os.environ.get('PORT', '5000'))
+    allow_lan = os.environ.get('ALLOW_LAN', '0') == '1'
+    host = os.environ.get('HOST') or ('0.0.0.0' if allow_lan else '127.0.0.1')
+    server_url = f"http://{'localhost' if host in ('127.0.0.1', '0.0.0.0') else host}:{port}"
     print(f"""
     ╔═══════════════════════════════════════════════════════╗
     ║   RPS REPORT SYSTEM - INICIANDO                       ║
     ╠═══════════════════════════════════════════════════════╣
-    ║  Servidor: http://localhost:{port}                      ║
+    ║  Servidor: {server_url}                      ║
     ║  Modo: {'DEBUG' if debug else 'PRODUCTION'}                                          ║                    
+    ║  Acesso em rede local: {'SIM' if host == '0.0.0.0' else 'NÃO'}                                ║
     ║  WebPDF: WeasyPrint (A4 Landscape)                    ║
     ╚═══════════════════════════════════════════════════════╝
     """)
-    app.run(debug=debug, port=port, host='0.0.0.0')
+    app.run(debug=debug, port=port, host=host)

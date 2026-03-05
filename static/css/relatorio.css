@@ -214,6 +214,77 @@ body {
   min-height: 250px;
 }
 
+.kpi-box-hover-info {
+  position: relative;
+}
+
+.kpi-hover-dialog {
+  position: absolute;
+  left: 0;
+  top: calc(100% + 10px);
+  width: 340px;
+  background: #ffffff;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  padding: 12px;
+  z-index: 1200;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(6px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  pointer-events: none;
+}
+
+.kpi-hover-dialog::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: 18px;
+  width: 10px;
+  height: 10px;
+  background: #ffffff;
+  border-top: 1px solid var(--border-color);
+  border-left: 1px solid var(--border-color);
+  transform: rotate(45deg);
+}
+
+.kpi-box-hover-info:hover .kpi-hover-dialog {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.kpi-hover-title {
+  font-size: 10pt;
+  font-weight: 700;
+  color: var(--rps-primary);
+  margin-bottom: 4px;
+}
+
+.kpi-hover-text {
+  font-size: 8.5pt;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+
+.kpi-hover-formula {
+  font-size: 8.5pt;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.kpi-hover-item {
+  font-size: 8.5pt;
+  color: var(--text-secondary);
+  margin-bottom: 2px;
+}
+
+.kpi-hover-item strong {
+  color: var(--text-primary);
+}
+
 /* --- MODO TELA CHEIA (APRESENTAÇÃO) --- */
 body.fullscreen-mode .btn-presentation {
   /* Opcional: mudar ícone ou estilo quando ativo */

@@ -21,6 +21,20 @@ const commonOptions = {
 
 const rawData = window.reportData || {};
 
+/* === FORMATAÇÃO COMPACTA DE VALORES (PT-BR) === */
+function formatCompact(val) {
+  if (val == null || isNaN(val)) return 'R$ 0';
+  const abs = Math.abs(val);
+  let num, suffix;
+  if (abs >= 1e9) { num = val / 1e9; suffix = 'Bi'; }
+  else if (abs >= 1e6) { num = val / 1e6; suffix = 'Mi'; }
+  else if (abs >= 1e3) { num = val / 1e3; suffix = 'M'; }
+  else { num = val; suffix = ''; }
+  // No máximo 2 casas decimais, removendo zeros à direita
+  let txt = num.toFixed(2).replace(/\.?0+$/, '');
+  return `R$ ${txt}${suffix}`;
+}
+
 /* === RENDERIZAÇÃO DE GRÁFICOS === */
 function renderCharts() {
   if (!rawData || Object.keys(rawData).length === 0) {
@@ -32,10 +46,11 @@ function renderCharts() {
   if (document.querySelector("#chart-ativos-evolucao")) {
     new ApexCharts(document.querySelector("#chart-ativos-evolucao"), {
       ...commonOptions,
-      series: [{ name: 'Total Ativos', data: rawData.ativos?.total || [] }],
+      series: [{ name: 'Total Ativos', data: (rawData.ativos?.total || []).map(v => Math.round(v * 100) / 100) }],
       chart: { type: 'line', height: 250 },
       xaxis: { categories: rawData.meses || [] },
-      yaxis: { labels: { formatter: (val) => `R$ ${val}k` } }
+      yaxis: { labels: { formatter: formatCompact } },
+      tooltip: { y: { formatter: formatCompact } }
     }).render();
   }
 
