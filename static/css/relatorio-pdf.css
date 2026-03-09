@@ -1,0 +1,461 @@
+/* ================================================
+   RELATORIO-PDF.CSS
+   Estilos exclusivos para geração de PDF via WeasyPrint.
+   Cada .page-container = exatamente 1 página A4 Paisagem (297 × 210 mm).
+   Nenhum conteúdo pode ultrapassar os limites da página.
+   ================================================ */
+
+/* === Tamanho de Página === */
+@page {
+  size: 297mm 210mm;
+  margin: 0;
+}
+
+/* === Reset Global === */
+html, body {
+  margin: 0 !important;
+  padding: 0 !important;
+  background: white !important;
+  width: 297mm;
+  height: auto;
+  overflow: visible;
+}
+
+/* === Ocultar Elementos Web-Only === */
+.fab-download,
+.sidenav-minimal,
+.slide-controls,
+.btn-floating,
+.btn-presentation,
+.btn-period-settings,
+.period-filter-modal,
+.btn-balancete,
+.balancete-modal,
+.kpi-hover-dialog,
+.snap-container {
+  display: none !important;
+}
+
+/* === Desativar TODAS as animações e transições === */
+*, *::before, *::after {
+  transition: none !important;
+  animation: none !important;
+}
+
+/* ================================================
+   PAGE CONTAINER — cada um = 1 página do PDF
+   ================================================ */
+.page-container {
+  width: 297mm !important;
+  height: 210mm !important;
+  min-height: 210mm !important;
+  max-height: 210mm !important;
+  overflow: hidden !important;
+  page-break-after: always;
+  page-break-inside: avoid;
+  margin: 0 !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  position: relative;
+  background-color: white;
+}
+
+/* Última página: sem quebra após */
+.page-container:last-child {
+  page-break-after: avoid;
+}
+
+/* ================================================
+   CONTENT WRAPPER
+   ================================================ */
+.content-wrapper {
+  width: 100% !important;
+  height: 210mm !important;
+  max-height: 210mm !important;
+  padding: 0mm 12mm 8mm 12mm !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+}
+
+/* ================================================
+   HEADER DE CADA PÁGINA
+   ================================================ */
+.header {
+  flex-shrink: 0 !important;
+  margin: 0mm -12mm 10px -12mm !important;
+  padding: 12px 20px !important;
+}
+
+.header-left h1 {
+  font-size: 18pt !important;
+  margin: 0 0 2px 0 !important;
+}
+
+.header-left .subtitle {
+  font-size: 8pt !important;
+}
+
+.header-right .client-name {
+  font-size: 10pt !important;
+}
+
+.header-right .period {
+  font-size: 8pt !important;
+}
+
+.header-right .page-number {
+  font-size: 7pt !important;
+}
+
+/* ================================================
+   CAPA (COVER PAGE)
+   ================================================ */
+.cover-page {
+  justify-content: center !important;
+  align-items: center !important;
+  padding: 15mm !important;
+}
+
+.cover-page img {
+  max-width: 200px !important;
+  max-height: 100px !important;
+}
+
+.cover-title {
+  font-size: 28pt !important;
+}
+
+.cover-subtitle {
+  font-size: 13pt !important;
+  margin-top: 8px !important;
+}
+
+.cover-client-box {
+  margin-top: 30px !important;
+  padding: 20px 50px !important;
+}
+
+.cover-client-name {
+  font-size: 18pt !important;
+}
+
+.cover-date {
+  font-size: 11pt !important;
+}
+
+.cover-footer {
+  bottom: 15px !important;
+  font-size: 8pt !important;
+}
+
+/* ================================================
+   LINHAS (ROWS)
+   ================================================ */
+.row {
+  overflow: hidden !important;
+  min-height: 0 !important;
+  margin-bottom: 10px !important;
+  gap: 12px !important;
+  flex-shrink: 1 !important;
+}
+
+.content-wrapper > .row:last-child {
+  margin-bottom: 0 !important;
+}
+
+/* ================================================
+   CARDS
+   ================================================ */
+.card {
+  overflow: hidden !important;
+  box-shadow: none !important;
+  min-height: 0 !important;
+  padding: 12px !important;
+  border: 1px solid var(--border-color);
+}
+
+.card:hover {
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.card-header {
+  flex-shrink: 0 !important;
+  margin-bottom: 8px !important;
+  padding-bottom: 6px !important;
+}
+
+.card-header h3 {
+  font-size: 10pt !important;
+  margin-bottom: 0 !important;
+}
+
+/* ================================================
+   GRÁFICOS
+   ================================================ */
+.chart-container {
+  overflow: hidden !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  flex: 1 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 2px !important;
+}
+
+.chart-img {
+  max-width: 100% !important;
+  max-height: 100% !important;
+  width: auto !important;
+  height: auto !important;
+  object-fit: contain !important;
+  display: block !important;
+}
+
+/* ================================================
+   KPI BOXES
+   ================================================ */
+.kpi-container {
+  flex-shrink: 0 !important;
+  margin-bottom: 10px !important;
+  gap: 10px !important;
+}
+
+.kpi-box {
+  height: 68px !important;
+  min-height: 68px !important;
+  max-height: 68px !important;
+  overflow: hidden !important;
+  padding: 6px 8px !important;
+}
+
+.kpi-box:hover {
+  transform: none !important;
+}
+
+.kpi-box::before {
+  display: none !important;
+}
+
+.kpi-label {
+  font-size: 6.5pt !important;
+  margin-bottom: 1px !important;
+}
+
+.kpi-value {
+  font-size: 11pt !important;
+  margin: 1px 0 !important;
+}
+
+.kpi-trend {
+  font-size: 5.5pt !important;
+  margin-top: 0 !important;
+}
+
+/* ================================================
+   TABELAS
+   ================================================ */
+table {
+  overflow: hidden !important;
+  font-size: 8pt !important;
+}
+
+th {
+  padding: 6px !important;
+  font-size: 7pt !important;
+}
+
+td {
+  padding: 5px 6px !important;
+}
+
+/* ================================================
+   BADGES & SECTION BADGES
+   ================================================ */
+.badge {
+  font-size: 7pt !important;
+  padding: 2px 6px !important;
+}
+
+.section-badge {
+  font-size: 8pt !important;
+  padding: 3px 8px !important;
+  margin-bottom: 6px !important;
+}
+
+/* ================================================
+   COMPARISON BOXES
+   ================================================ */
+.comparison-box {
+  padding: 10px !important;
+  overflow: hidden !important;
+}
+
+.comparison-value {
+  font-size: 14pt !important;
+  margin: 4px 0 !important;
+}
+
+.comparison-label {
+  font-size: 8pt !important;
+}
+
+/* ================================================
+   PÁGINA TRIBUTÁRIO — conteúdo mais denso
+   Reduzir espaçamentos para caber em 1 página
+   ================================================ */
+#tributario .content-wrapper {
+  padding: 0mm 10mm 5mm 10mm !important;
+}
+
+#tributario .header {
+  margin: 0mm -10mm 6px -10mm !important;
+  padding: 10px 16px !important;
+}
+
+#tributario .header-left h1 {
+  font-size: 16pt !important;
+}
+
+#tributario .row {
+  margin-bottom: 5px !important;
+}
+
+#tributario .card {
+  padding: 5px 8px !important;
+}
+
+#tributario .card-header {
+  margin-bottom: 4px !important;
+  padding-bottom: 4px !important;
+}
+
+#tributario h4 {
+  font-size: 9pt !important;
+  margin-bottom: 6px !important;
+}
+
+#tributario .comparison-value {
+  font-size: 12pt !important;
+}
+
+/* Reduzir linhas de detalhamento tributário */
+#tributario [style*="font-size: 9pt"] {
+  font-size: 8pt !important;
+  line-height: 1.4 !important;
+}
+
+#tributario [style*="margin-bottom: 6px"] {
+  margin-bottom: 3px !important;
+}
+
+#tributario [style*="padding: 15px"] {
+  padding: 8px 10px !important;
+}
+
+#tributario [style*="gap: 15px"] {
+  gap: 8px !important;
+}
+
+#tributario [style*="padding: 20px"] {
+  padding: 10px !important;
+}
+
+#tributario [style*="font-size: 20pt"] {
+  font-size: 16pt !important;
+}
+
+#tributario [style*="font-size: 11pt"] {
+  font-size: 10pt !important;
+}
+
+/* ================================================
+   PÁGINA RENTABILIDADE — 3 rows
+   ================================================ */
+#rentabilidade .row {
+  margin-bottom: 8px !important;
+}
+
+/* ================================================
+   PÁGINA VENDAS — 2 rows de gráficos
+   ================================================ */
+#vendas .row {
+  margin-bottom: 8px !important;
+}
+
+/* ================================================
+   PÁGINA DISTRIBUIÇÃO
+   ================================================ */
+#distribuicao .row {
+  margin-bottom: 10px !important;
+}
+
+/* ================================================
+   PÁGINA AGRADECIMENTOS
+   ================================================ */
+#agradecimentos .row {
+  margin-bottom: 10px !important;
+}
+
+#qrCodeContainer {
+  max-width: 100px !important;
+  max-height: 100px !important;
+}
+
+/* ================================================
+   TIPOGRAFIA — h3 indicator bar
+   ================================================ */
+h3::before {
+  width: 3px !important;
+  height: 16px !important;
+}
+
+/* ================================================
+   PREVENIR SCROLL EM ELEMENTOS INLINE
+   Todo overflow-y: auto vira hidden no PDF
+   ================================================ */
+[style*="overflow-y: auto"],
+[style*="overflow-y:auto"] {
+  overflow-y: hidden !important;
+}
+
+[style*="overflow: auto"],
+[style*="overflow:auto"] {
+  overflow: hidden !important;
+}
+
+/* ================================================
+   AJUSTES FINOS PARA CONTAINERS INLINE
+   Inline styles com height/max-height fixos
+   devem respeitar o flex do PDF
+   ================================================ */
+[style*="max-height: 250px"],
+[style*="max-height:250px"],
+[style*="max-height: 450px"],
+[style*="max-height:450px"] {
+  max-height: none !important;
+}
+
+[style*="height: 200px"],
+[style*="height:200px"] {
+  height: auto !important;
+}
+
+/* ================================================
+   ESTILO DE CONCLUSÃO — pontos fortes/atenção
+   ================================================ */
+#conclusao .row {
+  margin-bottom: 8px !important;
+}
+
+#conclusao .card {
+  padding: 10px !important;
+}

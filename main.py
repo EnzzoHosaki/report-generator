@@ -175,9 +175,10 @@ def report_pdf(cliente_id: int):
     
     html_string = render_template('relatorio_full.html', **contexto, mode='pdf')
 
-    css_file = os.path.join(app.static_folder, 'style.css')
-    pdf_bytes = HTML(string=html_string, base_url=app.root_path).write_pdf(
-        stylesheets=[CSS(filename=css_file)]
+    css_base = os.path.join(app.static_folder, 'style.css')
+    css_pdf = os.path.join(app.static_folder, 'css', 'relatorio-pdf.css')
+    pdf_bytes = HTML(string=html_string, base_url=request.url_root).write_pdf(
+        stylesheets=[CSS(filename=css_base), CSS(filename=css_pdf)]
     )
 
     response = make_response(pdf_bytes)
@@ -212,9 +213,10 @@ def report_pdf_batch():
                 branches=branches
             )
             html_string = render_template('relatorio_full.html', **contexto, mode='pdf')
-            css_file = os.path.join(app.static_folder, 'style.css')
-            pdf_bytes = HTML(string=html_string, base_url=app.root_path).write_pdf(
-                stylesheets=[CSS(filename=css_file)]
+            css_base = os.path.join(app.static_folder, 'style.css')
+            css_pdf = os.path.join(app.static_folder, 'css', 'relatorio-pdf.css')
+            pdf_bytes = HTML(string=html_string, base_url=request.url_root).write_pdf(
+                stylesheets=[CSS(filename=css_base), CSS(filename=css_pdf)]
             )
             filename = f"RPS_Relatorio_{cid}_{year}.pdf"
             zf.writestr(filename, pdf_bytes)
@@ -340,4 +342,4 @@ if __name__ == '__main__':
     ║  WebPDF: WeasyPrint (A4 Landscape)                    ║
     ╚═══════════════════════════════════════════════════════╝
     """)
-    app.run(debug=debug, port=port, host=host)
+    app.run(debug=debug, port=port, host=host, threaded=True)

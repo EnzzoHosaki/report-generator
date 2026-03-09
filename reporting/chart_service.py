@@ -35,7 +35,7 @@ class ChartService:
 
     def _fig_to_b64(self, fig) -> str:
         buf = io.BytesIO()
-        fig.savefig(buf, format="png", bbox_inches="tight", dpi=100, transparent=True)
+        fig.savefig(buf, format="png", bbox_inches="tight", dpi=150, transparent=True)
         buf.seek(0)
         img = base64.b64encode(buf.read()).decode("utf-8")
         plt.close(fig)

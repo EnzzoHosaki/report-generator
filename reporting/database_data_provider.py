@@ -254,6 +254,7 @@ class DatabaseDataProvider(DataProvider):
                 WHERE S.INICIAL NOT IN (2, 4, 5)
                   AND S.CODIGOEMPRESA = ?
                   AND S.DATA < ?
+                                    AND P.TIPO <> 1
                   AND SUBSTRING(S.CODIGOCONTACONTABIL FROM 1 FOR 1) = '1'
             """
             params_base = [cliente_id, data_inicio_ano]
@@ -297,6 +298,7 @@ class DatabaseDataProvider(DataProvider):
                 WHERE S.INICIAL NOT IN (2, 4, 5)
                   AND S.CODIGOEMPRESA = ?
                   AND EXTRACT(YEAR FROM S.DATA) = ?
+                                    AND P.TIPO <> 1
                   AND SUBSTRING(S.CODIGOCONTACONTABIL FROM 1 FOR 1) = '1'
             """
             params_mov = [cliente_id, ano]
@@ -478,7 +480,7 @@ class DatabaseDataProvider(DataProvider):
                 FROM
                   TABSALDOCONTABIL S
                 JOIN TABPLANOCONTAS P 
-                  ON P.CODIGO = S.CODIGOCONTACONTABIL
+                  ON P.CODIGO = S.CODIGOCONTACONTABIL                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
                 JOIN TABEMPRESAS E 
                   ON E.CODIGO = S.CODIGOEMPRESA 
                 LEFT JOIN TABFILIAL F 
@@ -503,7 +505,7 @@ class DatabaseDataProvider(DataProvider):
 
             sql += """
                 GROUP BY
-                  E.CODIGO,
+                  E.CODIGO,\
                   E.NOME,
                   F.CODIGO,
                   F.NOME,
@@ -581,6 +583,8 @@ class DatabaseDataProvider(DataProvider):
         def somar_em(dados: List[Dict[str, Any]], prefixo: str) -> float:
             total = 0.0
             for conta in dados:
+                if conta.get('tipo') == 'Sintetica':
+                    continue
                 cod_limpo = ''.join(c for c in conta['codigo'] if c.isdigit())
                 if cod_limpo.startswith(prefixo):
                     total += conta['saldo']

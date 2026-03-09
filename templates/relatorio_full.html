@@ -679,14 +679,6 @@
                     <h4 style="font-size: 10pt; margin-bottom: 10px; color: var(--text-primary);"><i class="fas fa-chart-line icon"></i>Lucro Real</h4>
                     <div style="font-size: 9pt; line-height: 1.6;">
                       <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
-                        <span style="color: var(--text-secondary);">Resultado Líquido:</span>
-                        <strong>{{ dados.estudo_tributario.lucro_real_detalhado.resultado_liquido|default('R$ 0,00') }}</strong>
-                      </div>
-                      <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
-                        <span style="color: var(--text-secondary);">Provisões contas:</span>
-                        <strong>{{ dados.estudo_tributario.lucro_real_detalhado.provisoes_59|default('R$ 0,00') }}</strong>
-                      </div>
-                      <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
                         <span style="color: var(--text-secondary);">Base IRPJ:</span>
                         <strong>{{ dados.estudo_tributario.lucro_real_detalhado.base_irpj|default('R$ 0,00') }}</strong>
                       </div>
@@ -695,20 +687,12 @@
                         <strong>{{ dados.estudo_tributario.lucro_real_detalhado.irpj_15|default('R$ 0,00') }}</strong>
                       </div>
                       <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
-                        <span style="color: var(--text-secondary);">Limite adicional:</span>
-                        <strong>{{ dados.estudo_tributario.lucro_real_detalhado.limite_adicional|default('R$ 0,00') }}</strong>
-                      </div>
-                      <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
                         <span style="color: var(--text-secondary);">Base adicional IRPJ:</span>
                         <strong>{{ dados.estudo_tributario.lucro_real_detalhado.base_adicional_irpj|default('R$ 0,00') }}</strong>
                       </div>
                       <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
                         <span style="color: var(--text-secondary);">Adicional IRPJ:</span>
                         <strong>{{ dados.estudo_tributario.lucro_real_detalhado.adicional_irpj_10|default('R$ 0,00') }}</strong>
-                      </div>
-                      <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
-                        <span style="color: var(--text-secondary);">IRPJ + Adicional:</span>
-                        <strong>{{ dados.estudo_tributario.lucro_real_irpj|default('R$ 0,00') }}</strong>
                       </div>
                       <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
                         <span style="color: var(--text-secondary);">Base CSLL:</span>
@@ -729,18 +713,6 @@
                     <h4 style="font-size: 10pt; margin-bottom: 10px; color: var(--text-primary);"><i class="fas fa-chart-bar icon"></i>Lucro Presumido</h4>
                     <div style="font-size: 9pt; line-height: 1.6;">
                       <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
-                        <span style="color: var(--text-secondary);">Venda Mercadorias/Produtos:</span>
-                        <strong>{{ dados.estudo_tributario.lucro_presumido_detalhado.vendas_mercadorias_produtos|default('R$ 0,00') }}</strong>
-                      </div>
-                      <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
-                        <span style="color: var(--text-secondary);">Cancelamentos/Devoluções:</span>
-                        <strong>{{ dados.estudo_tributario.lucro_presumido_detalhado.cancelamentos_devolucoes_vendas|default('R$ 0,00') }}</strong>
-                      </div>
-                      <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
-                        <span style="color: var(--text-secondary);">Receitas Financeiras:</span>
-                        <strong>{{ dados.estudo_tributario.lucro_presumido_detalhado.receitas_financeiras|default('R$ 0,00') }}</strong>
-                      </div>
-                      <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
                         <span style="color: var(--text-secondary);">Base IRPJ:</span>
                         <strong>{{ dados.estudo_tributario.lucro_presumido_detalhado.base_irpj|default('R$ 0,00') }}</strong>
                       </div>
@@ -749,20 +721,12 @@
                         <strong>{{ dados.estudo_tributario.lucro_presumido_detalhado.irpj_15|default('R$ 0,00') }}</strong>
                       </div>
                       <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
-                        <span style="color: var(--text-secondary);">Limite adicional:</span>
-                        <strong>{{ dados.estudo_tributario.lucro_presumido_detalhado.limite_adicional|default('R$ 0,00') }}</strong>
-                      </div>
-                      <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
                         <span style="color: var(--text-secondary);">Base adicional IRPJ:</span>
                         <strong>{{ dados.estudo_tributario.lucro_presumido_detalhado.base_adicional_irpj|default('R$ 0,00') }}</strong>
                       </div>
                       <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
                         <span style="color: var(--text-secondary);">Adicional IRPJ:</span>
                         <strong>{{ dados.estudo_tributario.lucro_presumido_detalhado.adicional_irpj_10|default('R$ 0,00') }}</strong>
-                      </div>
-                      <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
-                        <span style="color: var(--text-secondary);">IRPJ:</span>
-                        <strong>{{ dados.estudo_tributario.lucro_presumido_irpj|default('R$ 0,00') }}</strong>
                       </div>
                       <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
                         <span style="color: var(--text-secondary);">Base CSLL:</span>
